@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "CU1YVM0ZqRzg66/kOFlDnUTB2N8ATIYHBjRHWLleVeM0KZe+C46iIdVJOQej3fcE9C4nh+PJBlVjhrQnhTGDcw==",
+  "dgSpecHash": "2AfhJe+ldB2/ki80sVLaLpYriJmGOzqD55Byuknag0S/DKxAqBqXaHJfpKBH3GThZwVQ28co7cCKkmiL+GchDw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\djhlo\\bopl mods\\MapMaker!\\MapMaker.csproj",
+  "projectFilePath": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MapMaker.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.analyzers\\1.0.8\\bepinex.analyzers.1.0.8.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.baselib\\5.4.20\\bepinex.baselib.5.4.20.nupkg.sha512",

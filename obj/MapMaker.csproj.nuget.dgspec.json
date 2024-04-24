@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\djhlo\\bopl mods\\MapMaker!\\MapMaker.csproj": {}
+    "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MapMaker.csproj": {}
   },
   "projects": {
-    "C:\\Users\\djhlo\\bopl mods\\MapMaker!\\MapMaker.csproj": {
+    "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MapMaker.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\djhlo\\bopl mods\\MapMaker!\\MapMaker.csproj",
+        "projectUniqueName": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MapMaker.csproj",
         "projectName": "MapMaker",
-        "projectPath": "C:\\Users\\djhlo\\bopl mods\\MapMaker!\\MapMaker.csproj",
+        "projectPath": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MapMaker.csproj",
         "packagesPath": "C:\\Users\\djhlo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\djhlo\\bopl mods\\MapMaker!\\obj\\",
+        "outputPath": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\djhlo\\bopl mods\\MapMaker!\\NuGet.Config",
+          "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\NuGet.Config",
           "C:\\Users\\djhlo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
