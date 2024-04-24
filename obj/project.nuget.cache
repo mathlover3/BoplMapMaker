@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "CU1YVM0ZqRzg66/kOFlDnUTB2N8ATIYHBjRHWLleVeM0KZe+C46iIdVJOQej3fcE9C4nh+PJBlVjhrQnhTGDcw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\djhlo\\bopl mods\\MapMaker!\\MapMaker.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.analyzers\\1.0.8\\bepinex.analyzers.1.0.8.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.baselib\\5.4.20\\bepinex.baselib.5.4.20.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.core\\5.4.21\\bepinex.core.5.4.21.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.plugininfoprops\\1.1.0\\bepinex.plugininfoprops.1.1.0.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\harmonyx\\2.7.0\\harmonyx.2.7.0.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\microsoft.netframework.referenceassemblies\\1.0.2\\microsoft.netframework.referenceassemblies.1.0.2.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\microsoft.netframework.referenceassemblies.net472\\1.0.2\\microsoft.netframework.referenceassemblies.net472.1.0.2.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\mono.cecil\\0.11.4\\mono.cecil.0.11.4.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\monomod.runtimedetour\\21.12.13.1\\monomod.runtimedetour.21.12.13.1.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\monomod.utils\\21.12.13.1\\monomod.utils.21.12.13.1.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\unityengine.modules\\2019.4.5\\unityengine.modules.2019.4.5.nupkg.sha512"
+  ],
+  "logs": []
+}
