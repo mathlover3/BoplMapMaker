@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using UnityEngine.InputSystem;
 using System.Linq;
 using System.Drawing;
+using BepInEx.Configuration;
 
 namespace MapMaker
 {
@@ -28,6 +29,13 @@ namespace MapMaker
         public static int t;
         public static string mapsFolderPath; // Create blank folder path var
         public static int CurrentMapId;
+        public static Fix OneByOneBlockMass = Fix.One;
+        public enum MapIdCheckerThing
+        {
+            MapFoundWithId,
+            NoMapFoundWithId,
+            MultipleMapsFoundWithId
+        }
         private void Awake()
         {
             Logger.LogInfo("MapLoader Has been loaded");
@@ -161,6 +169,8 @@ namespace MapMaker
                     double width = Convert.ToDouble(size["width"]);
                     double height = Convert.ToDouble(size["height"]);
                     double radius = Convert.ToDouble(platform["radius"]);
+                    bool UseCustomMass = false;
+                    Fix Mass = (Fix)0;
 
                     //defult to 0 rotatson incase the json is missing it
                     double rotatson = 0;
@@ -169,7 +179,19 @@ namespace MapMaker
                         rotatson = ConvertToRadians((double)platform["rotation"]);
                     }
                     // Spawn platform
-                    SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson);
+                    if (platform.ContainsKey("UseCustomMass"))
+                    {
+                        UseCustomMass = (bool)platform["UseCustomMass"];
+                    }
+                    if (platform.ContainsKey("CustomMass") && UseCustomMass)
+                    {
+                        Mass = (Fix)(double)platform["CustomMass"];
+                    }
+                    else
+                    {
+                        Mass = CalculateMassOfPlatform((Fix)width, (Fix)height, (Fix)radius);
+                    }
+                    SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass);
                     Debug.Log("Platform spawned successfully");
                 }
                 catch (Exception ex)
@@ -210,7 +232,7 @@ namespace MapMaker
             }
         }
 
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -220,6 +242,7 @@ namespace MapMaker
             ResizePlatform(platform, Width, Height, Radius);
             //45 degrees
             StickyRect.GetGroundBody().up = new Vec2(rotatson);
+            AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
 
@@ -258,12 +281,22 @@ namespace MapMaker
             //subtract 1 as scene names start with 1 but ids start with 0
             return int.Parse(cleaned)-1;
         }
-        public enum MapIdCheckerThing
-        {
-            MapFoundWithId,
-            NoMapFoundWithId,
-            MultipleMapsFoundWithId
-        }
 
+        public static Fix CalculateMassOfPlatform(Fix Width, Fix Height, Fix Radius)
+        {
+            //multiply by 2 because Width and Height are just distances from the center 
+            var TrueWidth = Width * (Fix)2 + Radius;
+            var TrueHeight = Height * (Fix)2 + Radius;
+            var Area = TrueWidth * TrueHeight;
+            //if it is a circle
+            if (Width == (Fix)0.05 && Height == (Fix)0.05)
+            {
+                //A=Pi*R^2
+                //there is no exsponent for Fixes
+                Area = Fix.Pi * Radius * Radius;
+            }
+            return Area * OneByOneBlockMass;
+
+        }
     }
 }
