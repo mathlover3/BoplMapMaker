@@ -43,22 +43,26 @@ To use the Boplmap Mod in your game, follow these steps:
     {
       "transform": { "x": 10.0, "y": 20.0 },
       "size": { "width": 10.0, "height": 10.0 },
-      "radius": 1.0;
+      "radius": 1.0,
       "rotation": 0.0,
       "biome": "Plain",
       "visibility": true,
       "AntiLockPlatform": false,
-      "blank": false
+      "blank": false,
+      "UseCustomMass": false,
+      "CustomMass": 10
     },
     {
       "transform": { "x": 10.0, "y": 20.0 },
       "size": { "width": 10.0, "height": 10.0 },
-      "radius": 1.0;
+      "radius": 1.0,
       "rotation": 0.0,
       "biome": "Plain",
       "visibility": true,
       "AntiLockPlatform": false,
-      "blank": false
+      "blank": false,
+      "UseCustomMass": true,
+      "CustomMass": 10
     }
   ]
 }
