@@ -8,3 +8,6 @@ MapMaker.csproj
 *.bin
 *.v2
 *.v2
+.vs/MapMaker/v17/.suo
+*.cache
+*.csproj
