@@ -3,3 +3,8 @@
 *.vsidx
 .vs/MapMaker/v17/.suo
 MapMaker.csproj
+*.cache
+.vs/MapMaker/v17/.suo
+*.bin
+*.v2
+*.v2
