@@ -1,3 +1,5 @@
 
 *.dll
 *.vsidx
+.vs/MapMaker/v17/.suo
+MapMaker.csproj
