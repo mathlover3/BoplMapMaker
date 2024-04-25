@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net471</TargetFramework>
     <AssemblyName>MapMaker</AssemblyName>
     <Description>My first plugin</Description>
     <Version>1.0.0</Version>

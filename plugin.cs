@@ -1,4 +1,5 @@
 using BepInEx;
+using BepInEx.Logging;
 using BoplFixedMath;
 using HarmonyLib;
 using System.Reflection;
@@ -41,12 +42,12 @@ namespace MapMaker
         }
         private void Awake()
         {
-            Debug.Log("MapLoader Has been loaded");
+            Logger.LogInfo("MapLoader Has been loaded");
             Harmony harmony = new Harmony("com.MLT.MapLoader");
 
-            Debug.Log("Harmony harmony = new Harmony -- Melon, 2024");
+            Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
             harmony.PatchAll(); // Patch Harmony
-            Debug.Log("MapMaker Patch Compleate!");
+            Logger.LogInfo("MapMaker Patch Compleate!");
 
             SceneManager.sceneLoaded += OnSceneLoaded;
 
@@ -59,15 +60,16 @@ namespace MapMaker
             }
             //fill the MapJsons array up
             ZipArchive[] zipArchives = GetZipArchives();
-            // Create a List for the json for a bit
+            //Create a List for the json for a bit
             List<string> JsonList = new List<string>();
             foreach (ZipArchive zipArchive in zipArchives)
             {
                 //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .boplmapzip)
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
-                Debug.Log($"MapJson: {GetFileFromZipArchive(zipArchive, IsBoplMap)[0]} loaded");
+                Logger.LogInfo($"MapJson: {GetFileFromZipArchive(zipArchive, IsBoplMap)[0]} loaded");
             }
             MapJsons = JsonList.ToArray();
+            
         }
         public static bool IsBoplMap(string path)
         {

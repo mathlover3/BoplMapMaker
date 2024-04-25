@@ -19,7 +19,7 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net472"
+          "net471"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -27,8 +27,8 @@
           "https://nuget.bepinex.dev/v3/index.json": {}
         },
         "frameworks": {
-          "net472": {
-            "targetAlias": "net472",
+          "net471": {
+            "targetAlias": "net471",
             "projectReferences": {}
           }
         },
@@ -39,8 +39,8 @@
         }
       },
       "frameworks": {
-        "net472": {
-          "targetAlias": "net472",
+        "net471": {
+          "targetAlias": "net471",
           "dependencies": {
             "BepInEx.Analyzers": {
               "suppressParent": "All",
