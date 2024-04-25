@@ -16,6 +16,8 @@ using UnityEngine.InputSystem;
 using System.Linq;
 using System.Drawing;
 using BepInEx.Configuration;
+using System.IO.Compression;
+using System.Runtime.Remoting.Contexts;
 
 namespace MapMaker
 {
@@ -30,6 +32,7 @@ namespace MapMaker
         public static string mapsFolderPath; // Create blank folder path var
         public static int CurrentMapId;
         public static Fix OneByOneBlockMass = Fix.One;
+        public static string[] MapJsons;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -38,12 +41,12 @@ namespace MapMaker
         }
         private void Awake()
         {
-            Logger.LogInfo("MapLoader Has been loaded");
+            Debug.Log("MapLoader Has been loaded");
             Harmony harmony = new Harmony("com.MLT.MapLoader");
 
-            Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
+            Debug.Log("Harmony harmony = new Harmony -- Melon, 2024");
             harmony.PatchAll(); // Patch Harmony
-            Logger.LogInfo("MapMaker Patch Compleate!");
+            Debug.Log("MapMaker Patch Compleate!");
 
             SceneManager.sceneLoaded += OnSceneLoaded;
 
@@ -52,29 +55,43 @@ namespace MapMaker
             if (!Directory.Exists(mapsFolderPath))
             {
                 Directory.CreateDirectory(mapsFolderPath);
-                Logger.LogInfo("Maps folder created.");
+                Debug.Log("Maps folder created.");
             }
+            //fill the MapJsons array up
+            ZipArchive[] zipArchives = GetZipArchives();
+            // Create a List for the json for a bit
+            List<string> JsonList = new List<string>();
+            foreach (ZipArchive zipArchive in zipArchives)
+            {
+                //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .boplmapzip)
+                JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
+                Debug.Log($"MapJson: {GetFileFromZipArchive(zipArchive, IsBoplMap)[0]} loaded");
+            }
+            MapJsons = JsonList.ToArray();
+        }
+        public static bool IsBoplMap(string path)
+        {
+            if (path.EndsWith("boplmap")) return true;
+            //will only be reached if its not a boplmap
+            return false;
         }
         //see if there is a custom map we should load (returns enum) (david) (this was annoying to make but at least i learned about predicits!)
         public static MapIdCheckerThing CheckIfWeHaveCustomMapWithMapId()
         {
-            string[] mapFiles = Directory.GetFiles(mapsFolderPath, "*.boplmap");
             int[] MapIds = {};
-            foreach (string mapFile in mapFiles)
+            foreach (string mapJson in MapJsons)
             {
                 try
                 {
-                    string mapJson = File.ReadAllText(mapFile);
-                    Debug.Log($"Loaded map from file: {Path.GetFileName(mapFile)} to check if it has map id {CurrentMapId}");
                     Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
                     //add it to a array to be checked
                     int mapid = int.Parse((string)Dict["mapId"]);
                     Debug.Log("Map has Mapid of " +  mapid);
                     MapIds = MapIds.Append(mapid).ToArray();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Debug.LogError($"Failed to get MapId from file: {Path.GetFileName(mapFile)}. Error: {ex.Message}");
+                    Debug.LogError($"Failed to get MapId from Json: " + mapJson );
                 }
             }
             //define a predicit (basicly a funcsion that checks if a value meets a critera. in this case being = to CurrentMapId)
@@ -112,13 +129,10 @@ namespace MapMaker
         //CALL ONLY ON LEVEL LOAD!
         public static void LoadMapsFromFolder()
         {
-            string[] mapFiles = Directory.GetFiles(mapsFolderPath, "*.boplmap");
-            foreach (string mapFile in mapFiles)
+            foreach (string mapJson in MapJsons)
             {
                 try
                 {
-                    string mapJson = File.ReadAllText(mapFile);
-                    Debug.Log($"Loaded map from file: {Path.GetFileName(mapFile)}");
                     Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
                     if (int.Parse((string)Dict["mapId"]) == CurrentMapId)
                     {
@@ -127,7 +141,7 @@ namespace MapMaker
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Failed to load map from file: {Path.GetFileName(mapFile)}. Error: {ex.Message}");
+                    Debug.LogError($"Failed to load map from json: {mapJson} Error: {ex.Message}");
                 }
             }
         }
@@ -297,6 +311,71 @@ namespace MapMaker
             }
             return Area * OneByOneBlockMass;
 
+        }
+        //in part chatgpt code
+        public static ZipArchive UnzipFile(string zipFilePath)
+        {
+
+            // Open the zip file for reading
+            using (FileStream zipStream = new FileStream(zipFilePath, FileMode.Open))
+            using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
+            {
+                // Iterate through each entry in the zip file
+                /*foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    // If entry is a directory, skip it
+                    if (entry.FullName.EndsWith("/"))
+                        continue;
+
+                    // Read the contents of the entry
+                    using (StreamReader reader = new StreamReader(entry.Open()))
+                    {
+                        string contents = reader.ReadToEnd();
+                        Console.WriteLine($"Contents of {entry.FullName}:");
+                        Console.WriteLine(contents);
+                    }
+                }*/
+                return archive;
+            }
+        }
+        //finds all the files with a path that the predicate acsepts as a string array (note that depending on the file you may need to turn it into a byte array) (david)
+
+        public static string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
+        {
+            string[] data = { };
+            // Iterate through each entry in the zip file
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                // If entry is a directory, skip it
+                if (entry.FullName.EndsWith("/"))
+                    continue;
+                //see if it is valid (if the predicate returns true)
+                string[] path = { entry.FullName };
+                string[] ValidPathArray = Array.FindAll(path, predicate);
+                if (ValidPathArray.Length != 0)
+                {
+                    // Read the contents of the entry
+                    using (StreamReader reader = new StreamReader(entry.Open()))
+                    {
+                        string contents = reader.ReadToEnd();
+                        //add the contents to data
+                        data = data.Append(contents).ToArray();
+                    }
+                }
+            }
+            return data;
+        }
+        //gets all of the .boplmapzip files from the maps folder and turns them into a array of ZipArchive's (david)
+        public static ZipArchive[] GetZipArchives()
+        {
+            string[] MapZipFiles = Directory.GetFiles(mapsFolderPath, "*.boplmapzip");
+            Debug.Log($"{MapZipFiles.Length} .boplmapzip's");
+            ZipArchive[] zipArchives = { };
+            foreach (string zipFile in MapZipFiles)
+            {
+                zipArchives = zipArchives.Append(UnzipFile(zipFile)).ToArray();
+            }
+            return zipArchives;
         }
     }
 }

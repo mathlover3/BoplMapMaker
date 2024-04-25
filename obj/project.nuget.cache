@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "2AfhJe+ldB2/ki80sVLaLpYriJmGOzqD55Byuknag0S/DKxAqBqXaHJfpKBH3GThZwVQ28co7cCKkmiL+GchDw==",
+  "dgSpecHash": "6fY6PwNVnNX4xWhmqx300Wi9BFfYmkCbZz3AiKLwuREuMHYJGVjQCx+nWKPH7BL+pyot6l9Garoqiyn/bTjv5A==",
   "success": true,
   "projectFilePath": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MapMaker.csproj",
   "expectedPackageFiles": [
@@ -15,6 +15,7 @@
     "C:\\Users\\djhlo\\.nuget\\packages\\monomod.runtimedetour\\21.12.13.1\\monomod.runtimedetour.21.12.13.1.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\monomod.utils\\21.12.13.1\\monomod.utils.21.12.13.1.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\system.io.compression\\4.3.0\\system.io.compression.4.3.0.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\unityengine.modules\\2019.4.5\\unityengine.modules.2019.4.5.nupkg.sha512"
   ],
   "logs": []
