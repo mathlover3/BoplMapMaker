@@ -11,3 +11,6 @@ MapMaker.csproj
 .vs/MapMaker/v17/.suo
 *.cache
 *.csproj
+*.pdb
+*.vsidx
+*.vsidx
