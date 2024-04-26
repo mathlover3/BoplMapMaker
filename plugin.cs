@@ -34,6 +34,8 @@ namespace MapMaker
         public static int CurrentMapId;
         public static Fix OneByOneBlockMass = Fix.One;
         public static string[] MapJsons;
+        // Define a static logger instance
+        private static ManualLogSource logger;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -58,6 +60,11 @@ namespace MapMaker
                 Directory.CreateDirectory(mapsFolderPath);
                 Debug.Log("Maps folder created.");
             }
+            
+            
+        }
+        public void Start()
+        {
             //fill the MapJsons array up
             ZipArchive[] zipArchives = GetZipArchives();
             //Create a List for the json for a bit
@@ -65,12 +72,11 @@ namespace MapMaker
             foreach (ZipArchive zipArchive in zipArchives)
             {
                 //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .boplmapzip)
-                //GetFileFromZipArchive has a cannot access a disposed object error
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
                 Logger.LogInfo($"MapJson: {GetFileFromZipArchive(zipArchive, IsBoplMap)[0]} loaded");
             }
+            Logger.LogInfo($"JsonList is {JsonList}");
             MapJsons = JsonList.ToArray();
-            
         }
         public static bool IsBoplMap(string path)
         {
@@ -82,6 +88,7 @@ namespace MapMaker
         public static MapIdCheckerThing CheckIfWeHaveCustomMapWithMapId()
         {
             int[] MapIds = {};
+            Debug.Log($"MapJsons is {MapJsons}");
             foreach (string mapJson in MapJsons)
             {
                 try
@@ -92,9 +99,9 @@ namespace MapMaker
                     Debug.Log("Map has Mapid of " +  mapid);
                     MapIds = MapIds.Append(mapid).ToArray();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    Debug.LogError($"Failed to get MapId from Json: " + mapJson );
+                    Debug.LogError($"Failed to get MapId from Json: {mapJson} with exseptson: {ex}" );
                 }
             }
             //define a predicit (basicly a funcsion that checks if a value meets a critera. in this case being = to CurrentMapId)
@@ -320,9 +327,9 @@ namespace MapMaker
         {
 
             // Open the zip file for reading
-            using (FileStream zipStream = new FileStream(zipFilePath, FileMode.Open))
-            using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
-            {
+            FileStream zipStream = new FileStream(zipFilePath, FileMode.Open);
+            ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+            
                 // Iterate through each entry in the zip file
                 /*foreach (ZipArchiveEntry entry in archive.Entries)
                 {
@@ -339,33 +346,33 @@ namespace MapMaker
                     }
                 }*/
                 return archive;
-            }
+            
         }
         //finds all the files with a path that the predicate acsepts as a string array (note that depending on the file you may need to turn it into a byte array) (david)
 
-        public string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
+        public static string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
         {
-            Logger.LogInfo("enter GetFileFromZipArchive");
+            Debug.Log("enter GetFileFromZipArchive");
             string[] data = { };
             // Iterate through each entry in the zip file
             //archive is disposed of at this point for some reson
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
                 // If entry is a directory, skip it
-                Logger.LogInfo("check if its a drectory");
+                Debug.Log("check if its a drectory");
                 if (entry.FullName.EndsWith("/"))
                     continue;
-                Logger.LogInfo("it isnt a drectory");
+                Debug.Log("it isnt a drectory");
                 //see if it is valid (if the predicate returns true)
                 string[] path = { entry.FullName };
                 string[] ValidPathArray = Array.FindAll(path, predicate);
                 if (ValidPathArray.Length != 0)
                 {
-                    Logger.LogInfo("about to read the contents of entry");
+                    Debug.Log("about to read the contents of entry");
                     // Read the contents of the entry
                     using (StreamReader reader = new StreamReader(entry.Open()))
                     {
-                        Logger.LogInfo("reading the contents of entry");
+                        Debug.Log("reading the contents of entry");
                         string contents = reader.ReadToEnd();
                         //add the contents to data
                         data = data.Append(contents).ToArray();
@@ -384,7 +391,9 @@ namespace MapMaker
             {
                 zipArchives = zipArchives.Append(UnzipFile(zipFile)).ToArray();
             }
+            Debug.Log($"zipArchivesLength is {zipArchives.Length}");
             return zipArchives;
+
         }
     }
 }
