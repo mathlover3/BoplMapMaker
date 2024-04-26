@@ -65,6 +65,7 @@ namespace MapMaker
             foreach (ZipArchive zipArchive in zipArchives)
             {
                 //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .boplmapzip)
+                //GetFileFromZipArchive has a cannot access a disposed object error
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
                 Logger.LogInfo($"MapJson: {GetFileFromZipArchive(zipArchive, IsBoplMap)[0]} loaded");
             }
@@ -342,23 +343,29 @@ namespace MapMaker
         }
         //finds all the files with a path that the predicate acsepts as a string array (note that depending on the file you may need to turn it into a byte array) (david)
 
-        public static string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
+        public string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
         {
+            Logger.LogInfo("enter GetFileFromZipArchive");
             string[] data = { };
             // Iterate through each entry in the zip file
+            //archive is disposed of at this point for some reson
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
                 // If entry is a directory, skip it
+                Logger.LogInfo("check if its a drectory");
                 if (entry.FullName.EndsWith("/"))
                     continue;
+                Logger.LogInfo("it isnt a drectory");
                 //see if it is valid (if the predicate returns true)
                 string[] path = { entry.FullName };
                 string[] ValidPathArray = Array.FindAll(path, predicate);
                 if (ValidPathArray.Length != 0)
                 {
+                    Logger.LogInfo("about to read the contents of entry");
                     // Read the contents of the entry
                     using (StreamReader reader = new StreamReader(entry.Open()))
                     {
+                        Logger.LogInfo("reading the contents of entry");
                         string contents = reader.ReadToEnd();
                         //add the contents to data
                         data = data.Append(contents).ToArray();

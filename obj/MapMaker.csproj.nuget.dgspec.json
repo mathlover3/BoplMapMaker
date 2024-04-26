@@ -60,10 +60,6 @@
               "target": "Package",
               "version": "[1.0.2, )"
             },
-            "Newtonsoft.Json": {
-              "target": "Package",
-              "version": "[13.0.3, )"
-            },
             "System.IO.Compression": {
               "target": "Package",
               "version": "[4.3.0, )"

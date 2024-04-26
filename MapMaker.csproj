@@ -13,7 +13,6 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="UnityEngine.Modules" Version="2019.4.5" IncludeAssets="compile" />
   </ItemGroup>
@@ -284,6 +283,6 @@
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="taskkill /f /im &quot;BoplBattle.exe&quot; /t 2&gt;nul &amp;set errorlevel=0 &amp;&amp; copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BepInEx\plugins&quot; &amp;&amp; start &quot;&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle.exe&quot;" />
+    <Exec Command="taskkill /f /im &quot;BoplBattle.exe&quot; /t 2&gt;nul &amp;set errorlevel=0 &amp;&amp; copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BepInEx\plugins\mapMaker&quot; &amp;&amp; start &quot;&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle.exe&quot;" />
   </Target>
 </Project>
