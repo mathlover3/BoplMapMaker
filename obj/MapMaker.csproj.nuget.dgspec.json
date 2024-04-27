@@ -47,6 +47,11 @@
               "target": "Package",
               "version": "[1.*, )"
             },
+            "BepInEx.AssemblyPublicizer.MSBuild": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[0.4.2, )"
+            },
             "BepInEx.Core": {
               "target": "Package",
               "version": "[5.*, )"

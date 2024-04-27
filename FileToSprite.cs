@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO;
-
+// https://forum.unity.com/threads/generating-sprites-dynamically-from-png-or-jpeg-files-in-c.343735/
 public class IMG2Sprite : MonoBehaviour
 {
     //https://forum.unity.com/threads/generating-sprites-dynamically-from-png-or-jpeg-files-in-c.343735/
@@ -33,7 +33,16 @@ public class IMG2Sprite : MonoBehaviour
 
         Sprite NewSprite = new Sprite();
         Texture2D SpriteTexture = LoadTexture(FileData);
-        NewSprite = Sprite.Create(SpriteTexture, new Rect(0, 0, SpriteTexture.width, SpriteTexture.height), new Vector2(0, 0), PixelsPerUnit);
+        var rect = new Rect(0, 0, SpriteTexture.width, SpriteTexture.height);
+        // Assuming your sprite size is 100x100 pixels
+        float pivotX = 480f / (float)SpriteTexture.width; // Convert pixel coordinate to Unity units
+        float pivotY = 360f / (float)SpriteTexture.height; // Convert pixel coordinate to Unity units
+
+        // Create the sprite with the correct pivot point
+        Vector2 vector = new Vector2(pivotX, pivotY);
+
+        Debug.Log($"vector is {vector}");
+        NewSprite = Sprite.Create(SpriteTexture, rect, vector, PixelsPerUnit);
 
         return NewSprite;
     }

@@ -237,6 +237,7 @@ namespace MapMaker
                         CustomTextureName = (String)platform["CustomTextureName"];
                         Debug.Log(CustomTextureName);
                         //doesnt work if there are multiple files ending with the file name
+                        //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that.
                         Byte[] filedata;
                         Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
                         if (filedatas.Length > 0)
@@ -336,15 +337,8 @@ namespace MapMaker
             StickyRect.GetGroundBody().up = new Vec2(rotatson);
             AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
             SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
+            //TODO remove sprite object on scene change
             spriteRenderer.sprite = sprite;
-            var rect = sprite.rect;
-            Debug.Log($"rect is {rect}");
-            var rectWidth = rect.width;
-            var rectHeight = rect.height;
-            var vector = new Vector2(rectWidth / 2, rectHeight / 2);
-            Debug.Log($"vector is {vector}");
-            Debug.Log($"Field is {AccessTools.Field(typeof(Sprite), "pivot")}");
-            AccessTools.Field(typeof(Sprite), "pivot").SetValue(sprite, vector);
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
 

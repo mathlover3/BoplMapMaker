@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "OhsmrVGVC1dCpxeR4/XZTu/Mmbfi6OvBTe+WJZEhEE1Bm787rUbeUc8Gj7L491wdGhGstEI9lIY+PgaXMOzKig==",
+  "dgSpecHash": "4XbfzFA5m92hKJ4fwfISEOV3XTYoLxAEdjUVxnjQV3C3b/rw4KL5TmT/U5BsGJ8ESIAuY9fTW1QRsIfN1FWOkA==",
   "success": true,
   "projectFilePath": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MapMaker.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.analyzers\\1.0.8\\bepinex.analyzers.1.0.8.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.assemblypublicizer.msbuild\\0.4.2\\bepinex.assemblypublicizer.msbuild.0.4.2.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.baselib\\5.4.20\\bepinex.baselib.5.4.20.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.core\\5.4.21\\bepinex.core.5.4.21.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\bepinex.plugininfoprops\\1.1.0\\bepinex.plugininfoprops.1.1.0.nupkg.sha512",
