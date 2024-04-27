@@ -26,7 +26,7 @@ public class IMG2Sprite : MonoBehaviour
         }
     }
 
-    public Sprite LoadNewSprite(byte[] FileData, float PixelsPerUnit = 100.0f)
+    public static Sprite LoadNewSprite(byte[] FileData, float PixelsPerUnit = 100.0f)
     {
 
         // Load a PNG or JPG image from disk to a Texture2D, assign this texture to a new sprite and return its reference
@@ -38,7 +38,7 @@ public class IMG2Sprite : MonoBehaviour
         return NewSprite;
     }
 
-    public Texture2D LoadTexture(byte[] FileData)
+    public static Texture2D LoadTexture(byte[] FileData)
     {
 
         // Load a PNG or JPG file from disk to a Texture2D

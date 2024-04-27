@@ -19,6 +19,8 @@ using System.Drawing;
 using BepInEx.Configuration;
 using System.IO.Compression;
 using System.Runtime.Remoting.Contexts;
+using System.Text;
+using UnityEngine.UI;
 
 namespace MapMaker
 {
@@ -35,7 +37,12 @@ namespace MapMaker
         public static Fix OneByOneBlockMass = Fix.One;
         public static string[] MapJsons;
         // Define a static logger instance
-        private static ManualLogSource logger;
+        public static ManualLogSource logger;
+        public static bool UseCustomTexture = false;
+        public static string CustomTextureName;
+        //all the zipArchives in the same order as the MapJsons
+        public static ZipArchive[] zipArchives = { };
+        public static Sprite sprite;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -71,11 +78,9 @@ namespace MapMaker
             List<string> JsonList = new List<string>();
             foreach (ZipArchive zipArchive in zipArchives)
             {
-                //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .boplmapzip)
+                //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
-                Logger.LogInfo($"MapJson: {GetFileFromZipArchive(zipArchive, IsBoplMap)[0]} loaded");
             }
-            Logger.LogInfo($"JsonList is {JsonList}");
             MapJsons = JsonList.ToArray();
         }
         public static bool IsBoplMap(string path)
@@ -88,7 +93,6 @@ namespace MapMaker
         public static MapIdCheckerThing CheckIfWeHaveCustomMapWithMapId()
         {
             int[] MapIds = {};
-            Debug.Log($"MapJsons is {MapJsons}");
             foreach (string mapJson in MapJsons)
             {
                 try
@@ -139,6 +143,7 @@ namespace MapMaker
         //CALL ONLY ON LEVEL LOAD!
         public static void LoadMapsFromFolder()
         {
+            var i = 0;
             foreach (string mapJson in MapJsons)
             {
                 try
@@ -146,17 +151,19 @@ namespace MapMaker
                     Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
                     if (int.Parse((string)Dict["mapId"]) == CurrentMapId)
                     {
-                        SpawnPlatformsFromMap(mapJson);
+                        SpawnPlatformsFromMap(mapJson, i);
                     }
+                    
                 }
                 catch (Exception ex)
                 {
                     Debug.LogError($"Failed to load map from json: {mapJson} Error: {ex.Message}");
                 }
+                i++;
             }
         }
 
-        public static void SpawnPlatformsFromMap(string mapJson)
+        public static void SpawnPlatformsFromMap(string mapJson, int index)
         {
             //get the platform prefab out of the Platform ability gameobject (david) DO NOT REMOVE!
             //chatgpt code to get the Platform ability object
@@ -181,6 +188,7 @@ namespace MapMaker
             Debug.Log("platforms set");
             foreach (Dictionary<String, object> platform in platforms)
             {
+                sprite = null;
                 try
                 {
                     // Extract platform data (david)
@@ -194,6 +202,8 @@ namespace MapMaker
                     double height = Convert.ToDouble(size["height"]);
                     double radius = Convert.ToDouble(platform["radius"]);
                     bool UseCustomMass = false;
+                    //reset UseCustomTexture so the value for 1 platform doesnt blead trough to anouter
+                    UseCustomTexture = false;
                     Fix Mass = (Fix)0;
 
                     //defult to 0 rotatson incase the json is missing it
@@ -202,20 +212,60 @@ namespace MapMaker
                     { 
                         rotatson = ConvertToRadians((double)platform["rotation"]);
                     }
-                    // Spawn platform
+                    //custom mass
                     if (platform.ContainsKey("UseCustomMass"))
                     {
                         UseCustomMass = (bool)platform["UseCustomMass"];
                     }
                     if (platform.ContainsKey("CustomMass") && UseCustomMass)
                     {
-                        Mass = (Fix)(double)platform["CustomMass"];
+                        Mass = (Fix)Convert.ToDouble(platform["CustomMass"]);
                     }
                     else
                     {
                         Mass = CalculateMassOfPlatform((Fix)width, (Fix)height, (Fix)radius);
                     }
-                    SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass);
+                    //custom Texture 
+                    if (platform.ContainsKey("UseCustomTexture") && platform.ContainsKey("CustomTextureName") && platform.ContainsKey("PixelsPerUnit"))
+                    {
+                        UseCustomTexture = (bool)platform["UseCustomTexture"];
+                    }
+                    Debug.Log($"UseCustomTexture is {UseCustomTexture}");
+                    if (UseCustomTexture)
+                    {
+                        float PixelsPerUnit = (float)Convert.ToDouble(platform["PixelsPerUnit"]);
+                        CustomTextureName = (String)platform["CustomTextureName"];
+                        Debug.Log(CustomTextureName);
+                        //doesnt work if there are multiple files ending with the file name
+                        Byte[] filedata;
+                        Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
+                        if (filedatas.Length > 0)
+                        {
+                            filedata = filedatas[0];
+                            Debug.Log($"filedata is {filedata}");
+                            sprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
+                            Debug.Log($"sprite is {sprite}");
+                        }
+                        else
+                        {
+                            logger.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                            Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                            return;
+                        }
+
+                    }
+
+                    // Spawn platform
+                    if (!UseCustomTexture)
+                    {
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass);
+                    }
+                    else
+                    {
+
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite);
+                    }
+                    
                     Debug.Log("Platform spawned successfully");
                 }
                 catch (Exception ex)
@@ -223,6 +273,10 @@ namespace MapMaker
                     Debug.LogError($"Failed to spawn platform. Error: {ex.Message}");
                 }
             }
+        }
+        public static bool IsCustomTexture(string textureName)
+        {
+            return textureName.EndsWith(CustomTextureName);
         }
 
         private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -235,7 +289,7 @@ namespace MapMaker
                 //error if there are multiple maps with the same id
                 if (DoWeHaveMapWithMapId == MapIdCheckerThing.MultipleMapsFoundWithId)
                 {
-                    Debug.LogError("ERROR! MULTIPLE MAPS WITH THE GIVEM MAP ID FOUND! UHAFYIGGAFYAIO");
+                    Debug.LogError($"ERROR! MULTIPLE MAPS WITH MAP ID: {CurrentMapId} FOUND! UHAFYIGGAFYAIO");
                     return;
                 }
                 else
@@ -255,7 +309,7 @@ namespace MapMaker
                 LoadMapsFromFolder();
             }
         }
-
+        //no sprite
         public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass)
         {
             // Spawn platform (david - and now melon)
@@ -267,6 +321,30 @@ namespace MapMaker
             //45 degrees
             StickyRect.GetGroundBody().up = new Vec2(rotatson);
             AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
+            Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
+        }
+        //with sprite
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Sprite sprite)
+        {
+            // Spawn platform (david - and now melon)
+            var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
+            StickyRect.rr.Scale = Fix.One;
+            var platform = StickyRect.GetComponent<ResizablePlatform>();
+            platform.GetComponent<DPhysicsRoundedRect>().ManualInit();
+            ResizePlatform(platform, Width, Height, Radius);
+            //45 degrees
+            StickyRect.GetGroundBody().up = new Vec2(rotatson);
+            AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
+            SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
+            spriteRenderer.sprite = sprite;
+            var rect = sprite.rect;
+            Debug.Log($"rect is {rect}");
+            var rectWidth = rect.width;
+            var rectHeight = rect.height;
+            var vector = new Vector2(rectWidth / 2, rectHeight / 2);
+            Debug.Log($"vector is {vector}");
+            Debug.Log($"Field is {AccessTools.Field(typeof(Sprite), "pivot")}");
+            AccessTools.Field(typeof(Sprite), "pivot").SetValue(sprite, vector);
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
 
@@ -348,8 +426,7 @@ namespace MapMaker
                 return archive;
             
         }
-        //finds all the files with a path that the predicate acsepts as a string array (note that depending on the file you may need to turn it into a byte array) (david)
-
+        //finds all the files with a path that the predicate acsepts as a string array 
         public static string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
         {
             Debug.Log("enter GetFileFromZipArchive");
@@ -381,15 +458,49 @@ namespace MapMaker
             }
             return data;
         }
-        //gets all of the .boplmapzip files from the maps folder and turns them into a array of ZipArchive's (david)
+        public static Byte[][] GetFileFromZipArchiveBytes(ZipArchive archive, Predicate<string> predicate)
+        {
+            Debug.Log("enter GetFileFromZipArchive");
+            Byte[][] data = { };
+            // Iterate through each entry in the zip file
+            //archive is disposed of at this point for some reson
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                // If entry is a directory, skip it
+                Debug.Log("check if its a drectory");
+                if (entry.FullName.EndsWith("/"))
+                    continue;
+                Debug.Log("it isnt a drectory");
+                //see if it is valid (if the predicate returns true)
+                string[] path = { entry.FullName };
+                string[] ValidPathArray = Array.FindAll(path, predicate);
+                if (ValidPathArray.Length != 0)
+                {
+                    Debug.Log("about to read the contents of entry");
+                    // Read the contents of the entry
+                    using (var entryStream = entry.Open())
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        Debug.Log("reading the contents of entry");
+                        entryStream.CopyTo(memoryStream);
+                        //add the contents to data
+                        data = data.Append(memoryStream.ToArray()).ToArray();
+                    }
+                }
+            }
+            return data;
+        }
+
+
+        //gets all of the .zip files from the maps folder and turns them into a array of ZipArchive's (david) ONLY CALL ON START!
         public static ZipArchive[] GetZipArchives()
         {
-            string[] MapZipFiles = Directory.GetFiles(mapsFolderPath, "*.boplmapzip");
-            Debug.Log($"{MapZipFiles.Length} .boplmapzip's");
-            ZipArchive[] zipArchives = { };
+            string[] MapZipFiles = Directory.GetFiles(mapsFolderPath, "*.zip");
+            Debug.Log($"{MapZipFiles.Length} .zip's");
             foreach (string zipFile in MapZipFiles)
             {
                 zipArchives = zipArchives.Append(UnzipFile(zipFile)).ToArray();
+
             }
             Debug.Log($"zipArchivesLength is {zipArchives.Length}");
             return zipArchives;
