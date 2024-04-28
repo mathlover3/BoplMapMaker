@@ -30,16 +30,16 @@ public class IMG2Sprite : MonoBehaviour
     {
 
         // Load a PNG or JPG image from disk to a Texture2D, assign this texture to a new sprite and return its reference
-
+        
         Sprite NewSprite = new Sprite();
         Texture2D SpriteTexture = LoadTexture(FileData);
         var rect = new Rect(0, 0, SpriteTexture.width, SpriteTexture.height);
-        // Assuming your sprite size is 100x100 pixels
-        float pivotX = 480f / (float)SpriteTexture.width; // Convert pixel coordinate to Unity units
-        float pivotY = 360f / (float)SpriteTexture.height; // Convert pixel coordinate to Unity units
+        float pivotX = ((float)SpriteTexture.width/2) / (float)SpriteTexture.width; // Convert pixel coordinate to Unity units
+        float pivotY = ((float)SpriteTexture.height / 2) / (float)SpriteTexture.height; // Convert pixel coordinate to Unity units
 
         // Create the sprite with the correct pivot point
         Vector2 vector = new Vector2(pivotX, pivotY);
+        float PixelsPerUnit2 = Mathf.Max((float)SpriteTexture.width, (float)SpriteTexture.height);
 
         Debug.Log($"vector is {vector}");
         NewSprite = Sprite.Create(SpriteTexture, rect, vector, PixelsPerUnit);

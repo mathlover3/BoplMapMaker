@@ -43,6 +43,7 @@ namespace MapMaker
         //all the zipArchives in the same order as the MapJsons
         public static ZipArchive[] zipArchives = { };
         public static Sprite sprite;
+        public static Material PlatformMat;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -202,6 +203,11 @@ namespace MapMaker
                     double height = Convert.ToDouble(size["height"]);
                     double radius = Convert.ToDouble(platform["radius"]);
                     bool UseCustomMass = false;
+                    float Red = 1;
+                    float Green = 1;
+                    float Blue = 1;
+                    float Opacity = 1;
+                    Vector4 color;
                     //reset UseCustomTexture so the value for 1 platform doesnt blead trough to anouter
                     UseCustomTexture = false;
                     Fix Mass = (Fix)0;
@@ -237,7 +243,7 @@ namespace MapMaker
                         CustomTextureName = (String)platform["CustomTextureName"];
                         Debug.Log(CustomTextureName);
                         //doesnt work if there are multiple files ending with the file name
-                        //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that.
+                        //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
                         Byte[] filedata;
                         Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
                         if (filedatas.Length > 0)
@@ -255,16 +261,32 @@ namespace MapMaker
                         }
 
                     }
-
+                    if (platform.ContainsKey("Red"))
+                    {
+                        Red = (float)Convert.ToDouble(platform["Red"]);
+                    }
+                    if (platform.ContainsKey("Green"))
+                    {
+                        Green = (float)Convert.ToDouble(platform["Green"]);
+                    }
+                    if (platform.ContainsKey("Blue"))
+                    {
+                        Blue = (float)Convert.ToDouble(platform["Blue"]);
+                    }
+                    if (platform.ContainsKey("Opacity"))
+                    {
+                        Opacity = (float)Convert.ToDouble(platform["Opacity"]);
+                    }
+                    color = new Vector4(Red, Green, Blue, Opacity);
                     // Spawn platform
                     if (!UseCustomTexture)
                     {
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color);
                     }
                     else
                     {
 
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color);
                     }
                     
                     Debug.Log("Platform spawned successfully");
@@ -305,13 +327,15 @@ namespace MapMaker
                 levelt = GameObject.Find("Level").transform;
                 foreach (Transform tplatform in levelt)
                 {
+                    //steal matual
+                    PlatformMat = tplatform.gameObject.GetComponent<SpriteRenderer>().material;
                     Updater.DestroyFix(tplatform.gameObject);
                 }
                 LoadMapsFromFolder();
             }
         }
         //no sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -322,10 +346,13 @@ namespace MapMaker
             //45 degrees
             StickyRect.GetGroundBody().up = new Vec2(rotatson);
             AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
+            //color
+            SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
+            spriteRenderer.color = color;
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
         //with sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Sprite sprite)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Sprite sprite, Vector4 color)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -339,6 +366,8 @@ namespace MapMaker
             SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
             //TODO remove sprite object on scene change
             spriteRenderer.sprite = sprite;
+            spriteRenderer.material = PlatformMat;
+            spriteRenderer.color = color;
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
 
