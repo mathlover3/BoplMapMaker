@@ -21,6 +21,7 @@ using System.IO.Compression;
 using System.Runtime.Remoting.Contexts;
 using System.Text;
 using UnityEngine.UI;
+using System.Reflection.Emit;
 
 namespace MapMaker
 {
@@ -44,6 +45,12 @@ namespace MapMaker
         public static ZipArchive[] zipArchives = { };
         public static Sprite sprite;
         public static Material PlatformMat;
+        public static GameObject SlimeCam;
+        public static GameObject SlimeCamObject;
+        public static List<Drill.PlatformColors> CustomDrillColors;
+        public static List<NamedSprite> CustomMatchoManSprites;
+        public static int NextPlatformTypeValue = 5;
+        public const int StartingNextPlatformTypeValue = 5;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -68,8 +75,6 @@ namespace MapMaker
                 Directory.CreateDirectory(mapsFolderPath);
                 Debug.Log("Maps folder created.");
             }
-            
-            
         }
         public void Start()
         {
@@ -187,6 +192,9 @@ namespace MapMaker
             Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
             List<object> platforms = (List<object>)Dict["platforms"];
             Debug.Log("platforms set");
+            //empty the list of Drill colors so the indexs start at 0 agien
+            CustomDrillColors = new List<Drill.PlatformColors>();
+            NextPlatformTypeValue = StartingNextPlatformTypeValue;
             foreach (Dictionary<String, object> platform in platforms)
             {
                 sprite = null;
@@ -207,6 +215,9 @@ namespace MapMaker
                     float Green = 1;
                     float Blue = 1;
                     float Opacity = 1;
+                    bool circle = false;
+                    bool UseCustomDrillColorAndBolderTexture = false;
+                    PlatformType platformType = PlatformType.slime;
                     Vector4 color;
                     //reset UseCustomTexture so the value for 1 platform doesnt blead trough to anouter
                     UseCustomTexture = false;
@@ -227,9 +238,17 @@ namespace MapMaker
                     {
                         Mass = (Fix)Convert.ToDouble(platform["CustomMass"]);
                     }
+                    //is it a circle
+                    if (platform.ContainsKey("shape"))
+                    {
+                        if (Convert.ToString(platform["shape"]) == "circle")
+                        {
+                            circle = true;
+                        }
+                    }
                     else
                     {
-                        Mass = CalculateMassOfPlatform((Fix)width, (Fix)height, (Fix)radius);
+                        Mass = CalculateMassOfPlatform((Fix)width, (Fix)height, (Fix)radius, circle);
                     }
                     //custom Texture 
                     if (platform.ContainsKey("UseCustomTexture") && platform.ContainsKey("CustomTextureName") && platform.ContainsKey("PixelsPerUnit"))
@@ -261,6 +280,7 @@ namespace MapMaker
                         }
 
                     }
+                    //color
                     if (platform.ContainsKey("Red"))
                     {
                         Red = (float)Convert.ToDouble(platform["Red"]);
@@ -278,15 +298,20 @@ namespace MapMaker
                         Opacity = (float)Convert.ToDouble(platform["Opacity"]);
                     }
                     color = new Vector4(Red, Green, Blue, Opacity);
+                    //UseCustomDrillColorAndBolderTexture
+                    if (platform.ContainsKey("UseCustomDrillColorAndBolderTexture"))
+                    {
+                        UseCustomDrillColorAndBolderTexture = (bool)platform["UseCustomDrillColorAndBolderTexture"];
+                    }
                     // Spawn platform
                     if (!UseCustomTexture)
                     {
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType);
                     }
                     else
                     {
 
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType);
                     }
                     
                     Debug.Log("Platform spawned successfully");
@@ -296,6 +321,7 @@ namespace MapMaker
                     Debug.LogError($"Failed to spawn platform. Error: {ex.Message}");
                 }
             }
+
         }
         public static bool IsCustomTexture(string textureName)
         {
@@ -305,7 +331,7 @@ namespace MapMaker
         private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             Debug.Log("OnSceneLoaded: " + scene.name);
-            if (IsLevelName(scene.name)) // TODO: Check level, Replace with mapId from MapMaker Thing
+            if (IsLevelName(scene.name))
             {
                 CurrentMapId = GetMapIdFromSceneName(scene.name);
                 var DoWeHaveMapWithMapId = CheckIfWeHaveCustomMapWithMapId();
@@ -325,17 +351,24 @@ namespace MapMaker
                 }
                 //find the platforms and remove them (shadow + david)
                 levelt = GameObject.Find("Level").transform;
+                var index = 0;
                 foreach (Transform tplatform in levelt)
                 {
-                    //steal matual
-                    PlatformMat = tplatform.gameObject.GetComponent<SpriteRenderer>().material;
+                    //if its the first platform then steal some stuff from it before distroying it.
+                    if (index == 0)
+                    {
+                        //steal matual 
+                        PlatformMat = tplatform.gameObject.GetComponent<SpriteRenderer>().material;
+                    }
+                    index++;
+                    //distroy it
                     Updater.DestroyFix(tplatform.gameObject);
                 }
                 LoadMapsFromFolder();
             }
         }
         //no sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color, PlatformType platformType)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -349,10 +382,12 @@ namespace MapMaker
             //color
             SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
             spriteRenderer.color = color;
+            //PlatformType
+            StickyRect.platformType = platformType;
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
         //with sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Sprite sprite, Vector4 color)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Sprite sprite, Vector4 color, PlatformType platformType)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -368,17 +403,17 @@ namespace MapMaker
             spriteRenderer.sprite = sprite;
             spriteRenderer.material = PlatformMat;
             spriteRenderer.color = color;
+            //PlatformType
+            StickyRect.platformType = platformType;
+            //slime cam
+            var transform = StickyRect.transform;
+            //i think i need to use assetbundles for this part :(
+
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
 
         public static void Update()
         {
-            //ignore this its broken
-            //if (Platforms.Count > 0)
-            //{
-            //    ResizePlatform(Platforms[0], (Fix)0.1, (Fix)0.1, (Fix)(5 + t * 0.05));
-            //    t++;
-            //}
         }
 
         //this can be called anytime the object is active. this means you can have animated levels with shape changing platforms
@@ -407,14 +442,14 @@ namespace MapMaker
             return int.Parse(cleaned)-1;
         }
 
-        public static Fix CalculateMassOfPlatform(Fix Width, Fix Height, Fix Radius)
+        public static Fix CalculateMassOfPlatform(Fix Width, Fix Height, Fix Radius, bool circle)
         {
             //multiply by 2 because Width and Height are just distances from the center 
             var TrueWidth = Width * (Fix)2 + Radius;
             var TrueHeight = Height * (Fix)2 + Radius;
             var Area = TrueWidth * TrueHeight;
             //if it is a circle
-            if (Width == (Fix)0.05 && Height == (Fix)0.05)
+            if (circle)
             {
                 //A=Pi*R^2
                 //there is no exsponent for Fixes
@@ -528,6 +563,17 @@ namespace MapMaker
             Debug.Log($"zipArchivesLength is {zipArchives.Length}");
             return zipArchives;
 
+        }
+    }
+    [HarmonyPatch(typeof(MachoThrow2))]
+    public class MachoThrow2Patches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPrefix]
+        private static void Awake_MapMaker_Plug(MachoThrow2 __instance)
+        {
+            Debug.Log("MatchoThrow2");
+            __instance.boulders.sprites.AddRange(Plugin.CustomMatchoManSprites);
         }
     }
 }
