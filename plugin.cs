@@ -303,12 +303,29 @@ namespace MapMaker
                     {
                         UseCustomDrillColorAndBolderTexture = (bool)platform["UseCustomDrillColorAndBolderTexture"];
                     }
+                    if (UseCustomDrillColorAndBolderTexture)
+                    {
+                        //get drill colors dict to pass.
+                        var dict = (Dictionary<string, object>)platform["CustomDrillColors"];
+                        //if this platform fails to generate then the custom boulder texsters will get mixed up.
+                        var MyPlatformId = NextPlatformTypeValue;
+                        NextPlatformTypeValue = NextPlatformTypeValue + 1;
+                        Debug.Log("creating drill colors");
+                        var colors = DrillColors(MyPlatformId, dict);
+                        Debug.Log("drill colors created");
+                        platformType = (PlatformType)MyPlatformId;
+                        CustomDrillColors.Add(colors);
+
+
+
+                    }
                     // Spawn platform
-                    if (!UseCustomTexture)
+                    if (!UseCustomTexture && !UseCustomDrillColorAndBolderTexture)
                     {
                         SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType);
                     }
                     else
+                    if (UseCustomTexture)
                     {
 
                         SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType);
@@ -564,6 +581,40 @@ namespace MapMaker
             return zipArchives;
 
         }
+        //get the custom drill color from a dicsanry
+        public static Drill.PlatformColors DrillColors(int PlatformType, Dictionary<string, object> dict)
+        {
+            var colors = new Drill.PlatformColors();
+            //convert them to List<float> instead of object. (objects are so confusing)
+            List<object> ColorDarkObjectList = (List<object>)dict["ColorDark"];
+            List<object> ColorMediumObjectList = (List<object>)dict["ColorMedium"];
+            List<object> ColorLightObjectList = (List<object>)dict["ColorLight"];
+            List<float> ColorDarkFloats = new List<float>();
+            List<float> ColorMediumFloats = new List<float>();
+            List<float> ColorLightFloats = new List<float>();
+            //convert them to List<float>
+            for (int i = 0; i < ColorDarkObjectList.Count; i++)
+            {
+                ColorDarkFloats.Add((float)Convert.ToDouble(ColorDarkObjectList[i]));
+            }
+            for (int i = 0; i < ColorMediumObjectList.Count; i++)
+            {
+                ColorMediumFloats.Add((float)Convert.ToDouble(ColorMediumObjectList[i]));
+            }
+            for (int i = 0; i < ColorLightObjectList.Count; i++)
+            {
+                ColorLightFloats.Add((float)Convert.ToDouble(ColorLightObjectList[i]));
+            }
+            UnityEngine.Color ColorDark = new UnityEngine.Color(ColorDarkFloats[0], ColorDarkFloats[1], ColorDarkFloats[2], ColorDarkFloats[3]);
+            UnityEngine.Color ColorMedium = new UnityEngine.Color(ColorMediumFloats[0], ColorMediumFloats[1], ColorMediumFloats[2], ColorMediumFloats[3]);
+            UnityEngine.Color ColorLight = new UnityEngine.Color(ColorLightFloats[0], ColorLightFloats[1], ColorLightFloats[2], ColorLightFloats[3]);
+            colors.dark = ColorDark;
+            colors.medium = ColorMedium;
+            colors.light = ColorLight;
+            //used to define the custom platform type. will be used whenever we drill it
+            colors.type = (PlatformType)PlatformType;
+            return colors;
+        }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
     public class MachoThrow2Patches
@@ -574,6 +625,17 @@ namespace MapMaker
         {
             Debug.Log("MatchoThrow2");
             __instance.boulders.sprites.AddRange(Plugin.CustomMatchoManSprites);
+        }
+    }
+    [HarmonyPatch(typeof(Drill))]
+    public class DrillPatches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPrefix]
+        private static void Awake_MapMaker_Plug(Drill __instance)
+        {
+            Debug.Log("Drill");
+            __instance.platformDependentColors.AddRange(Plugin.CustomDrillColors);
         }
     }
 }
