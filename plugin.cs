@@ -51,6 +51,10 @@ namespace MapMaker
         public static List<NamedSprite> CustomMatchoManSprites;
         public static int NextPlatformTypeValue = 5;
         public const int StartingNextPlatformTypeValue = 5;
+        public static Sprite BoulderSprite;
+        //used to make CustomBoulderSmokeColors start with a value.
+        internal static UnityEngine.Color[] ignore = {new UnityEngine.Color(1,1,1,1)};
+        public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -195,9 +199,12 @@ namespace MapMaker
             //empty the list of Drill colors so the indexs start at 0 agien
             CustomDrillColors = new List<Drill.PlatformColors>();
             NextPlatformTypeValue = StartingNextPlatformTypeValue;
+            CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
+            CustomMatchoManSprites = new List<NamedSprite>();
             foreach (Dictionary<String, object> platform in platforms)
             {
                 sprite = null;
+                BoulderSprite = null;
                 try
                 {
                     // Extract platform data (david)
@@ -278,7 +285,6 @@ namespace MapMaker
                             Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
                             return;
                         }
-
                     }
                     //color
                     if (platform.ContainsKey("Red"))
@@ -315,9 +321,34 @@ namespace MapMaker
                         Debug.Log("drill colors created");
                         platformType = (PlatformType)MyPlatformId;
                         CustomDrillColors.Add(colors);
-
-
-
+                        //custom Boulder time
+                        float PixelsPerUnit = (float)Convert.ToDouble(platform["BoulderPixelsPerUnit"]);
+                        CustomTextureName = (String)platform["CustomBoulderTexture"];
+                        //Debug.Log(CustomTextureName);
+                        //doesnt work if there are multiple files ending with the file name
+                        //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
+                        Byte[] filedata;
+                        Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
+                        if (filedatas.Length > 0)
+                        {
+                            filedata = filedatas[0];
+                            Debug.Log($"filedata length is {filedata.Length}");
+                            BoulderSprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
+                            Debug.Log($"sprite is {BoulderSprite}");
+                            NamedSprite namedSprite = new NamedSprite(CustomTextureName, BoulderSprite, true);
+                            Debug.Log("NamedSprite generated");
+                            CustomMatchoManSprites.Add(namedSprite);
+                            Debug.Log("Added NamedSprite to CustomMatchoManSprites");
+                        }
+                        else
+                        {
+                            logger.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                            Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                            return;
+                        }
+                        var BoulderSmokeColorList = ListOfObjectsToListOfFloats((List<object>)platform["BoulderSmokeColor"]);
+                        UnityEngine.Color BoulderSmokeColor = new UnityEngine.Color(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
+                        CustomBoulderSmokeColors.Add(BoulderSmokeColor);
                     }
                     // Spawn platform
                     if (!UseCustomTexture && !UseCustomDrillColorAndBolderTexture)
@@ -589,22 +620,9 @@ namespace MapMaker
             List<object> ColorDarkObjectList = (List<object>)dict["ColorDark"];
             List<object> ColorMediumObjectList = (List<object>)dict["ColorMedium"];
             List<object> ColorLightObjectList = (List<object>)dict["ColorLight"];
-            List<float> ColorDarkFloats = new List<float>();
-            List<float> ColorMediumFloats = new List<float>();
-            List<float> ColorLightFloats = new List<float>();
-            //convert them to List<float>
-            for (int i = 0; i < ColorDarkObjectList.Count; i++)
-            {
-                ColorDarkFloats.Add((float)Convert.ToDouble(ColorDarkObjectList[i]));
-            }
-            for (int i = 0; i < ColorMediumObjectList.Count; i++)
-            {
-                ColorMediumFloats.Add((float)Convert.ToDouble(ColorMediumObjectList[i]));
-            }
-            for (int i = 0; i < ColorLightObjectList.Count; i++)
-            {
-                ColorLightFloats.Add((float)Convert.ToDouble(ColorLightObjectList[i]));
-            }
+            List<float> ColorDarkFloats = ListOfObjectsToListOfFloats(ColorDarkObjectList);
+            List<float> ColorMediumFloats = ListOfObjectsToListOfFloats(ColorMediumObjectList);
+            List<float> ColorLightFloats = ListOfObjectsToListOfFloats(ColorLightObjectList);
             UnityEngine.Color ColorDark = new UnityEngine.Color(ColorDarkFloats[0], ColorDarkFloats[1], ColorDarkFloats[2], ColorDarkFloats[3]);
             UnityEngine.Color ColorMedium = new UnityEngine.Color(ColorMediumFloats[0], ColorMediumFloats[1], ColorMediumFloats[2], ColorMediumFloats[3]);
             UnityEngine.Color ColorLight = new UnityEngine.Color(ColorLightFloats[0], ColorLightFloats[1], ColorLightFloats[2], ColorLightFloats[3]);
@@ -615,6 +633,15 @@ namespace MapMaker
             colors.type = (PlatformType)PlatformType;
             return colors;
         }
+        public static List<float> ListOfObjectsToListOfFloats(List<object> ObjectList)
+        {
+            List<float> Floats = new List<float>();
+            for (int i = 0; i < ObjectList.Count; i++)
+            {
+                Floats.Add((float)Convert.ToDouble(ObjectList[i]));
+            }
+            return Floats;
+        }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
     public class MachoThrow2Patches
@@ -624,7 +651,14 @@ namespace MapMaker
         private static void Awake_MapMaker_Plug(MachoThrow2 __instance)
         {
             Debug.Log("MatchoThrow2");
-            __instance.boulders.sprites.AddRange(Plugin.CustomMatchoManSprites);
+            //if there is something to add
+            if (Plugin.CustomMatchoManSprites.Count != 0)
+            {
+                __instance.boulders.sprites.AddRange(Plugin.CustomMatchoManSprites);
+            }
+            var ColorList = new List<UnityEngine.Color>(__instance.boulderSmokeColors);
+            ColorList.AddRange(Plugin.CustomBoulderSmokeColors);
+            __instance.boulderSmokeColors = ColorList.ToArray();
         }
     }
     [HarmonyPatch(typeof(Drill))]
@@ -635,7 +669,12 @@ namespace MapMaker
         private static void Awake_MapMaker_Plug(Drill __instance)
         {
             Debug.Log("Drill");
-            __instance.platformDependentColors.AddRange(Plugin.CustomDrillColors);
+            //if there is something to add
+            if (Plugin.CustomDrillColors.Count != 0)
+            {
+                __instance.platformDependentColors.AddRange(Plugin.CustomDrillColors);
+            }
+
         }
     }
 }
