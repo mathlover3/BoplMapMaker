@@ -45,7 +45,6 @@ namespace MapMaker
         public static ZipArchive[] zipArchives = { };
         public static Sprite sprite;
         public static Material PlatformMat;
-        public static GameObject SlimeCam;
         public static GameObject SlimeCamObject;
         public static List<Drill.PlatformColors> CustomDrillColors;
         public static List<NamedSprite> CustomMatchoManSprites;
@@ -55,6 +54,7 @@ namespace MapMaker
         //used to make CustomBoulderSmokeColors start with a value.
         internal static UnityEngine.Color[] ignore = {new UnityEngine.Color(1,1,1,1)};
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
+        public static AssetBundle MyAssetBundle = AssetBundle.LoadFromFile(Path.Combine(Paths.PluginPath, "mapMaker/assetbundle"));
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -79,6 +79,13 @@ namespace MapMaker
                 Directory.CreateDirectory(mapsFolderPath);
                 Debug.Log("Maps folder created.");
             }
+            string[] assetNames = MyAssetBundle.GetAllAssetNames();
+            foreach (string name in assetNames)
+            {
+                Debug.Log("asset name is: " +  name);
+            }
+            //load the slime cam for use in spawning platforms with slimecam
+            SlimeCamObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/slimetrailcam.prefab");
         }
         public void Start()
         {
@@ -353,13 +360,13 @@ namespace MapMaker
                     // Spawn platform
                     if (!UseCustomTexture && !UseCustomDrillColorAndBolderTexture)
                     {
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, true);
                     }
                     else
                     if (UseCustomTexture)
                     {
 
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType, true);
                     }
                     
                     Debug.Log("Platform spawned successfully");
@@ -416,7 +423,7 @@ namespace MapMaker
             }
         }
         //no sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color, PlatformType platformType)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color, PlatformType platformType, bool UseSlimeCam)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -432,10 +439,17 @@ namespace MapMaker
             spriteRenderer.color = color;
             //PlatformType
             StickyRect.platformType = platformType;
+            //SlimeCam
+            if (UseSlimeCam)
+            {
+                var transform = StickyRect.transform;
+                UnityEngine.Object.Instantiate(SlimeCamObject, transform);
+            }
+
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
         //with sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Sprite sprite, Vector4 color, PlatformType platformType)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Sprite sprite, Vector4 color, PlatformType platformType, bool UseSlimeCam)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -454,8 +468,12 @@ namespace MapMaker
             //PlatformType
             StickyRect.platformType = platformType;
             //slime cam
-            var transform = StickyRect.transform;
-            //i think i need to use assetbundles for this part :(
+            if (UseSlimeCam)
+            {
+                var transform = StickyRect.transform;
+                //i think i need to use assetbundles for this part :(
+                UnityEngine.Object.Instantiate(SlimeCamObject, transform);
+            }
 
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
