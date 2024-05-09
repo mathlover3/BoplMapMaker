@@ -54,7 +54,8 @@ namespace MapMaker
         //used to make CustomBoulderSmokeColors start with a value.
         internal static UnityEngine.Color[] ignore = {new UnityEngine.Color(1,1,1,1)};
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
-        public static AssetBundle MyAssetBundle = AssetBundle.LoadFromFile(Path.Combine(Paths.PluginPath, "mapMaker/assetbundle"));
+        public static string PluginFolderName = "mapMaker";
+        public static AssetBundle MyAssetBundle = AssetBundle.LoadFromFile(Path.Combine(Paths.PluginPath, PluginFolderName+"/assetbundle"));
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -231,6 +232,7 @@ namespace MapMaker
                     float Opacity = 1;
                     bool circle = false;
                     bool UseCustomDrillColorAndBolderTexture = false;
+                    bool UseSlimeCam = false;
                     PlatformType platformType = PlatformType.slime;
                     Vector4 color;
                     //reset UseCustomTexture so the value for 1 platform doesnt blead trough to anouter
@@ -357,16 +359,20 @@ namespace MapMaker
                         UnityEngine.Color BoulderSmokeColor = new UnityEngine.Color(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
                         CustomBoulderSmokeColors.Add(BoulderSmokeColor);
                     }
+                    if (platform.ContainsKey("UseSlimeCam"))
+                    {
+                        UseSlimeCam = (bool)platform["UseSlimeCam"];
+                    }
                     // Spawn platform
                     if (!UseCustomTexture && !UseCustomDrillColorAndBolderTexture)
                     {
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, true);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, UseSlimeCam);
                     }
                     else
                     if (UseCustomTexture)
                     {
 
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType, true);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType, UseSlimeCam);
                     }
                     
                     Debug.Log("Platform spawned successfully");
