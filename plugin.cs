@@ -54,8 +54,7 @@ namespace MapMaker
         //used to make CustomBoulderSmokeColors start with a value.
         internal static UnityEngine.Color[] ignore = {new UnityEngine.Color(1,1,1,1)};
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
-        public static string PluginFolderName = "mapMaker";
-        public static AssetBundle MyAssetBundle = AssetBundle.LoadFromFile(Path.Combine(Paths.PluginPath, PluginFolderName+"/assetbundle"));
+        public static AssetBundle MyAssetBundle;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -80,6 +79,8 @@ namespace MapMaker
                 Directory.CreateDirectory(mapsFolderPath);
                 Debug.Log("Maps folder created.");
             }
+            //thanks almafa64 on discord for the path stuff.
+            MyAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/assetbundle");
             string[] assetNames = MyAssetBundle.GetAllAssetNames();
             foreach (string name in assetNames)
             {
@@ -87,6 +88,7 @@ namespace MapMaker
             }
             //load the slime cam for use in spawning platforms with slimecam
             SlimeCamObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/slimetrailcam.prefab");
+            
         }
         public void Start()
         {
