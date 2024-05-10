@@ -224,160 +224,190 @@ namespace MapMaker
                     //doesnt work if any of them is a int for some reson? invalid cast error. // PLEASE USE TO CODE TO MAKE IT WORK!
                     double x = Convert.ToDouble(transform["x"]);
                     double y = Convert.ToDouble(transform["y"]);
-                    double width = Convert.ToDouble(size["width"]);
-                    double height = Convert.ToDouble(size["height"]);
-                    double radius = Convert.ToDouble(platform["radius"]);
-                    bool UseCustomMass = false;
-                    float Red = 1;
-                    float Green = 1;
-                    float Blue = 1;
-                    float Opacity = 1;
-                    bool circle = false;
-                    bool UseCustomDrillColorAndBolderTexture = false;
-                    bool UseSlimeCam = false;
-                    PlatformType platformType = PlatformType.slime;
-                    Vector4 color;
-                    //reset UseCustomTexture so the value for 1 platform doesnt blead trough to anouter
-                    UseCustomTexture = false;
-                    Fix Mass = (Fix)0;
-
                     //defult to 0 rotatson incase the json is missing it
                     double rotatson = 0;
                     if (platform.ContainsKey("rotation"))
-                    { 
-                        rotatson = ConvertToRadians((double)platform["rotation"]);
-                    }
-                    //custom mass
-                    if (platform.ContainsKey("UseCustomMass"))
                     {
-                        UseCustomMass = (bool)platform["UseCustomMass"];
+                        rotatson = ConvertToRadians(Convert.ToDouble(platform["rotation"]));
                     }
-                    if (platform.ContainsKey("CustomMass") && UseCustomMass)
+                    Debug.Log("getting IsPresetPatform");
+                    bool IsPresetPatform = (bool)platform["IsPresetPatform"];
+                    Debug.Log("IsPresetPatform is: " + IsPresetPatform);
+                    //if its a preset platform dont do any of this.
+                    if (!IsPresetPatform)
                     {
-                        Mass = (Fix)Convert.ToDouble(platform["CustomMass"]);
-                    }
-                    //is it a circle
-                    if (platform.ContainsKey("shape"))
-                    {
-                        if (Convert.ToString(platform["shape"]) == "circle")
-                        {
-                            circle = true;
-                        }
-                    }
-                    else
-                    {
-                        Mass = CalculateMassOfPlatform((Fix)width, (Fix)height, (Fix)radius, circle);
-                    }
-                    //custom Texture 
-                    if (platform.ContainsKey("UseCustomTexture") && platform.ContainsKey("CustomTextureName") && platform.ContainsKey("PixelsPerUnit"))
-                    {
-                        UseCustomTexture = (bool)platform["UseCustomTexture"];
-                    }
-                    Debug.Log($"UseCustomTexture is {UseCustomTexture}");
-                    if (UseCustomTexture)
-                    {
-                        float PixelsPerUnit = (float)Convert.ToDouble(platform["PixelsPerUnit"]);
-                        CustomTextureName = (String)platform["CustomTextureName"];
-                        Debug.Log(CustomTextureName);
-                        //doesnt work if there are multiple files ending with the file name
-                        //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
-                        Byte[] filedata;
-                        Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
-                        if (filedatas.Length > 0)
-                        {
-                            filedata = filedatas[0];
-                            Debug.Log($"filedata is {filedata}");
-                            sprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
-                            Debug.Log($"sprite is {sprite}");
-                        }
-                        else
-                        {
-                            logger.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
-                            Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
-                            return;
-                        }
-                    }
-                    //color
-                    if (platform.ContainsKey("Red"))
-                    {
-                        Red = (float)Convert.ToDouble(platform["Red"]);
-                    }
-                    if (platform.ContainsKey("Green"))
-                    {
-                        Green = (float)Convert.ToDouble(platform["Green"]);
-                    }
-                    if (platform.ContainsKey("Blue"))
-                    {
-                        Blue = (float)Convert.ToDouble(platform["Blue"]);
-                    }
-                    if (platform.ContainsKey("Opacity"))
-                    {
-                        Opacity = (float)Convert.ToDouble(platform["Opacity"]);
-                    }
-                    color = new Vector4(Red, Green, Blue, Opacity);
-                    //UseCustomDrillColorAndBolderTexture
-                    if (platform.ContainsKey("UseCustomDrillColorAndBolderTexture"))
-                    {
-                        UseCustomDrillColorAndBolderTexture = (bool)platform["UseCustomDrillColorAndBolderTexture"];
-                    }
-                    if (UseCustomDrillColorAndBolderTexture)
-                    {
-                        //get drill colors dict to pass.
-                        var dict = (Dictionary<string, object>)platform["CustomDrillColors"];
-                        //if this platform fails to generate then the custom boulder texsters will get mixed up.
-                        var MyPlatformId = NextPlatformTypeValue;
-                        NextPlatformTypeValue = NextPlatformTypeValue + 1;
-                        Debug.Log("creating drill colors");
-                        var colors = DrillColors(MyPlatformId, dict);
-                        Debug.Log("drill colors created");
-                        platformType = (PlatformType)MyPlatformId;
-                        CustomDrillColors.Add(colors);
-                        //custom Boulder time
-                        float PixelsPerUnit = (float)Convert.ToDouble(platform["BoulderPixelsPerUnit"]);
-                        CustomTextureName = (String)platform["CustomBoulderTexture"];
-                        //Debug.Log(CustomTextureName);
-                        //doesnt work if there are multiple files ending with the file name
-                        //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
-                        Byte[] filedata;
-                        Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
-                        if (filedatas.Length > 0)
-                        {
-                            filedata = filedatas[0];
-                            Debug.Log($"filedata length is {filedata.Length}");
-                            BoulderSprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
-                            Debug.Log($"sprite is {BoulderSprite}");
-                            NamedSprite namedSprite = new NamedSprite(CustomTextureName, BoulderSprite, true);
-                            Debug.Log("NamedSprite generated");
-                            CustomMatchoManSprites.Add(namedSprite);
-                            Debug.Log("Added NamedSprite to CustomMatchoManSprites");
-                        }
-                        else
-                        {
-                            logger.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
-                            Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
-                            return;
-                        }
-                        var BoulderSmokeColorList = ListOfObjectsToListOfFloats((List<object>)platform["BoulderSmokeColor"]);
-                        UnityEngine.Color BoulderSmokeColor = new UnityEngine.Color(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
-                        CustomBoulderSmokeColors.Add(BoulderSmokeColor);
-                    }
-                    if (platform.ContainsKey("UseSlimeCam"))
-                    {
-                        UseSlimeCam = (bool)platform["UseSlimeCam"];
-                    }
-                    // Spawn platform
-                    if (!UseCustomTexture && !UseCustomDrillColorAndBolderTexture)
-                    {
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, UseSlimeCam);
-                    }
-                    else
-                    if (UseCustomTexture)
-                    {
+                        double width = Convert.ToDouble(size["width"]);
+                        double height = Convert.ToDouble(size["height"]);
+                        double radius = Convert.ToDouble(platform["radius"]);
+                        bool UseCustomMass = false;
+                        float Red = 1;
+                        float Green = 1;
+                        float Blue = 1;
+                        float Opacity = 1;
+                        bool circle = false;
+                        bool UseCustomDrillColorAndBolderTexture = false;
+                        bool UseSlimeCam = false;
+                        PlatformType platformType = PlatformType.slime;
+                        Vector4 color;
+                        //reset UseCustomTexture so the value for 1 platform doesnt blead trough to anouter
+                        UseCustomTexture = false;
+                        Fix Mass = (Fix)0;
 
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType, UseSlimeCam);
+
+                        //custom mass
+                        if (platform.ContainsKey("UseCustomMass"))
+                        {
+                            UseCustomMass = (bool)platform["UseCustomMass"];
+                        }
+                        if (platform.ContainsKey("CustomMass") && UseCustomMass)
+                        {
+                            Mass = (Fix)Convert.ToDouble(platform["CustomMass"]);
+                        }
+                        //is it a circle
+                        if (platform.ContainsKey("shape"))
+                        {
+                            if (Convert.ToString(platform["shape"]) == "circle")
+                            {
+                                circle = true;
+                            }
+                        }
+                        else
+                        {
+                            Mass = CalculateMassOfPlatform((Fix)width, (Fix)height, (Fix)radius, circle);
+                        }
+                        //custom Texture 
+                        if (platform.ContainsKey("UseCustomTexture") && platform.ContainsKey("CustomTextureName") && platform.ContainsKey("PixelsPerUnit"))
+                        {
+                            UseCustomTexture = (bool)platform["UseCustomTexture"];
+                        }
+                        Debug.Log($"UseCustomTexture is {UseCustomTexture}");
+                        if (UseCustomTexture)
+                        {
+                            float PixelsPerUnit = (float)Convert.ToDouble(platform["PixelsPerUnit"]);
+                            CustomTextureName = (String)platform["CustomTextureName"];
+                            Debug.Log(CustomTextureName);
+                            //doesnt work if there are multiple files ending with the file name
+                            //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
+                            Byte[] filedata;
+                            Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
+                            if (filedatas.Length > 0)
+                            {
+                                filedata = filedatas[0];
+                                Debug.Log($"filedata is {filedata}");
+                                sprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
+                                Debug.Log($"sprite is {sprite}");
+                            }
+                            else
+                            {
+                                logger.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                                Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                                return;
+                            }
+                        }
+                        //color
+                        if (platform.ContainsKey("Red"))
+                        {
+                            Red = (float)Convert.ToDouble(platform["Red"]);
+                        }
+                        if (platform.ContainsKey("Green"))
+                        {
+                            Green = (float)Convert.ToDouble(platform["Green"]);
+                        }
+                        if (platform.ContainsKey("Blue"))
+                        {
+                            Blue = (float)Convert.ToDouble(platform["Blue"]);
+                        }
+                        if (platform.ContainsKey("Opacity"))
+                        {
+                            Opacity = (float)Convert.ToDouble(platform["Opacity"]);
+                        }
+                        color = new Vector4(Red, Green, Blue, Opacity);
+                        //UseCustomDrillColorAndBolderTexture
+                        if (platform.ContainsKey("UseCustomDrillColorAndBolderTexture"))
+                        {
+                            UseCustomDrillColorAndBolderTexture = (bool)platform["UseCustomDrillColorAndBolderTexture"];
+                        }
+                        if (UseCustomDrillColorAndBolderTexture)
+                        {
+                            //get drill colors dict to pass.
+                            var dict = (Dictionary<string, object>)platform["CustomDrillColors"];
+                            //if this platform fails to generate then the custom boulder texsters will get mixed up.
+                            var MyPlatformId = NextPlatformTypeValue;
+                            NextPlatformTypeValue = NextPlatformTypeValue + 1;
+                            Debug.Log("creating drill colors");
+                            var colors = DrillColors(MyPlatformId, dict);
+                            Debug.Log("drill colors created");
+                            platformType = (PlatformType)MyPlatformId;
+                            CustomDrillColors.Add(colors);
+                            //custom Boulder time
+                            float PixelsPerUnit = (float)Convert.ToDouble(platform["BoulderPixelsPerUnit"]);
+                            CustomTextureName = (String)platform["CustomBoulderTexture"];
+                            //Debug.Log(CustomTextureName);
+                            //doesnt work if there are multiple files ending with the file name
+                            //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
+                            Byte[] filedata;
+                            Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
+                            if (filedatas.Length > 0)
+                            {
+                                filedata = filedatas[0];
+                                Debug.Log($"filedata length is {filedata.Length}");
+                                BoulderSprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
+                                Debug.Log($"sprite is {BoulderSprite}");
+                                NamedSprite namedSprite = new NamedSprite(CustomTextureName, BoulderSprite, true);
+                                Debug.Log("NamedSprite generated");
+                                CustomMatchoManSprites.Add(namedSprite);
+                                Debug.Log("Added NamedSprite to CustomMatchoManSprites");
+                            }
+                            else
+                            {
+                                logger.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                                Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                                return;
+                            }
+                            var BoulderSmokeColorList = ListOfObjectsToListOfFloats((List<object>)platform["BoulderSmokeColor"]);
+                            UnityEngine.Color BoulderSmokeColor = new UnityEngine.Color(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
+                            CustomBoulderSmokeColors.Add(BoulderSmokeColor);
+                        }
+                        if (platform.ContainsKey("UseSlimeCam"))
+                        {
+                            UseSlimeCam = (bool)platform["UseSlimeCam"];
+                        }
+                        // Spawn platform
+                        if (!UseCustomTexture && !UseCustomDrillColorAndBolderTexture)
+                        {
+                            SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, UseSlimeCam);
+                        }
+                        else
+                        if (UseCustomTexture)
+                        {
+
+                            SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType, UseSlimeCam);
+                        }
+
+                        Debug.Log("Platform spawned successfully");
                     }
-                    
-                    Debug.Log("Platform spawned successfully");
+                    // if it is a preset platform then we do it difrently
+                    else
+                    {
+                        string PresetPlatformName = Convert.ToString(platform["PresetPlatformName"]);
+                        var Platform = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/"+ PresetPlatformName + ".prefab");
+                        Vector3 pos = new Vector3 ((float)x, (float)y, 0);
+                        //fix shader
+                        Platform.GetComponent<SpriteRenderer>().material = PlatformMat;
+                        //scale object
+                        //AddComponent(typeof(namespace.className)); 
+                        var ScaleFactor = (Fix)Convert.ToDouble(platform["ScaleFactor"]);
+                        var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
+                        GrowOnStartComp.scaleUp = ScaleFactor;
+                        Debug.Log("added GrowOnStart");
+                        //spawn object
+                        Platform = UnityEngine.Object.Instantiate<GameObject>(Platform, pos, Quaternion.identity);
+                        //rotate object
+                        StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
+                        StickyRect.GetGroundBody().rotation = (Fix)rotatson;
+
+                    }
+
                 }
                 catch (Exception ex)
                 {   
@@ -439,7 +469,7 @@ namespace MapMaker
             var platform = StickyRect.GetComponent<ResizablePlatform>();
             platform.GetComponent<DPhysicsRoundedRect>().ManualInit();
             ResizePlatform(platform, Width, Height, Radius);
-            //45 degrees
+            //rotatson (in radiens)
             StickyRect.GetGroundBody().up = new Vec2(rotatson);
             AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
             //color
@@ -465,7 +495,7 @@ namespace MapMaker
             var platform = StickyRect.GetComponent<ResizablePlatform>();
             platform.GetComponent<DPhysicsRoundedRect>().ManualInit();
             ResizePlatform(platform, Width, Height, Radius);
-            //45 degrees
+            //rotatson (in radiens)
             StickyRect.GetGroundBody().up = new Vec2(rotatson);
             AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
             SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
@@ -479,7 +509,6 @@ namespace MapMaker
             if (UseSlimeCam)
             {
                 var transform = StickyRect.transform;
-                //i think i need to use assetbundles for this part :(
                 UnityEngine.Object.Instantiate(SlimeCamObject, transform);
             }
 
