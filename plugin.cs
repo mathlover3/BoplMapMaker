@@ -443,7 +443,15 @@ namespace MapMaker
                         //rotate object
                         StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
                         StickyRect.GetGroundBody().rotation = (Fix)rotatson;
-
+                        if (pathType == PathType.AntiLockPlatform)
+                        {
+                            //antilock platform
+                            var AntiLockPlatformComp = Platform.AddComponent(typeof(AntiLockPlatform)) as AntiLockPlatform;
+                            AntiLockPlatformComp.OrbitForce = OrbitForce;
+                            AntiLockPlatformComp.OrbitPath = OrbitPath;
+                            AntiLockPlatformComp.DelaySeconds = DelaySeconds;
+                            AntiLockPlatformComp.isBird = isBird;
+                        }
                     }
 
                 }
