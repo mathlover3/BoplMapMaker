@@ -511,6 +511,8 @@ namespace MapMaker
                 var transform = StickyRect.transform;
                 UnityEngine.Object.Instantiate(SlimeCamObject, transform);
             }
+            var ShakeablePlatform = platform.GetComponent<ShakablePlatform>();
+            AccessTools.Field(typeof(ShakablePlatform), "originalMaterial").SetValue(ShakeablePlatform, PlatformMat);
 
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
