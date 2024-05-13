@@ -215,8 +215,14 @@ namespace MapMaker
             {
                 sprite = null;
                 BoulderSprite = null;
+                
                 try
                 {
+                    //set optsonal values to null/0 
+                    Fix OrbitForce = Fix.Zero;
+                    Vec2[] OrbitPath = null;
+                    Fix DelaySeconds = Fix.Zero;
+                    bool isBird = false;
                     // Extract platform data (david)
                     Dictionary<string, object> transform = (Dictionary<string, object>)platform["transform"];
                     Dictionary<string, object> size = (Dictionary<string, object>)platform["size"];
@@ -233,6 +239,46 @@ namespace MapMaker
                     Debug.Log("getting IsPresetPatform");
                     bool IsPresetPatform = (bool)platform["IsPresetPatform"];
                     Debug.Log("IsPresetPatform is: " + IsPresetPatform);
+
+                    //path stuff
+
+                    PathType pathType = PathType.None;
+                    if (platform.ContainsKey("PathType"))
+                    {
+                        if (Convert.ToString(platform["PathType"]) == "AntiLockPlatform")
+                        {
+                            pathType = PathType.AntiLockPlatform;
+                        }
+                        else if (Convert.ToString(platform["PathType"]) == "VectorFieldPlatform")
+                        {
+                            pathType = PathType.VectorFieldPlatform;
+                        }
+                    }
+                    //AntiLockPlatform
+                    if (pathType == PathType.AntiLockPlatform)
+                    {
+                        OrbitForce = (Fix)Convert.ToDouble(platform["OrbitForce"]);
+                        //object time! (objects are so confusing)
+                        //convert object to list of objects
+                        List<System.Object> OrbitPathObjects = (List<System.Object>)platform["OrbitPath"];
+                        //now to convert eatch object in the list to a list of 2 objects
+                        List<Vec2> Vecs1 = new List<Vec2>();
+                        for (int i = 0; i < OrbitPathObjects.Count; i++)
+                        {
+                            var obj = (List<System.Object>)OrbitPathObjects[i];
+                            var floatList = ListOfObjectsToListOfFloats(obj);
+                            var floatVec = new Vec2((Fix)floatList[0], (Fix)floatList[1]);
+                            Vecs1.Add(floatVec);
+                        }
+                        Vec2[] Vecs = Vecs1.ToArray();
+                        Debug.Log("orbit path decoded");
+
+                        //now we have a Vec2 array for orbit path
+                        OrbitPath = Vecs;
+                        //the rest is easy
+                        DelaySeconds = (Fix)Convert.ToDouble(platform["DelaySeconds"]);
+                        isBird = (bool)platform["isBird"];
+                    }
                     //if its a preset platform dont do any of this.
                     if (!IsPresetPatform)
                     {
@@ -372,20 +418,12 @@ namespace MapMaker
                         {
                             UseSlimeCam = (bool)platform["UseSlimeCam"];
                         }
-                        // Spawn platform
-                        if (!UseCustomTexture && !UseCustomDrillColorAndBolderTexture)
-                        {
-                            SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, UseSlimeCam);
-                        }
-                        else
-                        if (UseCustomTexture)
-                        {
-
-                            SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, sprite, color, platformType, UseSlimeCam);
-                        }
+                        //spawn platform
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird);
 
                         Debug.Log("Platform spawned successfully");
                     }
+                    
                     // if it is a preset platform then we do it difrently
                     else
                     {
@@ -460,34 +498,8 @@ namespace MapMaker
                 LoadMapsFromFolder();
             }
         }
-        //no sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color, PlatformType platformType, bool UseSlimeCam)
-        {
-            // Spawn platform (david - and now melon)
-            var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
-            StickyRect.rr.Scale = Fix.One;
-            var platform = StickyRect.GetComponent<ResizablePlatform>();
-            platform.GetComponent<DPhysicsRoundedRect>().ManualInit();
-            ResizePlatform(platform, Width, Height, Radius);
-            //rotatson (in radiens)
-            StickyRect.GetGroundBody().up = new Vec2(rotatson);
-            AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
-            //color
-            SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
-            spriteRenderer.color = color;
-            //PlatformType
-            StickyRect.platformType = platformType;
-            //SlimeCam
-            if (UseSlimeCam)
-            {
-                var transform = StickyRect.transform;
-                UnityEngine.Object.Instantiate(SlimeCamObject, transform);
-            }
-
-            Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
-        }
         //with sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Sprite sprite, Vector4 color, PlatformType platformType, bool UseSlimeCam)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color, PlatformType platformType, bool UseSlimeCam, Sprite sprite, PathType pathType, Fix OrbitForce, Vec2[] OrbitPath, Fix DelaySeconds, bool isBird)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -500,8 +512,11 @@ namespace MapMaker
             AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
             SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
             //TODO remove sprite object on scene change
-            spriteRenderer.sprite = sprite;
-            spriteRenderer.material = PlatformMat;
+            if (sprite != null)
+            {
+                spriteRenderer.sprite = sprite;
+                spriteRenderer.material = PlatformMat;
+            }
             spriteRenderer.color = color;
             //PlatformType
             StickyRect.platformType = platformType;
@@ -513,7 +528,16 @@ namespace MapMaker
             }
             var ShakeablePlatform = platform.GetComponent<ShakablePlatform>();
             AccessTools.Field(typeof(ShakablePlatform), "originalMaterial").SetValue(ShakeablePlatform, PlatformMat);
-
+            //moving platform
+            if (pathType == PathType.AntiLockPlatform)
+            {
+                //antilock platform
+                var AntiLockPlatformComp = platform.gameObject.AddComponent(typeof(AntiLockPlatform)) as AntiLockPlatform;
+                AntiLockPlatformComp.OrbitForce = OrbitForce;
+                AntiLockPlatformComp.OrbitPath = OrbitPath;
+                AntiLockPlatformComp.DelaySeconds = DelaySeconds;
+                AntiLockPlatformComp.isBird = isBird;
+            }
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
 
@@ -698,6 +722,12 @@ namespace MapMaker
                 Floats.Add((float)Convert.ToDouble(ObjectList[i]));
             }
             return Floats;
+        }
+        public enum PathType
+        { 
+            None,
+            AntiLockPlatform,
+            VectorFieldPlatform
         }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
