@@ -565,6 +565,7 @@ namespace MapMaker
             {
                 spriteRenderer.sprite = sprite;
                 spriteRenderer.material = PlatformMat;
+
             }
             spriteRenderer.color = color;
             //PlatformType
@@ -572,11 +573,15 @@ namespace MapMaker
             //slime cam
             if (UseSlimeCam)
             {
+                spriteRenderer.material = PlatformMat;
+
                 var transform = StickyRect.transform;
                 UnityEngine.Object.Instantiate(SlimeCamObject, transform);
+                transform.gameObject.tag = "ground";
             }
+            
             var ShakeablePlatform = platform.GetComponent<ShakablePlatform>();
-            AccessTools.Field(typeof(ShakablePlatform), "originalMaterial").SetValue(ShakeablePlatform, PlatformMat);
+            AccessTools.Field(typeof(ShakablePlatform), "originalMaterial").SetValue(ShakeablePlatform, spriteRenderer.material);
             //moving platform
             if (pathType == PathType.AntiLockPlatform)
             {
