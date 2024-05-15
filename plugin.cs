@@ -218,11 +218,19 @@ namespace MapMaker
                 
                 try
                 {
-                    //set optsonal values to null/0 
+                    //set optsonal values to null/0/defults 
                     Fix OrbitForce = Fix.Zero;
                     Vec2[] OrbitPath = null;
                     Fix DelaySeconds = Fix.Zero;
                     bool isBird = false;
+                    Fix orbitSpeed = (Fix)100;
+                    Fix expandSpeed = (Fix)100;
+                    Vec2 centerPoint = new Vec2(Fix.Zero, Fix.Zero);
+                    Fix normalSpeedFriction = (Fix)1;
+                    Fix DeadZoneDist = (Fix)1;
+                    Fix OrbitAccelerationMulitplier = (Fix)1;
+                    Fix targetRadius = (Fix)5;
+                    Fix ovalness01 = (Fix)1;
                     // Extract platform data (david)
                     Dictionary<string, object> transform = (Dictionary<string, object>)platform["transform"];
                     Dictionary<string, object> size = (Dictionary<string, object>)platform["size"];
@@ -276,8 +284,41 @@ namespace MapMaker
                         //now we have a Vec2 array for orbit path
                         OrbitPath = Vecs;
                         //the rest is easy
-                        DelaySeconds = (Fix)Convert.ToDouble(platform["DelaySeconds"]);
                         isBird = (bool)platform["isBird"];
+                    }
+                    //this is used in both types of paths
+                    if (platform.ContainsKey("DelaySeconds"))
+                    {
+                        DelaySeconds = (Fix)Convert.ToDouble(platform["DelaySeconds"]);
+                    }
+                    if (platform.ContainsKey("expandSpeed"))
+                    {
+                        expandSpeed = (Fix)Convert.ToDouble(platform["expandSpeed"]);
+                    }
+                    if (platform.ContainsKey("centerPoint"))
+                    {
+                        var floats = ListOfObjectsToListOfFloats((List<object>)platform["centerPoint"]);
+                        centerPoint = new Vec2((Fix)floats[0], (Fix)floats[1]);
+                    }
+                    if (platform.ContainsKey("normalSpeedFriction"))
+                    {
+                        normalSpeedFriction = (Fix)Convert.ToDouble(platform["normalSpeedFriction"]);
+                    }
+                    if (platform.ContainsKey("DeadZoneDist"))
+                    {
+                        DeadZoneDist = (Fix)Convert.ToDouble(platform["DeadZoneDist"]);
+                    }
+                    if (platform.ContainsKey("OrbitAccelerationMulitplier"))
+                    {
+                        OrbitAccelerationMulitplier = (Fix)Convert.ToDouble(platform["OrbitAccelerationMulitplier"]);
+                    }
+                    if (platform.ContainsKey("targetRadius"))
+                    {
+                        targetRadius = (Fix)Convert.ToDouble(platform["targetRadius"]);
+                    }
+                    if (platform.ContainsKey("ovalness01"))
+                    {
+                        ovalness01 = (Fix)Convert.ToDouble(platform["ovalness01"]);
                     }
                     //if its a preset platform dont do any of this.
                     if (!IsPresetPatform)
@@ -419,7 +460,7 @@ namespace MapMaker
                             UseSlimeCam = (bool)platform["UseSlimeCam"];
                         }
                         //spawn platform
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
 
                         Debug.Log("Platform spawned successfully");
                     }
@@ -507,7 +548,7 @@ namespace MapMaker
             }
         }
         //with sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color, PlatformType platformType, bool UseSlimeCam, Sprite sprite, PathType pathType, Fix OrbitForce, Vec2[] OrbitPath, Fix DelaySeconds, bool isBird)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color, PlatformType platformType, bool UseSlimeCam, Sprite sprite, PathType pathType, Fix OrbitForce, Vec2[] OrbitPath, Fix DelaySeconds, bool isBird,Fix orbitSpeed, Fix expandSpeed, Vec2 centerPoint, Fix normalSpeedFriction, Fix DeadZoneDist, Fix OrbitAccelerationMulitplier, Fix targetRadius, Fix ovalness01)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -545,6 +586,18 @@ namespace MapMaker
                 AntiLockPlatformComp.OrbitPath = OrbitPath;
                 AntiLockPlatformComp.DelaySeconds = DelaySeconds;
                 AntiLockPlatformComp.isBird = isBird;
+            }
+            if (pathType == PathType.VectorFieldPlatform)
+            {
+                var VectorFieldPlatformComp = platform.gameObject.AddComponent(typeof(VectorFieldPlatform)) as VectorFieldPlatform;
+                VectorFieldPlatformComp.centerPoint = centerPoint;
+                VectorFieldPlatformComp.DeadZoneDist = DeadZoneDist;
+                VectorFieldPlatformComp.DelaySeconds = DelaySeconds;
+                VectorFieldPlatformComp.expandSpeed = expandSpeed;
+                VectorFieldPlatformComp.normalSpeedFriction = normalSpeedFriction;
+                VectorFieldPlatformComp.OrbitAccelerationMulitplier = OrbitAccelerationMulitplier;
+                VectorFieldPlatformComp.orbitSpeed = orbitSpeed;
+                VectorFieldPlatformComp.ovalness01 = ovalness01;
             }
             Debug.Log("Spawned platform at position (" + X + ", " + Y + ") with dimensions (" + Width + ", " + Height + ") and radius " + Radius);
         }
