@@ -326,41 +326,28 @@ namespace MapMaker
                         double width = Convert.ToDouble(size["width"]);
                         double height = Convert.ToDouble(size["height"]);
                         double radius = Convert.ToDouble(platform["radius"]);
-                        bool UseCustomMass = false;
+                        bool UseCustomMassScale = false;
                         float Red = 1;
                         float Green = 1;
                         float Blue = 1;
                         float Opacity = 1;
-                        bool circle = false;
                         bool UseCustomDrillColorAndBolderTexture = false;
                         bool UseSlimeCam = false;
                         PlatformType platformType = PlatformType.slime;
                         Vector4 color;
                         //reset UseCustomTexture so the value for 1 platform doesnt blead trough to anouter
                         UseCustomTexture = false;
-                        Fix Mass = (Fix)0;
+                        Fix CustomMassScale = (Fix)0.05;
 
 
                         //custom mass
-                        if (platform.ContainsKey("UseCustomMass"))
+                        if (platform.ContainsKey("UseCustomMassScale"))
                         {
-                            UseCustomMass = (bool)platform["UseCustomMass"];
+                            UseCustomMassScale = (bool)platform["UseCustomMassScale"];
                         }
-                        if (platform.ContainsKey("CustomMass") && UseCustomMass)
+                        if (platform.ContainsKey("CustomMassScale") && UseCustomMassScale)
                         {
-                            Mass = (Fix)Convert.ToDouble(platform["CustomMass"]);
-                        }
-                        //is it a circle
-                        if (platform.ContainsKey("shape"))
-                        {
-                            if (Convert.ToString(platform["shape"]) == "circle")
-                            {
-                                circle = true;
-                            }
-                        }
-                        else
-                        {
-                            Mass = CalculateMassOfPlatform((Fix)width, (Fix)height, (Fix)radius, circle);
+                            CustomMassScale = (Fix)Convert.ToDouble(platform["CustomMassScale"]);
                         }
                         //custom Texture 
                         if (platform.ContainsKey("UseCustomTexture") && platform.ContainsKey("CustomTextureName") && platform.ContainsKey("PixelsPerUnit"))
@@ -460,7 +447,7 @@ namespace MapMaker
                             UseSlimeCam = (bool)platform["UseSlimeCam"];
                         }
                         //spawn platform
-                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, Mass, color, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
+                        SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
 
                         Debug.Log("Platform spawned successfully");
                     }
@@ -548,7 +535,7 @@ namespace MapMaker
             }
         }
         //with sprite
-        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix mass, Vector4 color, PlatformType platformType, bool UseSlimeCam, Sprite sprite, PathType pathType, Fix OrbitForce, Vec2[] OrbitPath, Fix DelaySeconds, bool isBird,Fix orbitSpeed, Fix expandSpeed, Vec2 centerPoint, Fix normalSpeedFriction, Fix DeadZoneDist, Fix OrbitAccelerationMulitplier, Fix targetRadius, Fix ovalness01)
+        public static void SpawnPlatform(Fix X, Fix Y, Fix Width, Fix Height, Fix Radius, Fix rotatson, Fix CustomMassScale, Vector4 color, PlatformType platformType, bool UseSlimeCam, Sprite sprite, PathType pathType, Fix OrbitForce, Vec2[] OrbitPath, Fix DelaySeconds, bool isBird,Fix orbitSpeed, Fix expandSpeed, Vec2 centerPoint, Fix normalSpeedFriction, Fix DeadZoneDist, Fix OrbitAccelerationMulitplier, Fix targetRadius, Fix ovalness01)
         {
             // Spawn platform (david - and now melon)
             var StickyRect = FixTransform.InstantiateFixed<StickyRoundedRectangle>(platformPrefab, new Vec2(X, Y));
@@ -558,7 +545,9 @@ namespace MapMaker
             ResizePlatform(platform, Width, Height, Radius);
             //rotatson (in radiens)
             StickyRect.GetGroundBody().up = new Vec2(rotatson);
-            AccessTools.Field(typeof(BoplBody), "mass").SetValue(StickyRect.GetGroundBody(), mass);
+            //mass
+            platform.MassPerArea = CustomMassScale;
+            Debug.Log("MassPerArea is " + platform.MassPerArea);
             SpriteRenderer spriteRenderer = (SpriteRenderer)AccessTools.Field(typeof(StickyRoundedRectangle), "spriteRen").GetValue(StickyRect);
             //TODO remove sprite object on scene change
             if (sprite != null)
@@ -635,23 +624,6 @@ namespace MapMaker
             string cleaned = rxNonDigits.Replace(s, "");
             //subtract 1 as scene names start with 1 but ids start with 0
             return int.Parse(cleaned)-1;
-        }
-
-        public static Fix CalculateMassOfPlatform(Fix Width, Fix Height, Fix Radius, bool circle)
-        {
-            //multiply by 2 because Width and Height are just distances from the center 
-            var TrueWidth = Width * (Fix)2 + Radius;
-            var TrueHeight = Height * (Fix)2 + Radius;
-            var Area = TrueWidth * TrueHeight;
-            //if it is a circle
-            if (circle)
-            {
-                //A=Pi*R^2
-                //there is no exsponent for Fixes
-                Area = Fix.Pi * Radius * Radius;
-            }
-            return Area * OneByOneBlockMass;
-
         }
         //in part chatgpt code
         public static ZipArchive UnzipFile(string zipFilePath)
