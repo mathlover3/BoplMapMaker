@@ -77,8 +77,9 @@ The Boplmap Mod is compatible with the following game & mod versions:
 Ensure that you are using the appropriate version of BepInEx and Splatch for your game.
 
 ## Credits
-- MapMakerSite & .boplmap Developed by **Abstractmelon**.
-- CustomMapLoader Developed by **DavidLovesJellycarWorlds**
+- MapMakerSite Developed by **Abstractmelon**.
+- .boplmap Format Developed by **Abstractmelon** & **DavidLovesJellycarWorlds**.
+- CustomMapLoader Developed by **DavidLovesJellycarWorlds**.
 - Special thanks to **Unluckycrafter** for their support and contributions.
 - **shad0w_dev**
 
