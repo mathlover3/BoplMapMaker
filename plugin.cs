@@ -193,8 +193,7 @@ namespace MapMaker
             {
                 if (obj.name == "Platform")
                 {
-                    // Found the object with the desired name and HideAndDontSave flag
-                    // You can now store its reference or perform any other actions
+                    //store its reference
                     PlatformAbility = obj;
                     Debug.Log("Found the object: " + obj.name);
                     break;
@@ -204,6 +203,41 @@ namespace MapMaker
             platformPrefab = platformTransform.platformPrefab;
             //turn the json into a dicsanary. (david+chatgpt) dont remove it as it works.
             Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
+            //spawn point stuff
+
+            if (Dict.ContainsKey("teamSpawns"))
+            {
+                //object time! (objects are so confusing)
+                //convert object to list of objects
+                List<System.Object> OrbitPathObjects = (List<System.Object>)Dict["teamSpawns"];
+                //now to convert eatch object in the list to a list of 2 objects
+                List<Vec2> Vecs1 = new List<Vec2>();
+                for (int i = 0; i < OrbitPathObjects.Count; i++)
+                {
+                    var obj = (List<System.Object>)OrbitPathObjects[i];
+                    var floatList = ListOfObjectsToListOfFloats(obj);
+                    var floatVec = new Vec2((Fix)floatList[0], (Fix)floatList[1]);
+                    Vecs1.Add(floatVec);
+                }
+                Vec2[] Vecs = Vecs1.ToArray();
+                //get the PlayerList
+                //set it to null to avoid using unasigned local var error. it will be assigend when the code runs unless somthing goes very badly.
+                GameObject PlayerList = null;
+                foreach (GameObject obj in allObjects)
+                {
+                    if (obj.name == "PlayerList")
+                    {
+                        //store its reference
+                        PlayerList = obj;
+                        Debug.Log("Found the PlayerList");
+                        break;
+                    }
+                }
+                GameSessionHandler handler = PlayerList.GetComponent(typeof(GameSessionHandler)) as GameSessionHandler;
+                handler.teamSpawns = Vecs;
+                //this is a static so i must set it from the type not a instance. also its not readonly like the name sugests.
+                GameSessionHandler.playerSpawns_readonly = Vecs;
+            }
             List<object> platforms = (List<object>)Dict["platforms"];
             Debug.Log("platforms set");
             //empty the list of Drill colors so the indexs start at 0 agien
@@ -231,6 +265,7 @@ namespace MapMaker
                     Fix OrbitAccelerationMulitplier = (Fix)1;
                     Fix targetRadius = (Fix)5;
                     Fix ovalness01 = (Fix)1;
+                    Vec2[] teamSpawns = new Vec2[4];
                     // Extract platform data (david)
                     Dictionary<string, object> transform = (Dictionary<string, object>)platform["transform"];
                     Dictionary<string, object> size = (Dictionary<string, object>)platform["size"];
@@ -479,6 +514,18 @@ namespace MapMaker
                             AntiLockPlatformComp.OrbitPath = OrbitPath;
                             AntiLockPlatformComp.DelaySeconds = DelaySeconds;
                             AntiLockPlatformComp.isBird = isBird;
+                        }
+                        if (pathType == PathType.VectorFieldPlatform)
+                        {
+                            var VectorFieldPlatformComp = Platform.AddComponent(typeof(VectorFieldPlatform)) as VectorFieldPlatform;
+                            VectorFieldPlatformComp.centerPoint = centerPoint;
+                            VectorFieldPlatformComp.DeadZoneDist = DeadZoneDist;
+                            VectorFieldPlatformComp.DelaySeconds = DelaySeconds;
+                            VectorFieldPlatformComp.expandSpeed = expandSpeed;
+                            VectorFieldPlatformComp.normalSpeedFriction = normalSpeedFriction;
+                            VectorFieldPlatformComp.OrbitAccelerationMulitplier = OrbitAccelerationMulitplier;
+                            VectorFieldPlatformComp.orbitSpeed = orbitSpeed;
+                            VectorFieldPlatformComp.ovalness01 = ovalness01;
                         }
                     }
 
