@@ -38,6 +38,9 @@
     <Reference Include="Mono.Security">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\Mono.Security.dll</HintPath>
     </Reference>
+    <Reference Include="PlatformApi">
+      <HintPath>..\..\PlatformApi\bin\Debug\net471\PlatformApi.dll</HintPath>
+    </Reference>
     <Reference Include="Purchasing.Common">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\Purchasing.Common.dll</HintPath>
     </Reference>

@@ -86,12 +86,8 @@ namespace MapMaker
             string[] assetNames = MyAssetBundle.GetAllAssetNames();
             foreach (string name in assetNames)
             {
-                Debug.Log("asset name is: " +  name);
+                Debug.Log("asset name is: " + name);
             }
-            //load the slime cam for use in spawning platforms with slimecam
-            SlimeCamObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/slimetrailcam.prefab");
-            //will not be needed once i make it a seprite plugin
-            platformApi.Awake();
         }
         public void Start()
         {
