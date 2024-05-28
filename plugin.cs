@@ -22,6 +22,7 @@ using System.Runtime.Remoting.Contexts;
 using System.Text;
 using UnityEngine.UI;
 using System.Reflection.Emit;
+using PlatformApi;
 
 namespace MapMaker
 {
@@ -55,7 +56,7 @@ namespace MapMaker
         internal static UnityEngine.Color[] ignore = {new UnityEngine.Color(1,1,1,1)};
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
         public static AssetBundle MyAssetBundle;
-        public static PlatformApi platformApi = new PlatformApi();
+        public static PlatformApi.PlatformApi platformApi = new PlatformApi.PlatformApi();
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -284,20 +285,20 @@ namespace MapMaker
 
                     //path stuff
 
-                    PlatformApi.PathType pathType = PlatformApi.PathType.None;
+                    PlatformApi.PlatformApi.PathType pathType = PlatformApi.PlatformApi.PathType.None;
                     if (platform.ContainsKey("PathType"))
                     {
                         if (Convert.ToString(platform["PathType"]) == "AntiLockPlatform")
                         {
-                            pathType = PlatformApi.PathType.AntiLockPlatform;
+                            pathType = PlatformApi.PlatformApi.PathType.AntiLockPlatform;
                         }
                         else if (Convert.ToString(platform["PathType"]) == "VectorFieldPlatform")
                         {
-                            pathType = PlatformApi.PathType.VectorFieldPlatform;
+                            pathType = PlatformApi.PlatformApi.PathType.VectorFieldPlatform;
                         }
                     }
                     //AntiLockPlatform
-                    if (pathType == PlatformApi.PathType.AntiLockPlatform)
+                    if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                     {
                         OrbitForce = Convert.ToDouble(platform["OrbitForce"]);
                         //object time! (objects are so confusing)
@@ -483,7 +484,7 @@ namespace MapMaker
                         Vector4[] color2 = {color};
                         Vec2[] centerPoint2 = {centerPoint};
                         //spawn platform
-                        PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
+                        PlatformApi.PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
 
                         Debug.Log("Platform spawned successfully");
                     }
@@ -507,7 +508,7 @@ namespace MapMaker
                         //rotate object
                         StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
                         StickyRect.GetGroundBody().rotation = (Fix)rotatson;
-                        if (pathType == PlatformApi.PathType.AntiLockPlatform)
+                        if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                         {
                             //antilock platform
                             var AntiLockPlatformComp = Platform.AddComponent(typeof(AntiLockPlatform)) as AntiLockPlatform;
@@ -516,7 +517,7 @@ namespace MapMaker
                             AntiLockPlatformComp.DelaySeconds = (Fix)DelaySeconds;
                             AntiLockPlatformComp.isBird = isBird;
                         }
-                        if (pathType == PlatformApi.PathType.VectorFieldPlatform)
+                        if (pathType == PlatformApi.PlatformApi.PathType.VectorFieldPlatform)
                         {
                             var VectorFieldPlatformComp = Platform.AddComponent(typeof(VectorFieldPlatform)) as VectorFieldPlatform;
                             VectorFieldPlatformComp.centerPoint = centerPoint;
