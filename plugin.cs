@@ -216,7 +216,7 @@ namespace MapMaker
                 {
                     var obj = (List<System.Object>)OrbitPathObjects[i];
                     var floatList = ListOfObjectsToListOfFloats(obj);
-                    var floatVec = new Vec2((Fix)floatList[0], (Fix)floatList[1]);
+                    var floatVec = new Vec2((Fix)floatList[0], FloorToThousandnths(floatList[1]));
                     Vecs1.Add(floatVec);
                 }
                 Vec2[] Vecs = Vecs1.ToArray();
@@ -310,7 +310,7 @@ namespace MapMaker
                         {
                             var obj = (List<System.Object>)OrbitPathObjects[i];
                             var floatList = ListOfObjectsToListOfFloats(obj);
-                            var floatVec = new Vec2((Fix)floatList[0], (Fix)floatList[1]);
+                            var floatVec = new Vec2(FloorToThousandnths(floatList[0]), FloorToThousandnths(floatList[1]));
                             Vecs1.Add(floatVec);
                         }
                         Vec2[] Vecs = Vecs1.ToArray();
@@ -333,7 +333,7 @@ namespace MapMaker
                     if (platform.ContainsKey("centerPoint"))
                     {
                         var floats = ListOfObjectsToListOfFloats((List<object>)platform["centerPoint"]);
-                        centerPoint = new Vec2((Fix)floats[0], (Fix)floats[1]);
+                        centerPoint = new Vec2(FloorToThousandnths(floats[0]), FloorToThousandnths(floats[1]));
                     }
                     if (platform.ContainsKey("normalSpeedFriction"))
                     {
@@ -494,12 +494,16 @@ namespace MapMaker
                     {
                         string PresetPlatformName = Convert.ToString(platform["PresetPlatformName"]);
                         var Platform = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/"+ PresetPlatformName + ".prefab");
-                        Vector3 pos = new Vector3 ((float)x, (float)y, 0);
+                        //idk if this is gonna work to fix the posable desink as it is converted back to a float...
+                        var x2 = FloorToThousandnths(x);
+                        var y2 = FloorToThousandnths(y);
+                        Vector3 pos = new Vector3 ((float)x2, (float)y2, 0);
+                        //the rest of the FloorToThousandnths should work fine for fixing it though
                         //fix shader
                         Platform.GetComponent<SpriteRenderer>().material = PlatformMat;
                         //scale object
                         //AddComponent(typeof(namespace.className)); 
-                        var ScaleFactor = (Fix)Convert.ToDouble(platform["ScaleFactor"]);
+                        var ScaleFactor = FloorToThousandnths(Convert.ToDouble(platform["ScaleFactor"]));
                         var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
                         GrowOnStartComp.scaleUp = ScaleFactor;
                         Debug.Log("added GrowOnStart");
@@ -507,27 +511,27 @@ namespace MapMaker
                         Platform = UnityEngine.Object.Instantiate<GameObject>(Platform, pos, Quaternion.identity);
                         //rotate object
                         StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
-                        StickyRect.GetGroundBody().rotation = (Fix)rotatson;
+                        StickyRect.GetGroundBody().rotation = FloorToThousandnths(rotatson);
                         if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                         {
                             //antilock platform
                             var AntiLockPlatformComp = Platform.AddComponent(typeof(AntiLockPlatform)) as AntiLockPlatform;
-                            AntiLockPlatformComp.OrbitForce = (Fix)OrbitForce;
+                            AntiLockPlatformComp.OrbitForce = FloorToThousandnths(OrbitForce);
                             AntiLockPlatformComp.OrbitPath = OrbitPath;
-                            AntiLockPlatformComp.DelaySeconds = (Fix)DelaySeconds;
+                            AntiLockPlatformComp.DelaySeconds = FloorToThousandnths(DelaySeconds);
                             AntiLockPlatformComp.isBird = isBird;
                         }
                         if (pathType == PlatformApi.PlatformApi.PathType.VectorFieldPlatform)
                         {
                             var VectorFieldPlatformComp = Platform.AddComponent(typeof(VectorFieldPlatform)) as VectorFieldPlatform;
                             VectorFieldPlatformComp.centerPoint = centerPoint;
-                            VectorFieldPlatformComp.DeadZoneDist = (Fix)DeadZoneDist;
-                            VectorFieldPlatformComp.DelaySeconds = (Fix)DelaySeconds;
-                            VectorFieldPlatformComp.expandSpeed = (Fix)expandSpeed;
-                            VectorFieldPlatformComp.normalSpeedFriction = (Fix)normalSpeedFriction;
-                            VectorFieldPlatformComp.OrbitAccelerationMulitplier = (Fix)OrbitAccelerationMulitplier;
-                            VectorFieldPlatformComp.orbitSpeed = (Fix)orbitSpeed;
-                            VectorFieldPlatformComp.ovalness01 = (Fix)ovalness01;
+                            VectorFieldPlatformComp.DeadZoneDist = FloorToThousandnths(DeadZoneDist);
+                            VectorFieldPlatformComp.DelaySeconds = FloorToThousandnths(DelaySeconds);
+                            VectorFieldPlatformComp.expandSpeed = FloorToThousandnths(expandSpeed);
+                            VectorFieldPlatformComp.normalSpeedFriction = FloorToThousandnths(normalSpeedFriction);
+                            VectorFieldPlatformComp.OrbitAccelerationMulitplier = FloorToThousandnths(OrbitAccelerationMulitplier);
+                            VectorFieldPlatformComp.orbitSpeed = FloorToThousandnths(orbitSpeed);
+                            VectorFieldPlatformComp.ovalness01 = FloorToThousandnths(ovalness01);
                         }
                     }
 
@@ -538,6 +542,10 @@ namespace MapMaker
                 }
             }
 
+        }
+        internal static Fix FloorToThousandnths(double value)
+        {
+            return Fix.Floor(((Fix)value) * (Fix)1000) / (Fix)1000;
         }
         public static bool IsCustomTexture(string textureName)
         {
