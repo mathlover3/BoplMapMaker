@@ -541,9 +541,15 @@ namespace MapMaker
                     Debug.LogError($"Failed to spawn platform. Error: {ex.Message}");
                 }
             }
+            if (Dict.ContainsKey("boulders"))
+            {
+                List<object> boulders = (List<object>)Dict["boulders"];
+                MapMaker.MoreJsonParceing.SpawnBoulders(boulders);
+            }
+            
 
         }
-        internal static Fix FloorToThousandnths(double value)
+        public static Fix FloorToThousandnths(double value)
         {
             return Fix.Floor(((Fix)value) * (Fix)1000) / (Fix)1000;
         }
