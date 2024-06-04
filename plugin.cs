@@ -546,7 +546,27 @@ namespace MapMaker
                 List<object> boulders = (List<object>)Dict["boulders"];
                 MapMaker.MoreJsonParceing.SpawnBoulders(boulders);
             }
-            
+            try
+            {
+                // Create a new GameObject
+                GameObject spawnerGameObject = new GameObject("SpawnerObject");
+
+                // Add the FixTransform and Spawner components to the GameObject
+                spawnerGameObject.AddComponent<FixTransform>();
+                Spawner spawner = spawnerGameObject.AddComponent<Spawner>();
+
+                if (spawner == null)
+                {
+                    Debug.Log("SPAWNER IS NULL!!!");
+                }
+                var spawner2 = FixTransform.InstantiateFixed<Spawner>(spawner, new Vec2(Fix.Zero, (Fix)40));
+                spawner2.spawnType = Spawner.ObjectSpawnType.Boulder;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error: {ex}");
+            }
+
 
         }
         public static Fix FloorToThousandnths(double value)
