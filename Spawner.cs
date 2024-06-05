@@ -32,8 +32,10 @@ namespace MapMaker
         private FixTransform fixTransform;
         private Fix RelitiveSimTime;
         public bool UseSignal = false;
-        //up to 256 signals.
-        public byte Signal = 0;
+        //if true then it will only activate once when the signal is on
+        public bool TriggerSignal = false;
+        //up to 65536 signals! more then enoth for amost anything! even building a computer???
+        public ushort Signal = 0;
         public void Awake()
         {
             UnityEngine.Debug.Log("Spawner Awake");

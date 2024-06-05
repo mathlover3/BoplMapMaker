@@ -569,7 +569,7 @@ namespace MapMaker
                 try
                 {
                     // Create a new GameObject
-                    GameObject spawnerGameObject = new GameObject("SpawnerObject");
+                    /*GameObject spawnerGameObject = new GameObject("SpawnerObject");
 
                     // Add the FixTransform and Spawner components to the GameObject
                     spawnerGameObject.AddComponent<FixTransform>();
@@ -582,7 +582,21 @@ namespace MapMaker
                     var spawner2 = FixTransform.InstantiateFixed<Spawner>(spawner, new Vec2(Fix.Zero, (Fix)30));
                     spawner2.spawnType = Spawner.ObjectSpawnType.Explosion;
                     spawner2.velocity = new Vec2((Fix)10, Fix.Zero);
-                    spawner2.angularVelocity = (Fix)10;
+                    spawner2.angularVelocity = (Fix)10;*/
+                    // Create a new GameObject
+                    GameObject spawnerGameObject = new GameObject("TriggerObject");
+
+                    // Add the FixTransform and Spawner components to the GameObject
+                    spawnerGameObject.AddComponent<FixTransform>();
+                    Trigger trigger = spawnerGameObject.AddComponent<Trigger>();
+
+                    if (trigger == null)
+                    {
+                        Debug.Log("trigger IS NULL!!!");
+                    }
+                    var trigger2 = FixTransform.InstantiateFixed<Trigger>(trigger, new Vec2(Fix.Zero, (Fix)30));
+                    trigger2.SetPos(new Vec2(Fix.Zero, (Fix)30));
+                    trigger2.SetExtents(new Vec2((Fix)20, (Fix)20));
                 }
                 catch (Exception ex)
                 {
@@ -666,7 +680,7 @@ namespace MapMaker
                         Console.WriteLine(contents);
                     }
                 }*/
-                return archive;
+                    return archive;
             
         }
         //finds all the files with a path that the predicate acsepts as a string array 
