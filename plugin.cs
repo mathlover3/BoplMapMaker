@@ -546,26 +546,7 @@ namespace MapMaker
                 List<object> boulders = (List<object>)Dict["boulders"];
                 MapMaker.MoreJsonParceing.SpawnBoulders(boulders);
             }
-            try
-            {
-                // Create a new GameObject
-                GameObject spawnerGameObject = new GameObject("SpawnerObject");
 
-                // Add the FixTransform and Spawner components to the GameObject
-                spawnerGameObject.AddComponent<FixTransform>();
-                Spawner spawner = spawnerGameObject.AddComponent<Spawner>();
-
-                if (spawner == null)
-                {
-                    Debug.Log("SPAWNER IS NULL!!!");
-                }
-                var spawner2 = FixTransform.InstantiateFixed<Spawner>(spawner, new Vec2(Fix.Zero, (Fix)40));
-                spawner2.spawnType = Spawner.ObjectSpawnType.Boulder;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Error: {ex}");
-            }
 
 
         }
@@ -584,6 +565,29 @@ namespace MapMaker
             Debug.Log("OnSceneLoaded: " + scene.name);
             if (IsLevelName(scene.name))
             {
+                //TODO remove this when done testing with spawners
+                try
+                {
+                    // Create a new GameObject
+                    GameObject spawnerGameObject = new GameObject("SpawnerObject");
+
+                    // Add the FixTransform and Spawner components to the GameObject
+                    spawnerGameObject.AddComponent<FixTransform>();
+                    Spawner spawner = spawnerGameObject.AddComponent<Spawner>();
+
+                    if (spawner == null)
+                    {
+                        Debug.Log("SPAWNER IS NULL!!!");
+                    }
+                    var spawner2 = FixTransform.InstantiateFixed<Spawner>(spawner, new Vec2(Fix.Zero, (Fix)30));
+                    spawner2.spawnType = Spawner.ObjectSpawnType.Explosion;
+                    spawner2.velocity = new Vec2((Fix)10, Fix.Zero);
+                    spawner2.angularVelocity = (Fix)10;
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Error: {ex}");
+                }
                 CurrentMapId = GetMapIdFromSceneName(scene.name);
                 var DoWeHaveMapWithMapId = CheckIfWeHaveCustomMapWithMapId();
                 //error if there are multiple maps with the same id
@@ -616,6 +620,7 @@ namespace MapMaker
                     Updater.DestroyFix(tplatform.gameObject);
                 }
                 LoadMapsFromFolder();
+
             }
         }
         public static bool IsLevelName(String input)
