@@ -583,20 +583,30 @@ namespace MapMaker
                     spawner2.spawnType = Spawner.ObjectSpawnType.Explosion;
                     spawner2.velocity = new Vec2((Fix)10, Fix.Zero);
                     spawner2.angularVelocity = (Fix)10;*/
+
                     // Create a new GameObject
-                    GameObject spawnerGameObject = new GameObject("TriggerObject");
+                    GameObject triggerGameObject = new GameObject("TriggerObject");
 
-                    // Add the FixTransform and Spawner components to the GameObject
-                    spawnerGameObject.AddComponent<FixTransform>();
-                    Trigger trigger = spawnerGameObject.AddComponent<Trigger>();
-
+                    // Add the FixTransform and Trigger components to the GameObject
+                    triggerGameObject.AddComponent<FixTransform>();
+                    
+                    Trigger trigger = triggerGameObject.AddComponent<Trigger>();
+                    
+                    if (triggerGameObject == null)
+                    {
+                        Debug.Log("triggerGameObject IS NULL!!!");
+                    }
                     if (trigger == null)
                     {
                         Debug.Log("trigger IS NULL!!!");
                     }
                     var trigger2 = FixTransform.InstantiateFixed<Trigger>(trigger, new Vec2(Fix.Zero, (Fix)30));
+                    if (trigger2 == null)
+                    {
+                        Debug.Log("trigger2 IS NULL!!!");
+                    }
                     trigger2.SetPos(new Vec2(Fix.Zero, (Fix)30));
-                    trigger2.SetExtents(new Vec2((Fix)20, (Fix)20));
+                    trigger2.SetExtents(new Vec2((Fix)10, (Fix)10));
                 }
                 catch (Exception ex)
                 {

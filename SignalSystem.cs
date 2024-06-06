@@ -49,15 +49,15 @@ namespace MapMaker
         //returns the id of the first trigger with that signal id. assumes the List is sorted
         public static int BinarySearchTriggerSignalId(uint signal)
         {
-            UnityEngine.Debug.Log("BinarySearchTriggerSignalId");
+            //UnityEngine.Debug.Log("BinarySearchTriggerSignalId");
             var LowerBound = 0;
             var UpperBound = Triggers.Count - 1;
             var Middle = 0;
-            UnityEngine.Debug.Log("right before while");
+            //UnityEngine.Debug.Log("right before while");
             while (LowerBound < UpperBound)
             {
                 Middle = (int)Math.Floor((float)(LowerBound + UpperBound / 2));
-                UnityEngine.Debug.Log("Middle is " + Middle);
+                //UnityEngine.Debug.Log("Middle is " + Middle);
                 var SignalAtMiddle = Triggers[Middle].Signal;
                 if (SignalAtMiddle > signal)
                 {
@@ -73,13 +73,13 @@ namespace MapMaker
                 }
             }
             //get the first
-            UnityEngine.Debug.Log("Middle is " + Middle);
+            //UnityEngine.Debug.Log("Middle is " + Middle);
             if (Triggers.Count != 0)
             {
                 while (Middle >= 0 && Triggers[Middle].Signal == signal)
                 {
                     Middle--;
-                    UnityEngine.Debug.Log("New Middle is " + Middle);
+                    //UnityEngine.Debug.Log("New Middle is " + Middle);
                 }
                 return Middle + 1;
             }
