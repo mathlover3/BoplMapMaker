@@ -102,6 +102,26 @@ namespace MapMaker
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
             }
             MapJsons = JsonList.ToArray();
+            //find objects
+            GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
+            UnityEngine.Debug.Log("getting Bow object");
+            var objectsFound = 0;
+            var ObjectsToFind = 1;
+            foreach (GameObject obj in allObjects)
+            {
+                if (obj.name == "invisibleHitbox")
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    Trigger.DPhysicsBoxPrefab = obj.GetComponent<DPhysicsBox>();
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    objectsFound++;
+                    if (objectsFound == ObjectsToFind)
+                    {
+                        break;
+                    }
+                }
+            }
         }
         public static bool IsBoplMap(string path)
         {

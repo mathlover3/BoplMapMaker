@@ -12,6 +12,8 @@ namespace MapMaker
 {
     internal class Trigger : MonoUpdatable, ICollisionCallback, IUpdatable
     {
+        //TRIGGERS PHYSICS BOXES ARE ON LAYER 3!
+        public static DPhysicsBox DPhysicsBoxPrefab;
         public uint Signal = 0;
         public DPhysicsBox dPhysicsBox = null;
         public IPhysicsCollider hitbox = null;
@@ -19,19 +21,21 @@ namespace MapMaker
         public void Awake()
         {
             UnityEngine.Debug.Log("Trigger Awake");
+
             //i have no clue why but there are 2 if i dont have this check causing a LOT of errors.
-            if (GetComponent<DPhysicsBox>() == null) 
+            if (GetComponent<LineRenderer>() == null) 
             {
                 LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
                 lineRenderer.material = new Material(Shader.Find("Hidden/Internal-Colored"));
                 lineRenderer.endColor = (lineRenderer.startColor = Color.black);
                 lineRenderer.endWidth = (lineRenderer.startWidth = 0.2f);
-                dPhysicsBox = gameObject.AddComponent<DPhysicsBox>();
             }
-            else
-            {
-                dPhysicsBox = GetComponent<DPhysicsBox>();
-            }
+            dPhysicsBox = FixTransform.InstantiateFixed<DPhysicsBox>(DPhysicsBoxPrefab, new Vec2(Fix.Zero, Fix.Zero), Fix.Zero);
+            dPhysicsBox.gameObject.GetComponent<Hitbox>().IsDestroyed = true;
+            Destroy(dPhysicsBox.gameObject.GetComponent<Hitbox>());
+            dPhysicsBox.tag = "TriggerBox";
+            dPhysicsBox.gameObject.layer = 3;
+            dPhysicsBox.ManualInit();
             fixTrans = GetComponent<FixTransform>();
             dPhysicsBox.RegisterCollisionCallback(this);
             SignalSystem.RegisterTrigger(this);
