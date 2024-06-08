@@ -26,7 +26,6 @@ namespace MapMaker
             UnityEngine.Debug.Log("Trigger Awake");
             if (gameObject.name != "TriggerObject")
             {
-                layersToDetect.Add(LayerMask.NameToLayer("Player"));
                 //i have no clue why but there are 2 if i dont have this check causing a LOT of errors.
                 if (GetComponent<LineRenderer>() == null)
                 {
@@ -47,7 +46,6 @@ namespace MapMaker
                 fixTrans = GetComponent<FixTransform>();
                 //register stuff
                 dPhysicsBox.RegisterCollisionCallback(this);
-                SignalSystem.RegisterTrigger(this);
                 Updater.RegisterUpdatable(this);
             }    
 
@@ -57,6 +55,10 @@ namespace MapMaker
         {
             dPhysicsBox.position = pos;
             fixTrans.position = pos;
+        }
+        public void Register()
+        {
+            SignalSystem.RegisterTrigger(this);
         }
         public void SetExtents(Vec2 extents)
         {

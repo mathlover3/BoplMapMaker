@@ -57,6 +57,8 @@ namespace MapMaker
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
         public static AssetBundle MyAssetBundle;
         public static PlatformApi.PlatformApi platformApi = new PlatformApi.PlatformApi();
+        private static Trigger TriggerPrefab = null;
+        private static Spawner SpawnerPrefab = null;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -588,51 +590,39 @@ namespace MapMaker
                 //TODO remove this when done testing with spawners
                 try
                 {
-                    // Create a new GameObject
-                    GameObject spawnerGameObject = new GameObject("SpawnerObject");
-
-                    // Add the FixTransform and Spawner components to the GameObject
-                    spawnerGameObject.AddComponent<FixTransform>();
-                    Spawner spawner = spawnerGameObject.AddComponent<Spawner>();
-
-                    if (spawner == null)
-                    {
-                        Debug.Log("SPAWNER IS NULL!!!");
-                    }
-                    var spawner2 = FixTransform.InstantiateFixed<Spawner>(spawner, new Vec2(Fix.Zero, (Fix)30));
-                    spawner2.spawnType = Spawner.ObjectSpawnType.Boulder;
-                    spawner2.UseSignal = true;
-                    spawner2.velocity = new Vec2((Fix)10, Fix.Zero);
-                    spawner2.angularVelocity = (Fix)10;
 
                     // Create a new GameObject
                     GameObject triggerGameObject = new GameObject("TriggerObject");
 
                     // Add the FixTransform and Trigger components to the GameObject
                     triggerGameObject.AddComponent<FixTransform>();
-                    
-                    Trigger trigger = triggerGameObject.AddComponent<Trigger>();
-                    
-                    if (triggerGameObject == null)
-                    {
-                        Debug.Log("triggerGameObject IS NULL!!!");
-                    }
-                    if (trigger == null)
-                    {
-                        Debug.Log("trigger IS NULL!!!");
-                    }
-                    var trigger2 = FixTransform.InstantiateFixed<Trigger>(trigger, new Vec2(Fix.Zero, (Fix)30));
-                    if (trigger2 == null)
-                    {
-                        Debug.Log("trigger2 IS NULL!!!");
-                    }
-                    trigger2.SetPos(new Vec2(Fix.Zero, (Fix)30));
-                    trigger2.SetExtents(new Vec2((Fix)10, (Fix)10));
+
+                    TriggerPrefab = triggerGameObject.AddComponent<Trigger>();
+                    // Create a new GameObject
+                    GameObject spawnerGameObject = new GameObject("SpawnerObject");
+
+                    // Add the FixTransform and Spawner components to the GameObject
+                    spawnerGameObject.AddComponent<FixTransform>();
+                    SpawnerPrefab = spawnerGameObject.AddComponent<Spawner>();
+
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Error: {ex}");
+                    Debug.LogError($"Error in spawning triggers/spawners at scene load: {ex}");
                 }
+                //TESTING START!
+                Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
+                Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
+                var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
+                var SignalStuff = platform.AddComponent<MovingPlatformSignalStuff>();
+                List<int> layers = new List<int>
+                {
+                    LayerMask.NameToLayer("Player")
+                };
+                CreateTrigger(layers, new Vec2(Fix.Zero, (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
+
+
+                //TESTING END!
                 CurrentMapId = GetMapIdFromSceneName(scene.name);
                 var DoWeHaveMapWithMapId = CheckIfWeHaveCustomMapWithMapId();
                 //error if there are multiple maps with the same id
@@ -824,6 +814,29 @@ namespace MapMaker
             }
             return Floats;
         }
+        internal static Spawner CreateSpawner(Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity,  Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, ushort Signal = 0, bool IsTriggerSignal = false)
+        {
+            var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, new Vec2(Fix.Zero, (Fix)30));
+            spawner.spawnType = spawnType;
+            spawner.UseSignal = UseSignal;
+            spawner.Signal = Signal;
+            spawner.IsTriggerSignal = IsTriggerSignal;
+            spawner.BoulderType = BoulderType;
+            spawner.SimTimeBetweenSpawns = SimTimeBetweenSpawns;
+            spawner.velocity = SpawningVelocity;
+            spawner.angularVelocity = angularVelocity;
+            return spawner;
+        }
+        internal static Trigger CreateTrigger(List<int> LayersToDetect, Vec2 Pos, Vec2 Extents, ushort Signal)
+        {
+            var trigger = FixTransform.InstantiateFixed<Trigger>(TriggerPrefab, new Vec2(Fix.Zero, (Fix)30));
+            trigger.layersToDetect = LayersToDetect;
+            trigger.Signal = Signal;
+            trigger.SetPos(Pos);
+            trigger.SetExtents(Extents);
+            trigger.Register();
+            return trigger;
+        }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
     public class MachoThrow2Patches
@@ -857,6 +870,64 @@ namespace MapMaker
                 __instance.platformDependentColors.AddRange(Plugin.CustomDrillColors);
             }
 
+        }
+    }
+    [HarmonyPatch(typeof(AntiLockPlatform))]
+    public class AntiLockPlatformPatches
+    {
+        [HarmonyPatch("UpdateSim")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(AntiLockPlatform __instance)
+        {
+            if (__instance.GetComponent<MovingPlatformSignalStuff>() != null)
+            {
+                var SignalStuff = __instance.GetComponent<MovingPlatformSignalStuff>();
+                //if its on and its not inverted
+                if (!SignalStuff.SignalIsInverted && SignalSystem.IsSignalOn(SignalStuff.Signal))
+                {
+                    //contenue the path
+                    return true;
+                }
+                //if the signal is off and it is inverted
+                if (SignalStuff.SignalIsInverted && !SignalSystem.IsSignalOn(SignalStuff.Signal))
+                {
+                    //contenue the path
+                    return true;
+                }
+                //signal is off and it isnt inverted or signal is on and it is inverted
+                return false;
+            }
+            //no MovingPlatformSignalStuff comp found
+            return true;
+        }
+    }
+    [HarmonyPatch(typeof(VectorFieldPlatform))]
+    public class VectorFieldPlatformPatches
+    {
+        [HarmonyPatch("UpdateSim")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(VectorFieldPlatform __instance)
+        {
+            if (__instance.GetComponent<MovingPlatformSignalStuff>() != null)
+            {
+                var SignalStuff = __instance.GetComponent<MovingPlatformSignalStuff>();
+                //if its on and its not inverted
+                if (!SignalStuff.SignalIsInverted && SignalSystem.IsSignalOn(SignalStuff.Signal))
+                {
+                    //contenue the path
+                    return true;
+                }
+                //if the signal is off and it is inverted
+                if (SignalStuff.SignalIsInverted && !SignalSystem.IsSignalOn(SignalStuff.Signal))
+                {
+                    //contenue the path
+                    return true;
+                }
+                //signal is off and it isnt inverted or signal is on and it is inverted
+                return false;
+            }
+            //no MovingPlatformSignalStuff comp found
+            return true;
         }
     }
 }
