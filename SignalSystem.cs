@@ -12,33 +12,7 @@ namespace MapMaker
     internal class SignalSystem
     {
         //up to 65536 signals! more then enoth for amost anything! even building a computer???
-        public static byte[] Signals = new byte[8192];
         public static List<Trigger> Triggers = new List<Trigger>();
-        //returns the value of the signal.
-        public static bool GetSignal(uint signal)
-        {
-            switch (signal % 8)
-            {
-                //exstract the bit we want
-                case 0:
-                    return (Signals[(uint)Fix.Floor((Fix)signal / (Fix)8)] & 1) > 0;
-                case 1:
-                    return (Signals[(uint)Fix.Floor((Fix)signal / (Fix)8)] & 2) > 0;
-                case 2:
-                    return (Signals[(uint)Fix.Floor((Fix)signal / (Fix)8)] & 4) > 0;
-                case 3:
-                    return (Signals[(uint)Fix.Floor((Fix)signal / (Fix)8)] & 8) > 0;
-                case 4:
-                    return (Signals[(uint)Fix.Floor((Fix)signal / (Fix)8)] & 16) > 0;
-                case 5:
-                    return (Signals[(uint)Fix.Floor((Fix)signal / (Fix)8)] & 32) > 0;
-                case 6:
-                    return (Signals[(uint)Fix.Floor((Fix)signal / (Fix)8)] & 64) > 0;
-                case 7:
-                    return (Signals[(uint)Fix.Floor((Fix)signal / (Fix)8)] & 128) > 0;
-                default: return false;
-            }
-        }
         //registers the trigger and returns the id
         public static int RegisterTrigger(Trigger trigger)
         {
@@ -85,6 +59,38 @@ namespace MapMaker
             }
             return 0;
 
+        }
+        public static bool IsSignalOn(ushort signal)
+        {
+            //if there are no triggers return false
+            if (Triggers.Count == 0)
+            {
+                //UnityEngine.Debug.Log("No Triggers Registerd");
+                return false;
+            }
+            //outerwise get the first trigger with that signal id if there is one
+            var FirstTriggerIndex = BinarySearchTriggerSignalId(signal);
+            //UnityEngine.Debug.Log("FirstTriggerIndex: " + FirstTriggerIndex);
+            //if theres no trigger with that signal return false
+            if (Triggers[FirstTriggerIndex].Signal != signal)
+            {
+                //UnityEngine.Debug.Log("the First Trigger didnt have the same signal");
+                return false;
+            }
+            var CurrentTriggerIndex = FirstTriggerIndex;
+            //while its not past the last trigger and this triggers signal is correct check if its IsOn is true and if so return true
+            while (CurrentTriggerIndex < Triggers.Count && Triggers[CurrentTriggerIndex].Signal == signal)
+            {
+                //UnityEngine.Debug.Log("CurrentTriggerIndex is: " + CurrentTriggerIndex);
+                if (Triggers[CurrentTriggerIndex].IsOn)
+                {
+                    //UnityEngine.Debug.Log("Signal Is On! " + signal);
+                    return true;
+                }
+                CurrentTriggerIndex++;
+            }
+            //if none of the triggers with that id were on then return false.
+            return false;
         }
     }
 }

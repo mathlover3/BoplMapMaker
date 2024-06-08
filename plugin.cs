@@ -589,7 +589,7 @@ namespace MapMaker
                 try
                 {
                     // Create a new GameObject
-                    /*GameObject spawnerGameObject = new GameObject("SpawnerObject");
+                    GameObject spawnerGameObject = new GameObject("SpawnerObject");
 
                     // Add the FixTransform and Spawner components to the GameObject
                     spawnerGameObject.AddComponent<FixTransform>();
@@ -600,9 +600,10 @@ namespace MapMaker
                         Debug.Log("SPAWNER IS NULL!!!");
                     }
                     var spawner2 = FixTransform.InstantiateFixed<Spawner>(spawner, new Vec2(Fix.Zero, (Fix)30));
-                    spawner2.spawnType = Spawner.ObjectSpawnType.Explosion;
+                    spawner2.spawnType = Spawner.ObjectSpawnType.Boulder;
+                    spawner2.UseSignal = true;
                     spawner2.velocity = new Vec2((Fix)10, Fix.Zero);
-                    spawner2.angularVelocity = (Fix)10;*/
+                    spawner2.angularVelocity = (Fix)10;
 
                     // Create a new GameObject
                     GameObject triggerGameObject = new GameObject("TriggerObject");

@@ -33,7 +33,8 @@ namespace MapMaker
         private Fix RelitiveSimTime;
         public bool UseSignal = false;
         //if true then it will only activate once when the signal is on
-        public bool TriggerSignal = false;
+        public bool IsTriggerSignal = false;
+        private bool HasTrigged = false;
         //up to 65536 signals! more then enoth for amost anything! even building a computer???
         public ushort Signal = 0;
         public void Awake()
@@ -126,38 +127,42 @@ namespace MapMaker
 
         public override void UpdateSim(Fix SimDeltaTime)
         {
-            if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress)
+            if (gameObject.name != "SpawnerObject")
             {
-                RelitiveSimTime = RelitiveSimTime + SimDeltaTime;
-                if (RelitiveSimTime > SimTimeBetweenSpawns)
+                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && !UseSignal)
                 {
-                    RelitiveSimTime = RelitiveSimTime - SimTimeBetweenSpawns;
-                    Vec2 pos = fixTransform.position;
-                    switch (spawnType)
+
+                    RelitiveSimTime = RelitiveSimTime + SimDeltaTime;
+                    if (RelitiveSimTime > SimTimeBetweenSpawns)
                     {
-                        case ObjectSpawnType.Boulder:
-                            var boulder = PlatformApi.PlatformApi.SpawnBoulder(pos, scale, BoulderType, color);
-                            var dphysicsRoundedRect = boulder.hitbox;
-                            dphysicsRoundedRect.velocity = velocity;
-                            dphysicsRoundedRect.angularVelocity = angularVelocity;
-                                // * dphysicsRoundedRect.inverseMass;
-                            break;
-                        case ObjectSpawnType.Arrow:
-                            SpawnArrow(pos, angle, scale, velocity, angularVelocity);
-                            break;
-                        case ObjectSpawnType.Grenade:
-                            SpawnGrenade(pos, angle, scale, velocity, angularVelocity);
-                            break;
-                        case ObjectSpawnType.AbilityOrb:
-                            SpawnAbilityPickup(pos, scale, velocity);
-                            break;
-                        case ObjectSpawnType.SmokeGrenade:
-                            SpawnSmokeGrenade(pos, angle, scale, velocity, angularVelocity);
-                            break;
-                        case ObjectSpawnType.Explosion:
-                            SpawnNormalExplosion(pos, scale);
-                            break;
+                        RelitiveSimTime = RelitiveSimTime - SimTimeBetweenSpawns;
+                        SpawnMyItem();
                     }
+                }
+                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && SignalSystem.IsSignalOn(Signal) && UseSignal)
+                {
+                    //if its in trigger signal mode and it hasnt trigged yet
+                    if (IsTriggerSignal && !HasTrigged)
+                    {
+                        UnityEngine.Debug.Log("SignalIsOn! and its a trigger signal!");
+                        SpawnMyItem();
+                        HasTrigged = true;
+                    }
+                    //if its not in trigger signal mode
+                    if (!IsTriggerSignal)
+                    {
+                        RelitiveSimTime = RelitiveSimTime + SimDeltaTime;
+                        if (RelitiveSimTime > SimTimeBetweenSpawns)
+                        {
+                            RelitiveSimTime = RelitiveSimTime - SimTimeBetweenSpawns;
+                            SpawnMyItem();
+                        }
+                    }
+                }
+                //if we use signal but its off then reset HasTrigged;
+                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && UseSignal && !SignalSystem.IsSignalOn(Signal))
+                {
+                    HasTrigged = false;
                 }
             }
         }
@@ -230,6 +235,35 @@ namespace MapMaker
         public void SpawnNormalExplosion(Vec2 pos, Fix scale)
         {
             FixTransform.InstantiateFixed<Explosion>(MissleExplosion, pos).GetComponent<IPhysicsCollider>().Scale = scale;
+        }
+        public void SpawnMyItem()
+        {
+            Vec2 pos = fixTransform.position;
+            switch (spawnType)
+            {
+                case ObjectSpawnType.Boulder:
+                    var boulder = PlatformApi.PlatformApi.SpawnBoulder(pos, scale, BoulderType, color);
+                    var dphysicsRoundedRect = boulder.hitbox;
+                    dphysicsRoundedRect.velocity = velocity;
+                    dphysicsRoundedRect.angularVelocity = angularVelocity;
+                    // * dphysicsRoundedRect.inverseMass;
+                    break;
+                case ObjectSpawnType.Arrow:
+                    SpawnArrow(pos, angle, scale, velocity, angularVelocity);
+                    break;
+                case ObjectSpawnType.Grenade:
+                    SpawnGrenade(pos, angle, scale, velocity, angularVelocity);
+                    break;
+                case ObjectSpawnType.AbilityOrb:
+                    SpawnAbilityPickup(pos, scale, velocity);
+                    break;
+                case ObjectSpawnType.SmokeGrenade:
+                    SpawnSmokeGrenade(pos, angle, scale, velocity, angularVelocity);
+                    break;
+                case ObjectSpawnType.Explosion:
+                    SpawnNormalExplosion(pos, scale);
+                    break;
+            }
         }
     }
 }
