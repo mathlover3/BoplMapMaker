@@ -7,19 +7,17 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace MapMaker
 {
-    internal class Trigger : MonoUpdatable, ICollisionCallback, IUpdatable
+    public class Trigger : MonoUpdatable, ICollisionCallback, IUpdatable
     {
         //TRIGGERS PHYSICS BOXES ARE ON LAYER 3!
         public static DPhysicsBox DPhysicsBoxPrefab;
-        public uint Signal = 0;
+        public LogicOutput LogicOutput = new LogicOutput();
         public DPhysicsBox dPhysicsBox = null;
         public FixTransform fixTrans = null;
         public List<int> layersToDetect = new List<int>();
-        public bool IsOn = false;
         private bool Colliding = false;
         public void Awake()
         {
@@ -58,7 +56,7 @@ namespace MapMaker
         }
         public void Register()
         {
-            SignalSystem.RegisterTrigger(this);
+            SignalSystem.RegisterTrigger(LogicOutput);
         }
         public void SetExtents(Vec2 extents)
         {
@@ -79,10 +77,11 @@ namespace MapMaker
             {
                 foreach (var layer in layersToDetect)
                 {
+                    
                     if (layer == collision.layer)
                     {
                         Colliding = true;
-                        IsOn = true;
+                        LogicOutput.IsOn = true;
                         //UnityEngine.Debug.Log("OnCollide! " + collision);
                     }
                 }
@@ -93,11 +92,10 @@ namespace MapMaker
         {
             if (gameObject.name != "TriggerObject")
             {
-                if (IsOn && !Colliding)
+                if (LogicOutput.IsOn && !Colliding)
                 {
-                    IsOn = false;
+                    LogicOutput.IsOn = false;
                 }
-                Colliding = false;
                 //UnityEngine.Debug.Log("IsOn: " + IsOn);
                 try
                 {
@@ -129,6 +127,5 @@ namespace MapMaker
                 }
             }
         }
-
     }
 }

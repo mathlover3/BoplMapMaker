@@ -53,13 +53,14 @@ namespace MapMaker
         public const int StartingNextPlatformTypeValue = 5;
         public static Sprite BoulderSprite;
         //used to make CustomBoulderSmokeColors start with a value.
-        internal static UnityEngine.Color[] ignore = {new UnityEngine.Color(1,1,1,1)};
+        public static UnityEngine.Color[] ignore = {new UnityEngine.Color(1,1,1,1)};
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
         public static AssetBundle MyAssetBundle;
         public static PlatformApi.PlatformApi platformApi = new PlatformApi.PlatformApi();
         private static Trigger TriggerPrefab = null;
         private static Spawner SpawnerPrefab = null;
         private static DisappearPlatformsOnSignal DisappearPlatformsOnSignalPrefab = null;
+        public static SignalSystem signalSystem;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -603,7 +604,7 @@ namespace MapMaker
             Debug.Log("OnSceneLoaded: " + scene.name);
             if (IsLevelName(scene.name))
             {
-                //TODO remove this when done testing with spawners
+                
                 try
                 {
 
@@ -626,16 +627,27 @@ namespace MapMaker
                     // Add the FixTransform and Spawner components to the GameObject
                     DisappearGameObject.AddComponent<FixTransform>();
                     DisappearPlatformsOnSignalPrefab = DisappearGameObject.AddComponent<DisappearPlatformsOnSignal>();
+
+                    // Create a new GameObject
+                    GameObject SignalSystemObject = new GameObject("SignalSystemObject");
+
+                    // Add the FixTransform and Spawner components to the GameObject
+                    SignalSystemObject.AddComponent<FixTransform>();
+                    signalSystem = SignalSystemObject.AddComponent<SignalSystem>();
+                    SignalSystem.LogicInputs = new List<LogicInput>();
+                    SignalSystem.LogicOutputs = new List<LogicOutput>();
+                    SignalSystem.LogicTriggerOutputs = new List<LogicOutput>();
                 }
                 catch (Exception ex)
                 {
                     Debug.LogError($"Error in spawning triggers/spawners at scene load: {ex}");
                 }
+                //TODO remove this when done testing with spawners
                 //TESTING START!
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
                 var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
-                var SignalStuff = platform.AddComponent<MovingPlatformSignalStuff>();
+                AddMovingPlatformSignalStuff(platform, 0);
                 
                 CreateDisappearPlatformsOnSignal(platform, 0, Fix.One, false, false, false);
                 List<int> layers = new List<int>
@@ -643,7 +655,8 @@ namespace MapMaker
                     LayerMask.NameToLayer("Player")
                 };
                 CreateTrigger(layers, new Vec2(Fix.Zero, (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
-
+                //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
+                signalSystem.SetUpDicts();
 
                 //TESTING END!
                 CurrentMapId = GetMapIdFromSceneName(scene.name);
@@ -837,39 +850,69 @@ namespace MapMaker
             }
             return Floats;
         }
-        internal static Spawner CreateSpawner(Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity,  Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, ushort Signal = 0, bool IsTriggerSignal = false)
+        public static Spawner CreateSpawner(Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity,  Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, ushort Signal = 0, bool IsTriggerSignal = false)
         {
             var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, new Vec2(Fix.Zero, (Fix)30));
             spawner.spawnType = spawnType;
             spawner.UseSignal = UseSignal;
-            spawner.Signal = Signal;
+            var input = new LogicInput
+            {
+                Signal = Signal,
+                gate = spawner,
+                IsOn = false
+            };
+            spawner.InputSignals.Add(input);
             spawner.IsTriggerSignal = IsTriggerSignal;
             spawner.BoulderType = BoulderType;
             spawner.SimTimeBetweenSpawns = SimTimeBetweenSpawns;
             spawner.velocity = SpawningVelocity;
             spawner.angularVelocity = angularVelocity;
+            spawner.Register();
             return spawner;
         }
-        internal static Trigger CreateTrigger(List<int> LayersToDetect, Vec2 Pos, Vec2 Extents, ushort Signal)
+        public static Trigger CreateTrigger(List<int> LayersToDetect, Vec2 Pos, Vec2 Extents, ushort Signal)
         {
             var trigger = FixTransform.InstantiateFixed<Trigger>(TriggerPrefab, new Vec2(Fix.Zero, (Fix)30));
             trigger.layersToDetect = LayersToDetect;
-            trigger.Signal = Signal;
+            trigger.LogicOutput.Signal = Signal;
+            trigger.LogicOutput.IsOn = false;
             trigger.SetPos(Pos);
             trigger.SetExtents(Extents);
             trigger.Register();
             return trigger;
         }
-        internal static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, ushort Signal, Fix SecondsToReapper, bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
+        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, ushort Signal, Fix SecondsToReapper, bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
         {
             var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, new Vec2(Fix.Zero, Fix.Zero));
             Disappear.platform = platform;
-            Disappear.Signal = Signal;
+            var input = new LogicInput
+            {
+                Signal = Signal,
+                gate = Disappear,
+                IsOn = false
+            };
+            Disappear.InputSignals.Add(input);
             Disappear.SignalIsInverse = SignalIsInverse;
             Disappear.SecondsToReapper = SecondsToReapper;
             Disappear.DisappearOnlyWhenSignal = DisappearOnlyWhenSignal;
             Disappear.OnlyDisappearWhenSignalTurnsOn = OnlyDisappearWhenSignalTurnsOn;
+            Disappear.Register();
             return Disappear;
+
+        }
+        public static MovingPlatformSignalStuff AddMovingPlatformSignalStuff(GameObject platform, ushort Signal, bool SignalIsInverted = false)
+        {
+            var SignalStuff = platform.AddComponent<MovingPlatformSignalStuff>();
+            var input = new LogicInput
+            {
+                Signal = Signal,
+                gate = SignalStuff,
+                IsOn = false
+            };
+            SignalStuff.InputSignals.Add(input);
+            SignalStuff.SignalIsInverted = SignalIsInverted;
+            SignalStuff.Register();
+            return SignalStuff;
 
         }
     }
@@ -907,6 +950,7 @@ namespace MapMaker
 
         }
     }
+    //these 2 things happen before the logic gate stuff has a chance to run for the frame so it will be 1 frame behind.
     [HarmonyPatch(typeof(AntiLockPlatform))]
     public class AntiLockPlatformPatches
     {
@@ -918,13 +962,13 @@ namespace MapMaker
             {
                 var SignalStuff = __instance.GetComponent<MovingPlatformSignalStuff>();
                 //if its on and its not inverted
-                if (!SignalStuff.SignalIsInverted && SignalSystem.IsSignalOn(SignalStuff.Signal))
+                if (!SignalStuff.SignalIsInverted && SignalStuff.IsOn())
                 {
                     //contenue the path
                     return true;
                 }
                 //if the signal is off and it is inverted
-                if (SignalStuff.SignalIsInverted && !SignalSystem.IsSignalOn(SignalStuff.Signal))
+                if (SignalStuff.SignalIsInverted && SignalStuff.IsOn())
                 {
                     //contenue the path
                     return true;
@@ -947,13 +991,13 @@ namespace MapMaker
             {
                 var SignalStuff = __instance.GetComponent<MovingPlatformSignalStuff>();
                 //if its on and its not inverted
-                if (!SignalStuff.SignalIsInverted && SignalSystem.IsSignalOn(SignalStuff.Signal))
+                if (!SignalStuff.SignalIsInverted && SignalStuff.IsOn())
                 {
                     //contenue the path
                     return true;
                 }
                 //if the signal is off and it is inverted
-                if (SignalStuff.SignalIsInverted && !SignalSystem.IsSignalOn(SignalStuff.Signal))
+                if (SignalStuff.SignalIsInverted && SignalStuff.IsOn())
                 {
                     //contenue the path
                     return true;

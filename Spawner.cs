@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace MapMaker
 {
-    internal class Spawner : MonoUpdatable
+    public class Spawner : LogicGate
     {
         private static GameObject BowObject;
         private static BoplBody arrow;
@@ -36,12 +36,11 @@ namespace MapMaker
         public bool IsTriggerSignal = false;
         private bool HasTrigged = false;
         //up to 65536 signals! more then enoth for amost anything! even building a computer???
-        public ushort Signal = 0;
+
         public void Awake()
         {
             UnityEngine.Debug.Log("Spawner Awake");
-            Updater.RegisterUpdatable(this);
-            fixTransform = (FixTransform)this.GetComponent(typeof(FixTransform));
+            fixTransform = (FixTransform)GetComponent(typeof(FixTransform));
             //only do all of this if it hasnt already been done.
             if (BowObject == null || arrow == null || grenade == null || AbilityPickup == null)
             {
@@ -121,50 +120,13 @@ namespace MapMaker
                 arrow = (BoplBody)AccessTools.Field(typeof(BowTransform), "Arrow").GetValue(BowTransform);
             }
         }
-        public override void Init()
+        public void Register()
         {
+            SignalSystem.RegisterLogicGate(this);
         }
-
-        public override void UpdateSim(Fix SimDeltaTime)
+        public bool IsOn()
         {
-            if (gameObject.name != "SpawnerObject")
-            {
-                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && !UseSignal)
-                {
-
-                    RelitiveSimTime = RelitiveSimTime + SimDeltaTime;
-                    if (RelitiveSimTime > SimTimeBetweenSpawns)
-                    {
-                        RelitiveSimTime = RelitiveSimTime - SimTimeBetweenSpawns;
-                        SpawnMyItem();
-                    }
-                }
-                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && SignalSystem.IsSignalOn(Signal) && UseSignal)
-                {
-                    //if its in trigger signal mode and it hasnt trigged yet
-                    if (IsTriggerSignal && !HasTrigged)
-                    {
-                        UnityEngine.Debug.Log("SignalIsOn! and its a trigger signal!");
-                        SpawnMyItem();
-                        HasTrigged = true;
-                    }
-                    //if its not in trigger signal mode
-                    if (!IsTriggerSignal)
-                    {
-                        RelitiveSimTime = RelitiveSimTime + SimDeltaTime;
-                        if (RelitiveSimTime > SimTimeBetweenSpawns)
-                        {
-                            RelitiveSimTime = RelitiveSimTime - SimTimeBetweenSpawns;
-                            SpawnMyItem();
-                        }
-                    }
-                }
-                //if we use signal but its off then reset HasTrigged;
-                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && UseSignal && !SignalSystem.IsSignalOn(Signal))
-                {
-                    HasTrigged = false;
-                }
-            }
+            return InputSignals[0].IsOn;
         }
         public enum ObjectSpawnType
         {
@@ -263,6 +225,48 @@ namespace MapMaker
                 case ObjectSpawnType.Explosion:
                     SpawnNormalExplosion(pos, scale);
                     break;
+            }
+        }
+
+        public override void Logic(Fix SimDeltaTime)
+        {
+            if (gameObject.name != "SpawnerObject")
+            {
+                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && !UseSignal)
+                {
+
+                    RelitiveSimTime = RelitiveSimTime + SimDeltaTime;
+                    if (RelitiveSimTime > SimTimeBetweenSpawns)
+                    {
+                        RelitiveSimTime = RelitiveSimTime - SimTimeBetweenSpawns;
+                        SpawnMyItem();
+                    }
+                }
+                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && IsOn() && UseSignal)
+                {
+                    //if its in trigger signal mode and it hasnt trigged yet
+                    if (IsTriggerSignal && !HasTrigged)
+                    {
+                        UnityEngine.Debug.Log("SignalIsOn! and its a trigger signal!");
+                        SpawnMyItem();
+                        HasTrigged = true;
+                    }
+                    //if its not in trigger signal mode
+                    if (!IsTriggerSignal)
+                    {
+                        RelitiveSimTime = RelitiveSimTime + SimDeltaTime;
+                        if (RelitiveSimTime > SimTimeBetweenSpawns)
+                        {
+                            RelitiveSimTime = RelitiveSimTime - SimTimeBetweenSpawns;
+                            SpawnMyItem();
+                        }
+                    }
+                }
+                //if we use signal but its off then reset HasTrigged;
+                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && UseSignal && !IsOn())
+                {
+                    HasTrigged = false;
+                }
             }
         }
     }

@@ -9,10 +9,9 @@ using UnityEngine;
 
 namespace MapMaker
 {
-    internal class DisappearPlatformsOnSignal : MonoUpdatable
+    public class DisappearPlatformsOnSignal : LogicGate
     {
         public GameObject platform = null;
-        public ushort Signal = 0;
         public bool SignalIsInverse = false;
         //if true it only is gone when the signal/inverse signal is on and if its not it imeaditly comes back. if false it takes SecondsToReapper seconds to reapear.
         public bool DisappearOnlyWhenSignal = true;
@@ -32,19 +31,18 @@ namespace MapMaker
         private bool delaying = false;
         private Material originalMaterial;
         private bool update1 = true;
-        public void Awake()
+        public void Register()
         {
-            Updater.RegisterUpdatable(this);
+            SignalSystem.RegisterLogicGate(this);
         }
-        public override void Init()
+        public bool IsOn()
         {
-
+            return InputSignals[0].IsOn;
         }
 
-        public override void UpdateSim(Fix SimDeltaTime)
+        public override void Logic(Fix SimDeltaTime)
         {
-
-
+            UnityEngine.Debug.Log("DisappearPlatforms Logic");
             if (!(gameObject.name == "DisappearPlatformsObject"))
             {
                 //update1
@@ -53,10 +51,9 @@ namespace MapMaker
                     originalMaterial = platform.GetComponent<SpriteRenderer>().material;
                     update1 = false;
                 }
-                var IsSignalOn = SignalSystem.IsSignalOn(Signal);
-                var IsOn = (IsSignalOn && !SignalIsInverse || !IsSignalOn && SignalIsInverse);
+                var IsOnReal = (IsOn() && !SignalIsInverse || !IsOn() && SignalIsInverse);
                 //if its being activated and its not being delayed already and its not already disapered
-                if (IsOn && !delaying && platform.activeInHierarchy)
+                if (IsOnReal && !delaying && platform.activeInHierarchy)
                 {
                     delaying = true;
                 }
@@ -76,7 +73,7 @@ namespace MapMaker
                     age = Fix.Zero;
                     platform.GetComponent<SpriteRenderer>().material = originalMaterial;
                 }
-                if (!IsOn || OnlyDisappearWhenSignalTurnsOn)
+                if (!IsOnReal || OnlyDisappearWhenSignalTurnsOn)
                 {
                     age += GameTime.PlayerTimeScale * SimDeltaTime;
                 }

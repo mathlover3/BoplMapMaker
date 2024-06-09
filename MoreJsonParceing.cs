@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MapMaker
 {
-    internal class MoreJsonParceing
+    public class MoreJsonParceing
     {
         public static void SpawnBoulders(List<object> boulders)
         {
