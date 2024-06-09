@@ -9,7 +9,7 @@ namespace MapMaker
 {
     public class MovingPlatformSignalStuff: MonoBehaviour
     {
-        //yes this is all. just for some signal related stuff
+        //yes this is all. just for storing some signal related stuff
         public ushort Signal = 0;
         public bool SignalIsInverted = false;
     }

@@ -59,6 +59,7 @@ namespace MapMaker
         public static PlatformApi.PlatformApi platformApi = new PlatformApi.PlatformApi();
         private static Trigger TriggerPrefab = null;
         private static Spawner SpawnerPrefab = null;
+        private static DisappearPlatformsOnSignal DisappearPlatformsOnSignalPrefab = null;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -108,7 +109,7 @@ namespace MapMaker
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
             UnityEngine.Debug.Log("getting Bow object");
             var objectsFound = 0;
-            var ObjectsToFind = 1;
+            var ObjectsToFind = 2;
             foreach (GameObject obj in allObjects)
             {
                 if (obj.name == "invisibleHitbox")
@@ -123,6 +124,21 @@ namespace MapMaker
                         break;
                     }
                 }
+                if (obj.name == "Blink gun")
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    DisappearPlatformsOnSignal.QuantumTunnelPrefab = obj.GetComponent<ShootQuantum>().QuantumTunnelPrefab;
+                    DisappearPlatformsOnSignal.onHitResizableWallMaterail = obj.GetComponent<ShootQuantum>().onHitResizableWallMaterail;
+                    DisappearPlatformsOnSignal.onHitWallMaterail = obj.GetComponent<ShootQuantum>().onHitWallMaterail;
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    objectsFound++;
+                    if (objectsFound == ObjectsToFind)
+                    {
+                        break;
+                    }
+                }
+                //Blink gun
             }
         }
         public static bool IsBoplMap(string path)
@@ -604,7 +620,12 @@ namespace MapMaker
                     // Add the FixTransform and Spawner components to the GameObject
                     spawnerGameObject.AddComponent<FixTransform>();
                     SpawnerPrefab = spawnerGameObject.AddComponent<Spawner>();
+                    // Create a new GameObject
+                    GameObject DisappearGameObject = new GameObject("DisappearPlatformsObject");
 
+                    // Add the FixTransform and Spawner components to the GameObject
+                    DisappearGameObject.AddComponent<FixTransform>();
+                    DisappearPlatformsOnSignalPrefab = DisappearGameObject.AddComponent<DisappearPlatformsOnSignal>();
                 }
                 catch (Exception ex)
                 {
@@ -615,6 +636,8 @@ namespace MapMaker
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
                 var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
                 var SignalStuff = platform.AddComponent<MovingPlatformSignalStuff>();
+                
+                CreateDisappearPlatformsOnSignal(platform, 0, Fix.One, false, false, false);
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")
@@ -836,6 +859,18 @@ namespace MapMaker
             trigger.SetExtents(Extents);
             trigger.Register();
             return trigger;
+        }
+        internal static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, ushort Signal, Fix SecondsToReapper, bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
+        {
+            var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, new Vec2(Fix.Zero, Fix.Zero));
+            Disappear.platform = platform;
+            Disappear.Signal = Signal;
+            Disappear.SignalIsInverse = SignalIsInverse;
+            Disappear.SecondsToReapper = SecondsToReapper;
+            Disappear.DisappearOnlyWhenSignal = DisappearOnlyWhenSignal;
+            Disappear.OnlyDisappearWhenSignalTurnsOn = OnlyDisappearWhenSignalTurnsOn;
+            return Disappear;
+
         }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
