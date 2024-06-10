@@ -277,7 +277,7 @@ namespace MapMaker
         }
         private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime)
         {
-            //UnityEngine.Debug.Log($"CallAllLogic");
+            UnityEngine.Debug.Log($"CallAllLogic");
             //triggers dont have gates
             if (output.gate)
             {
@@ -285,8 +285,7 @@ namespace MapMaker
             }
             for (int i = 0; i < output.outputs.Count; i++)
             {
-                //UnityEngine.Debug.Log($"output is: {output}");
-                //UnityEngine.Debug.Log($"output.outputs is of length {output.outputs.Count}");
+                UnityEngine.Debug.Log($"output.outputs is of length {output.outputs.Count}");
                 LogicInput input = output.outputs[i];
                 UnityEngine.Debug.Log($"output.IsOn is: {output.IsOn}");
                 input.IsOn = output.IsOn;
