@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MapMaker
 {
-    public struct LogicInput
+    public class LogicInput
     {
         public LogicInput()
         {

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace MapMaker
 {
-    public struct LogicOutput
+    public class LogicOutput
     {
         public LogicOutput() 
         {
