@@ -236,21 +236,21 @@ namespace MapMaker
             allOutputs.AddRange(LogicTriggerOutputs);
             foreach (var output in allOutputs)
             {
-                UnityEngine.Debug.Log($"allOutputs has length of {allOutputs.Count}");
+                //UnityEngine.Debug.Log($"allOutputs has length of {allOutputs.Count}");
                 var inputs = GetLogicInputs(output.Signal);
-                UnityEngine.Debug.Log($"LogicInputs for signal {output.Signal} has length {inputs.Count}");
+                //UnityEngine.Debug.Log($"LogicInputs for signal {output.Signal} has length {inputs.Count}");
                 foreach (var input in inputs)
                 {
-                    UnityEngine.Debug.Log($"input: {input} input.inputs: {input.inputs}");
+                    //UnityEngine.Debug.Log($"input: {input} input.inputs: {input.inputs}");
                     if (input.inputs == null)
                     {
-                        UnityEngine.Debug.Log($"input.inputs IS NULL!");
+                        //UnityEngine.Debug.Log($"input.inputs IS NULL!");
                     }
                     input.inputs.Add(output);
-                    UnityEngine.Debug.Log($"added output to inputs");
+                    //UnityEngine.Debug.Log($"added output to inputs");
                     //they have the same signal so lets just get them both out of the way in one fail swoop.
                     output.outputs.Add(input);
-                    UnityEngine.Debug.Log($"added input to outputs");
+                    //UnityEngine.Debug.Log($"added input to outputs");
                     //this should attact all inputs to all corsponding outputs in one go so we shouldnt need this. keeping it here just in case though.
                     /*
                     foreach (var output2 in GetLogicOutputs(input.Signal))
@@ -277,7 +277,7 @@ namespace MapMaker
         }
         private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime)
         {
-            UnityEngine.Debug.Log($"CallAllLogic");
+            //UnityEngine.Debug.Log($"CallAllLogic");
             //triggers dont have gates
             if (output.gate)
             {
@@ -285,14 +285,14 @@ namespace MapMaker
             }
             for (int i = 0; i < output.outputs.Count; i++)
             {
-                UnityEngine.Debug.Log($"output.outputs is of length {output.outputs.Count}");
+                //UnityEngine.Debug.Log($"output.outputs is of length {output.outputs.Count}");
                 LogicInput input = output.outputs[i];
-                UnityEngine.Debug.Log($"output.IsOn is: {output.IsOn}");
+                //UnityEngine.Debug.Log($"output.IsOn is: {output.IsOn}");
                 input.IsOn = output.IsOn;
                 input.gate.Logic(SimDeltaTime);
                 for (int j = 0; j < input.gate.OutputSignals.Count; j++)
                 {
-                    UnityEngine.Debug.Log($"input.gate.OutputSignals is of length {input.gate.OutputSignals.Count}");
+                    //UnityEngine.Debug.Log($"input.gate.OutputSignals is of length {input.gate.OutputSignals.Count}");
                     LogicOutput output2 = input.gate.OutputSignals[j];
                     CallAllLogic(output2, SimDeltaTime);
                 }

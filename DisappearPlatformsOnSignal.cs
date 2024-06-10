@@ -42,7 +42,7 @@ namespace MapMaker
 
         public override void Logic(Fix SimDeltaTime)
         {
-            UnityEngine.Debug.Log("DisappearPlatforms Logic");
+            //UnityEngine.Debug.Log("DisappearPlatforms Logic");
             if (!(gameObject.name == "DisappearPlatformsObject"))
             {
                 //update1
@@ -84,6 +84,7 @@ namespace MapMaker
                     UnityEngine.Debug.Log("delaying");
                     TimeDelayed += GameTime.PlayerTimeScale * SimDeltaTime;
                     UnityEngine.Debug.Log("TimeDelayed: " + TimeDelayed);
+                    age = Fix.Zero;
                     if (platform.CompareTag("ResizablePlatform"))
                     {
                         Material material = onHitResizableWallMaterail;
@@ -109,7 +110,7 @@ namespace MapMaker
                     //if this isnt a OnlyDisappearWhenSignalTurnsOn one.
                     if (!OnlyDisappearWhenSignalTurnsOn)
                     {
-                        UnityEngine.Debug.Log("making platform disaper.");
+                        //UnityEngine.Debug.Log("making platform disaper.");
                         if (!platform)
                         {
                             UnityEngine.Debug.Log("GAME OBJECT IS NULL!");

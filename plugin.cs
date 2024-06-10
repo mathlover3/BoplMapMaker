@@ -649,7 +649,7 @@ namespace MapMaker
                 var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
                 AddMovingPlatformSignalStuff(platform, 0);
                 
-                CreateDisappearPlatformsOnSignal(platform, 0, Fix.One, false, false, false);
+                CreateDisappearPlatformsOnSignal(platform, 0, Fix.One, Fix.One, false, false, false);
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")
@@ -881,7 +881,7 @@ namespace MapMaker
             trigger.Register();
             return trigger;
         }
-        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, ushort Signal, Fix SecondsToReapper, bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
+        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, ushort Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
         {
             var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, new Vec2(Fix.Zero, Fix.Zero));
             Disappear.platform = platform;
@@ -893,6 +893,7 @@ namespace MapMaker
             };
             Disappear.InputSignals.Add(input);
             Disappear.SignalIsInverse = SignalIsInverse;
+            Disappear.delay = delay;
             Disappear.SecondsToReapper = SecondsToReapper;
             Disappear.DisappearOnlyWhenSignal = DisappearOnlyWhenSignal;
             Disappear.OnlyDisappearWhenSignalTurnsOn = OnlyDisappearWhenSignalTurnsOn;
