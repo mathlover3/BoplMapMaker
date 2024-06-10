@@ -60,6 +60,7 @@ namespace MapMaker
         private static Trigger TriggerPrefab = null;
         private static Spawner SpawnerPrefab = null;
         private static DisappearPlatformsOnSignal DisappearPlatformsOnSignalPrefab = null;
+        private static AndGate andGatePrefab = null;
         public static SignalSystem signalSystem;
         public enum MapIdCheckerThing
         {
@@ -624,10 +625,16 @@ namespace MapMaker
                     // Create a new GameObject
                     GameObject DisappearGameObject = new GameObject("DisappearPlatformsObject");
 
-                    // Add the FixTransform and Spawner components to the GameObject
+                    // Add the components to the GameObject
                     DisappearGameObject.AddComponent<FixTransform>();
                     DisappearPlatformsOnSignalPrefab = DisappearGameObject.AddComponent<DisappearPlatformsOnSignal>();
 
+                    // Create a new GameObject
+                    GameObject AndGateObject = new GameObject("AndGateObject");
+
+                    // Add the FixTransform and Spawner components to the GameObject
+                    AndGateObject.AddComponent<FixTransform>();
+                    andGatePrefab = AndGateObject.AddComponent<AndGate>();
                     // Create a new GameObject
                     GameObject SignalSystemObject = new GameObject("SignalSystemObject");
 
@@ -647,14 +654,17 @@ namespace MapMaker
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
                 var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
-                AddMovingPlatformSignalStuff(platform, 0);
+                AddMovingPlatformSignalStuff(platform, 2);
                 
-                CreateDisappearPlatformsOnSignal(platform, 0, Fix.One, Fix.One, false, false, false);
+                CreateDisappearPlatformsOnSignal(platform, 2, Fix.One, Fix.One, false, false, false);
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")
                 };
                 CreateTrigger(layers, new Vec2(Fix.Zero, (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
+                CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
+                ushort[] signals = { 0, 1 };
+                CreateAndGate(signals, 2, new Vec2(Fix.Zero, Fix.Zero));
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
 
@@ -915,6 +925,31 @@ namespace MapMaker
             SignalStuff.Register();
             return SignalStuff;
 
+        }
+        public static AndGate CreateAndGate(ushort[] InputSignals, ushort OutputSignal, Vec2 pos)
+        {
+            var And = FixTransform.InstantiateFixed<AndGate>(andGatePrefab, pos);
+            var LogicInputs = new List<LogicInput>();
+            foreach (var InputSignal in InputSignals)
+            {
+                var input = new LogicInput
+                {
+                    Signal = InputSignal,
+                    gate = And,
+                    IsOn = false
+                };
+                LogicInputs.Add(input);
+            }
+            var output = new LogicOutput
+            {
+                Signal = OutputSignal,
+                gate = And,
+                IsOn = false
+            };
+            And.InputSignals.AddRange(LogicInputs);
+            And.OutputSignals.Add(output);
+            And.Register();
+            return And;
         }
     }
     [HarmonyPatch(typeof(MachoThrow2))]

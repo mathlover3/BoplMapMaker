@@ -25,7 +25,7 @@ namespace MapMaker
                 if (LogicOutputs.Count == 0)
                 {
                     LogicOutputs.Insert(0, LogicGate.OutputSignals[i]);
-                    return;
+                    break;
                 }
                 var InsertSpot = BinarySearchLogicOutputSignalId(LogicGate.OutputSignals[i].Signal);
                 LogicOutputs.Insert(InsertSpot, LogicGate.OutputSignals[i]);
@@ -36,7 +36,7 @@ namespace MapMaker
                 if (LogicInputs.Count == 0)
                 {
                     LogicInputs.Insert(0, LogicGate.InputSignals[i]);
-                    return;
+                    break;
                 }
                 var InsertSpot = BinarySearchLogicInputSignalId(LogicGate.InputSignals[i].Signal);
                 LogicInputs.Insert(InsertSpot, LogicGate.InputSignals[i]);
@@ -56,37 +56,38 @@ namespace MapMaker
         //returns the id of the first LogicOutput with that signal id. assumes the List is sorted
         public static int BinarySearchLogicOutputSignalId(ushort Signal)
         {
-            //UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
+            UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
             var LowerBound = 0;
             var UpperBound = LogicOutputs.Count - 1;
             var Middle = 0;
             //UnityEngine.Debug.Log("right before while");
-            while (LowerBound < UpperBound)
+            while (LowerBound <= UpperBound)
             {
-                Middle = (int)Math.Floor((float)(LowerBound + UpperBound / 2));
-                //UnityEngine.Debug.Log("Middle is " + Middle);
+                Middle = ((LowerBound + UpperBound) / 2);
+                //UnityEngine.Debug.Log("mid is " + Middle);
                 var SignalAtMiddle = LogicOutputs[Middle].Signal;
-                if (SignalAtMiddle > Signal)
+                if (Signal < SignalAtMiddle)
                 {
-                    UpperBound = Middle;
+                    UpperBound = Middle - 1;
                 }
-                else if (SignalAtMiddle < Signal)
+                else if (Signal > SignalAtMiddle)
                 {
-                    LowerBound = Middle;
+                    LowerBound = Middle + 1;
                 }
-                else 
+                else
                 {
                     break;
                 }
             }
             //get the first
-            //UnityEngine.Debug.Log("Middle is " + Middle);
+            //UnityEngine.Debug.Log("mid is " + Middle);
             if (LogicOutputs.Count != 0)
             {
-                while (Middle >= 0 && LogicOutputs[Middle].Signal == Signal)
+                //if its index 0 and the signal is greater we want it to run one. hence the >= instead of a ==
+                while (Middle >= 0 && LogicOutputs[Middle].Signal >= Signal)
                 {
                     Middle--;
-                    //UnityEngine.Debug.Log("New Middle is " + Middle);
+                    //UnityEngine.Debug.Log("New mid is " + Middle);
                 }
                 return Middle + 1;
             }
@@ -96,23 +97,24 @@ namespace MapMaker
         //returns the id of the first LogicInput with that signal id. assumes the List is sorted
         public static int BinarySearchLogicInputSignalId(ushort Signal)
         {
-            //UnityEngine.Debug.Log("BinarySearchLogicInputSignalId");
-            var LowerBound = 0;
-            var UpperBound = LogicInputs.Count - 1;
-            var Middle = 0;
+            UnityEngine.Debug.Log("BinarySearchLogicInputSignalId");
+            var min = 0;
+            var max = LogicInputs.Count - 1;
+            var mid = 0;
             //UnityEngine.Debug.Log("right before while");
-            while (LowerBound < UpperBound)
+            while (min <= max)
             {
-                Middle = (int)Math.Floor((float)(LowerBound + UpperBound / 2));
-                //UnityEngine.Debug.Log("Middle is " + Middle);
-                var SignalAtMiddle = LogicInputs[Middle].Signal;
-                if (SignalAtMiddle > Signal)
+                //rounding down results in 0 when there is 2 or less items.
+                mid = Mathf.CeilToInt((float)((min + max) / 2));
+                UnityEngine.Debug.Log("mid is " + mid);
+                var SignalAtMiddle = LogicInputs[mid].Signal;
+                if (Signal < SignalAtMiddle)
                 {
-                    UpperBound = Middle;
+                    max = mid - 1;
                 }
-                else if (SignalAtMiddle < Signal)
+                else if (Signal > SignalAtMiddle)
                 {
-                    LowerBound = Middle;
+                    min = mid + 1;
                 }
                 else
                 {
@@ -120,15 +122,16 @@ namespace MapMaker
                 }
             }
             //get the first
-            //UnityEngine.Debug.Log("Middle is " + Middle);
+            UnityEngine.Debug.Log("mid is " + mid);
             if (LogicInputs.Count != 0)
             {
-                while (Middle >= 0 && LogicInputs[Middle].Signal == Signal)
+                //if its index 0 and the signal is greater we want it to run one. hence the >= instead of a ==
+                while (mid >= 0 && LogicInputs[mid].Signal >= Signal)
                 {
-                    Middle--;
-                    //UnityEngine.Debug.Log("New Middle is " + Middle);
+                    mid--;
+                    UnityEngine.Debug.Log("New mid is " + mid);
                 }
-                return Middle + 1;
+                return mid + 1;
             }
             return 0;
 
@@ -136,23 +139,23 @@ namespace MapMaker
         //returns the id of the first LogicOutput with that signal id. assumes the List is sorted
         public static int BinarySearchLogicTriggerOutputSignalId(ushort Signal)
         {
-            //UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
+            UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
             var LowerBound = 0;
             var UpperBound = LogicTriggerOutputs.Count - 1;
             var Middle = 0;
             //UnityEngine.Debug.Log("right before while");
-            while (LowerBound < UpperBound)
+            while (LowerBound <= UpperBound)
             {
-                Middle = (int)Math.Floor((float)(LowerBound + UpperBound / 2));
-                //UnityEngine.Debug.Log("Middle is " + Middle);
+                Middle = ((LowerBound + UpperBound) / 2);
+                //UnityEngine.Debug.Log("mid is " + Middle);
                 var SignalAtMiddle = LogicTriggerOutputs[Middle].Signal;
-                if (SignalAtMiddle > Signal)
+                if (Signal < SignalAtMiddle)
                 {
-                    UpperBound = Middle;
+                    UpperBound = Middle - 1;
                 }
-                else if (SignalAtMiddle < Signal)
+                else if (Signal > SignalAtMiddle)
                 {
-                    LowerBound = Middle;
+                    LowerBound = Middle + 1;
                 }
                 else
                 {
@@ -160,13 +163,14 @@ namespace MapMaker
                 }
             }
             //get the first
-            //UnityEngine.Debug.Log("Middle is " + Middle);
+            //UnityEngine.Debug.Log("mid is " + Middle);
             if (LogicTriggerOutputs.Count != 0)
             {
-                while (Middle >= 0 && LogicTriggerOutputs[Middle].Signal == Signal)
+                //if its index 0 and the signal is greater we want it to run one. hence the >= instead of a ==
+                while (Middle >= 0 && LogicTriggerOutputs[Middle].Signal >= Signal)
                 {
                     Middle--;
-                    //UnityEngine.Debug.Log("New Middle is " + Middle);
+                    //UnityEngine.Debug.Log("New mid is " + Middle);
                 }
                 return Middle + 1;
             }
@@ -192,9 +196,10 @@ namespace MapMaker
             var CurrentLogicInputIndex = FirstLogicInputIndex;
             //create a new list
             List<LogicInput> inputs = new List<LogicInput>();
-            //while its not past the last LogicInput and this LogicInputs signal is correct check if its IsOn is true and if so add it to the list
+            //while its not past the last old LogicInput and this LogicInputs signal is correct check if its IsOn is true and if so add it to the list
             while (CurrentLogicInputIndex < LogicInputs.Count && LogicInputs[CurrentLogicInputIndex].Signal == signal)
             {
+                UnityEngine.Debug.Log($"adding LogicInput to inputs");
                 inputs.Add(LogicInputs[CurrentLogicInputIndex]);
                 CurrentLogicInputIndex++;
             }
@@ -236,21 +241,20 @@ namespace MapMaker
             allOutputs.AddRange(LogicTriggerOutputs);
             foreach (var output in allOutputs)
             {
-                //UnityEngine.Debug.Log($"allOutputs has length of {allOutputs.Count}");
+                UnityEngine.Debug.Log($"allOutputs has length of {allOutputs.Count}");
                 var inputs = GetLogicInputs(output.Signal);
-                //UnityEngine.Debug.Log($"LogicInputs for signal {output.Signal} has length {inputs.Count}");
+                UnityEngine.Debug.Log($"LogicInputs for signal {output.Signal} has length {inputs.Count}");
                 foreach (var input in inputs)
                 {
-                    //UnityEngine.Debug.Log($"input: {input} input.inputs: {input.inputs}");
                     if (input.inputs == null)
                     {
-                        //UnityEngine.Debug.Log($"input.inputs IS NULL!");
+                        UnityEngine.Debug.Log($"input.inputs IS NULL!");
                     }
                     input.inputs.Add(output);
-                    //UnityEngine.Debug.Log($"added output to inputs");
+                    UnityEngine.Debug.Log($"added output to inputs");
                     //they have the same signal so lets just get them both out of the way in one fail swoop.
                     output.outputs.Add(input);
-                    //UnityEngine.Debug.Log($"added input to outputs");
+                    UnityEngine.Debug.Log($"added input to outputs");
                     //this should attact all inputs to all corsponding outputs in one go so we shouldnt need this. keeping it here just in case though.
                     /*
                     foreach (var output2 in GetLogicOutputs(input.Signal))
@@ -277,7 +281,7 @@ namespace MapMaker
         }
         private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime)
         {
-            //UnityEngine.Debug.Log($"CallAllLogic");
+            UnityEngine.Debug.Log($"CallAllLogic");
             //triggers dont have gates
             if (output.gate)
             {
