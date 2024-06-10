@@ -16,4 +16,40 @@ namespace MapMaker
         //called when all of the inputs have been updated
         public abstract void Logic(Fix SimDeltaTime);
     }
+    public abstract class LogicGateTrigger : LogicGate, IUpdatable
+    {
+
+        public int hierarchyNumber;
+
+        public bool IsDestroyed { get; set; }
+
+        public int HierarchyNumber
+        {
+            get
+            {
+                return hierarchyNumber;
+            }
+            set
+            {
+                hierarchyNumber = value;
+            }
+        }
+
+        public abstract void Init();
+
+        public abstract void UpdateSim(Fix SimDeltaTime);
+
+        public virtual bool IsEnabled()
+        {
+            return base.isActiveAndEnabled;
+        }
+
+        public virtual void LateUpdateSim(Fix SimDeltaTime)
+        {
+        }
+
+        public virtual void OnDestroyUpdatable()
+        {
+        }
+    }
 }
