@@ -96,6 +96,7 @@ namespace MapMaker
                 {
                     LogicOutput.IsOn = false;
                 }
+                Colliding = false;
                 //UnityEngine.Debug.Log("IsOn: " + IsOn);
                 try
                 {
