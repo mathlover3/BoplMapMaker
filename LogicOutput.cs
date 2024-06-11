@@ -18,6 +18,7 @@ namespace MapMaker
         //must be set before registering your gate
         public LogicGate gate;
         public bool IsOn;
+        public bool WasOnLastTick;
         //these are connected to the output of this gate
         public List<LogicInput> outputs;
     }

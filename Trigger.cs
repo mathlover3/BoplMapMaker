@@ -81,6 +81,7 @@ namespace MapMaker
                     if (layer == collision.layer)
                     {
                         Colliding = true;
+                        LogicOutput.WasOnLastTick = LogicOutput.IsOn;
                         LogicOutput.IsOn = true;
                         //UnityEngine.Debug.Log("OnCollide! " + collision);
                     }
@@ -90,10 +91,12 @@ namespace MapMaker
 
         public override void UpdateSim(Fix SimDeltaTime)
         {
+            LogicOutput.WasOnLastTick = LogicOutput.IsOn;
             if (gameObject.name != "TriggerObject")
             {
                 if (LogicOutput.IsOn && !Colliding)
                 {
+                    LogicOutput.WasOnLastTick = LogicOutput.IsOn;
                     LogicOutput.IsOn = false;
                 }
                 Colliding = false;

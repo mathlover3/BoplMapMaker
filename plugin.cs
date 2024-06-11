@@ -653,7 +653,8 @@ namespace MapMaker
                     signalSystem = SignalSystemObject.AddComponent<SignalSystem>();
                     SignalSystem.LogicInputs = new List<LogicInput>();
                     SignalSystem.LogicOutputs = new List<LogicOutput>();
-                    SignalSystem.LogicTriggerOutputs = new List<LogicOutput>();
+                    SignalSystem.LogicStartingOutputs = new List<LogicOutput>();
+                    SignalSystem.LogicGatesToAlwaysUpdate = new List<LogicGate>();
                 }
                 catch (Exception ex)
                 {

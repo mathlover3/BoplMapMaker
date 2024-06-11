@@ -34,6 +34,8 @@ namespace MapMaker
         public void Register()
         {
             SignalSystem.RegisterLogicGate(this);
+            //must always run so that it can do its logic
+            SignalSystem.RegisterGateThatAlwaysRuns(this);
         }
         public bool IsOn()
         {

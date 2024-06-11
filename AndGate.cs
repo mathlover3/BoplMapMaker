@@ -20,7 +20,9 @@ namespace MapMaker
             //if there are 0 signals then Logic will never be called.
             if (InputSignals.Count == 1)
             {
+                output.WasOnLastTick = output.IsOn;
                 output.IsOn = InputSignals[0].IsOn;
+
                 return;
             }
             var CurrentValue = true;
@@ -29,7 +31,9 @@ namespace MapMaker
             {
                 CurrentValue = InputSignals[i].IsOn && CurrentValue;
             }
+            output.WasOnLastTick = output.IsOn;
             output.IsOn = CurrentValue;
+
         }
     }
 }

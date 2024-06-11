@@ -14,7 +14,10 @@ namespace MapMaker
     {
         public static List<LogicOutput> LogicOutputs = new List<LogicOutput>();
         public static List<LogicInput> LogicInputs = new List<LogicInput>();
-        public static List<LogicOutput> LogicTriggerOutputs = new List<LogicOutput>();
+        //these outputs will always have there gates run and if its output changes it runs the later ones. used for stuff that may update there output even if there input doesnt change
+        public static List<LogicOutput> LogicStartingOutputs = new List<LogicOutput>();
+        //if true this logic gate will run every update. used for stuff that needs updated every frame. NOT SORTED!
+        public static List<LogicGate> LogicGatesToAlwaysUpdate = new List<LogicGate>();
         //registers the trigger and returns the id
         public static void RegisterLogicGate(LogicGate LogicGate)
         {
@@ -32,26 +35,34 @@ namespace MapMaker
             }
             for (int i = 0; i < LogicGate.InputSignals.Count; i++)
             {
-                UnityEngine.Debug.Log("RegisterInput");
-                if (LogicInputs.Count == 0)
-                {
-                    LogicInputs.Insert(0, LogicGate.InputSignals[i]);
-                    break;
-                }
-                var InsertSpot = BinarySearchLogicInputSignalId(LogicGate.InputSignals[i].Signal);
-                LogicInputs.Insert(InsertSpot, LogicGate.InputSignals[i]);
+                RegisterInput(LogicGate.InputSignals[i]);
             }
         }
         public static void RegisterTrigger(LogicOutput logicOutput)
         {
             UnityEngine.Debug.Log("RegisterTrigger");
-                if (LogicTriggerOutputs.Count == 0)
-                {
-                    LogicTriggerOutputs.Insert(0, logicOutput);
-                    return;
-                }
-                var InsertSpot = BinarySearchLogicTriggerOutputSignalId(logicOutput.Signal);
-                LogicTriggerOutputs.Insert(InsertSpot, logicOutput);
+            if (LogicStartingOutputs.Count == 0)
+            {
+                LogicStartingOutputs.Insert(0, logicOutput);
+                return;
+            }
+            var InsertSpot = BinarySearchLogicTriggerOutputSignalId(logicOutput.Signal);
+            LogicStartingOutputs.Insert(InsertSpot, logicOutput);
+        }
+        public static void RegisterInput(LogicInput input)
+        {
+            UnityEngine.Debug.Log("RegisterInput");
+            if (LogicInputs.Count == 0)
+            {
+                LogicInputs.Insert(0, input);
+                return;
+            }
+            var InsertSpot = BinarySearchLogicInputSignalId(input.Signal);
+            LogicInputs.Insert(InsertSpot, input);
+        }
+        public static void RegisterGateThatAlwaysRuns(LogicGate gate)
+        {
+            LogicGatesToAlwaysUpdate.Add(gate);
         }
         //returns the id of the first LogicOutput with that signal id. assumes the List is sorted
         public static int BinarySearchLogicOutputSignalId(ushort Signal)
@@ -141,14 +152,14 @@ namespace MapMaker
         {
             UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
             var LowerBound = 0;
-            var UpperBound = LogicTriggerOutputs.Count - 1;
+            var UpperBound = LogicStartingOutputs.Count - 1;
             var Middle = 0;
             //UnityEngine.Debug.Log("right before while");
             while (LowerBound <= UpperBound)
             {
                 Middle = ((LowerBound + UpperBound) / 2);
                 //UnityEngine.Debug.Log("mid is " + Middle);
-                var SignalAtMiddle = LogicTriggerOutputs[Middle].Signal;
+                var SignalAtMiddle = LogicStartingOutputs[Middle].Signal;
                 if (Signal < SignalAtMiddle)
                 {
                     UpperBound = Middle - 1;
@@ -164,10 +175,10 @@ namespace MapMaker
             }
             //get the first
             //UnityEngine.Debug.Log("mid is " + Middle);
-            if (LogicTriggerOutputs.Count != 0)
+            if (LogicStartingOutputs.Count != 0)
             {
                 //if its index 0 and the signal is greater we want it to run one. hence the >= instead of a ==
-                while (Middle >= 0 && LogicTriggerOutputs[Middle].Signal >= Signal)
+                while (Middle >= 0 && LogicStartingOutputs[Middle].Signal >= Signal)
                 {
                     Middle--;
                     //UnityEngine.Debug.Log("New mid is " + Middle);
@@ -209,7 +220,7 @@ namespace MapMaker
         {
             var allOutputs = new List<LogicOutput>();
             allOutputs.AddRange(LogicOutputs);
-            allOutputs.AddRange(LogicTriggerOutputs);
+            allOutputs.AddRange(LogicStartingOutputs);
 
             //if there are no LogicOutputs return a empty list
             if (allOutputs.Count == 0)
@@ -238,7 +249,7 @@ namespace MapMaker
         {
             var allOutputs = new List<LogicOutput>();
             allOutputs.AddRange(LogicOutputs);
-            allOutputs.AddRange(LogicTriggerOutputs);
+            allOutputs.AddRange(LogicStartingOutputs);
             foreach (var output in allOutputs)
             {
                 UnityEngine.Debug.Log($"allOutputs has length of {allOutputs.Count}");
@@ -273,20 +284,39 @@ namespace MapMaker
 
         public override void UpdateSim(Fix SimDeltaTime)
         {
-            for (int i = 0; i < LogicTriggerOutputs.Count; i++)
+            for (int i = 0; i < LogicStartingOutputs.Count; i++)
             {
-                LogicOutput output = LogicTriggerOutputs[i];
-                CallAllLogic(output, SimDeltaTime);
+                LogicOutput output = LogicStartingOutputs[i];
+                CallAllLogic(output, SimDeltaTime, true);
+            }
+            foreach (var gate in LogicGatesToAlwaysUpdate)
+            {
+                gate.Logic(SimDeltaTime);
             }
         }
-        private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime)
+        private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
         {
-            UnityEngine.Debug.Log($"CallAllLogic");
             //triggers dont have gates
             if (output.gate)
             {
-                output.gate.Logic(SimDeltaTime);
+                //if this isnt a first call then on line 315 we will have already done this
+                if (FirstCall)
+                {
+                    output.gate.Logic(SimDeltaTime);
+                }
+
+                //if this is a delay and its not the first call then we are stoping the prossesing as this may be a loop
+                if (output.gate.GetComponent<SignalDelay>() != null && !FirstCall)
+                {
+                    return;
+                }
             }
+            //if the state hasnt changed dont keep going wasting time.
+            if (output.IsOn == output.WasOnLastTick)
+            {
+                return;
+            }
+            UnityEngine.Debug.Log($"CallAllLogic");
             for (int i = 0; i < output.outputs.Count; i++)
             {
                 //UnityEngine.Debug.Log($"output.outputs is of length {output.outputs.Count}");
@@ -298,7 +328,7 @@ namespace MapMaker
                 {
                     //UnityEngine.Debug.Log($"input.gate.OutputSignals is of length {input.gate.OutputSignals.Count}");
                     LogicOutput output2 = input.gate.OutputSignals[j];
-                    CallAllLogic(output2, SimDeltaTime);
+                    CallAllLogic(output2, SimDeltaTime, false);
                 }
             }
         }

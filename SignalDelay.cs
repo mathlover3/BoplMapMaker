@@ -15,7 +15,10 @@ namespace MapMaker
 
         public void Register()
         {
-            SignalSystem.RegisterLogicGate(this);
+            //we also need to register the inputs. sure the output will be registerd multiple times but thats fine.
+            SignalSystem.RegisterInput(InputSignals[0]);
+            //this may change output even if the input doesnt change.
+            SignalSystem.RegisterTrigger(OutputSignals[0]);
         }
         public bool IsOn()
         {
@@ -29,6 +32,7 @@ namespace MapMaker
             {
                 //UnityEngine.Debug.Log("hi");
                 var signal = SignalBuffer[0];
+                OutputSignals[0].WasOnLastTick = OutputSignals[0].IsOn;
                 OutputSignals[0].IsOn = signal;
                 SignalBuffer.RemoveAt(0);
                 SignalTimeBuffer.RemoveAt(0);
