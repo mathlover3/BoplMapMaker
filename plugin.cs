@@ -61,6 +61,7 @@ namespace MapMaker
         private static Spawner SpawnerPrefab = null;
         private static DisappearPlatformsOnSignal DisappearPlatformsOnSignalPrefab = null;
         private static AndGate andGatePrefab = null;
+        private static SignalDelay SignalDelayPrefab = null;
         public static SignalSystem signalSystem;
         public enum MapIdCheckerThing
         {
@@ -635,8 +636,17 @@ namespace MapMaker
                     // Add the FixTransform and Spawner components to the GameObject
                     AndGateObject.AddComponent<FixTransform>();
                     andGatePrefab = AndGateObject.AddComponent<AndGate>();
+
+                    // Create a new GameObject
+                    GameObject SignalDelayObject = new GameObject("SignalDelayObject");
+
+                    // Add the FixTransform and Spawner components to the GameObject
+                    SignalDelayObject.AddComponent<FixTransform>();
+                    SignalDelayPrefab = SignalDelayObject.AddComponent<SignalDelay>();
+
                     // Create a new GameObject
                     GameObject SignalSystemObject = new GameObject("SignalSystemObject");
+
 
                     // Add the FixTransform and Spawner components to the GameObject
                     SignalSystemObject.AddComponent<FixTransform>();
@@ -654,9 +664,9 @@ namespace MapMaker
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
                 var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
-                AddMovingPlatformSignalStuff(platform, 2);
-                
-                CreateDisappearPlatformsOnSignal(platform, 2, Fix.One, Fix.One, false, false, false);
+                AddMovingPlatformSignalStuff(platform, 3);
+                CreateSignalDelay(2, 3, Fix.One, Vec2.zero);
+                CreateDisappearPlatformsOnSignal(platform, 3, Fix.One, Fix.One, false, false, false);
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")
@@ -950,6 +960,28 @@ namespace MapMaker
             And.OutputSignals.Add(output);
             And.Register();
             return And;
+        }
+        public static SignalDelay CreateSignalDelay(ushort InputSignal, ushort OutputSignal, Fix delay, Vec2 pos)
+        {
+            var Delay = FixTransform.InstantiateFixed<SignalDelay>(SignalDelayPrefab, pos);
+            var input = new LogicInput
+            {
+                Signal = InputSignal,
+                gate = Delay,
+                IsOn = false
+            };
+            var output = new LogicOutput
+            {
+                Signal = OutputSignal,
+                gate = Delay,
+                IsOn = false
+            };
+            Delay.delay = delay;
+            Delay.InputSignals.Add(input);
+            Delay.OutputSignals.Add(output);
+            Delay.Register();
+            return Delay;
+
         }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
