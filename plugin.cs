@@ -62,6 +62,8 @@ namespace MapMaker
         private static DisappearPlatformsOnSignal DisappearPlatformsOnSignalPrefab = null;
         private static AndGate andGatePrefab = null;
         private static SignalDelay SignalDelayPrefab = null;
+        private static OrGate OrGatePrefab = null;
+        private static NotGate NotGatePrefab = null;
         public static SignalSystem signalSystem;
         public enum MapIdCheckerThing
         {
@@ -645,6 +647,21 @@ namespace MapMaker
                     SignalDelayPrefab = SignalDelayObject.AddComponent<SignalDelay>();
 
                     // Create a new GameObject
+                    GameObject OrGateObject = new GameObject("OrGateObject");
+
+                    // Add the FixTransform and Spawner components to the GameObject
+                    OrGateObject.AddComponent<FixTransform>();
+                    OrGatePrefab = OrGateObject.AddComponent<OrGate>();
+
+                    // Create a new GameObject
+                    GameObject NotGateObject = new GameObject("NotGateObject");
+
+                    // Add the FixTransform and Spawner components to the GameObject
+                    NotGateObject.AddComponent<FixTransform>();
+                    NotGatePrefab = NotGateObject.AddComponent<NotGate>();
+
+
+                    // Create a new GameObject
                     GameObject SignalSystemObject = new GameObject("SignalSystemObject");
 
 
@@ -665,17 +682,26 @@ namespace MapMaker
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
                 var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
-                AddMovingPlatformSignalStuff(platform, 3);
-                CreateSignalDelay(2, 3, Fix.One, Vec2.zero);
-                CreateDisappearPlatformsOnSignal(platform, 3, Fix.One, Fix.One, false, false, false);
+
+                
+                
+                
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")
                 };
-                CreateTrigger(layers, new Vec2(Fix.Zero, (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
+                CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
                 CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
-                ushort[] signals = { 0, 1 };
-                CreateAndGate(signals, 2, new Vec2(Fix.Zero, Fix.Zero));
+                ulong[] UUids = { 0, 4 };
+                CreateOrGate(UUids, 6, new Vec2(Fix.Zero, Fix.Zero));
+                CreateNotGate(6, 2, new Vec2(Fix.Zero, Fix.Zero));
+                ulong[] UUids2 = { 1, 5 };
+                CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, Fix.Zero));
+                CreateNotGate(7, 3, new Vec2(Fix.Zero, Fix.Zero));
+                CreateSignalDelay(2, 5, Fix.Zero, Vec2.zero);
+                CreateSignalDelay(3, 4, Fix.Zero, Vec2.zero);
+                AddMovingPlatformSignalStuff(platform, 2);
+                CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, Fix.One, false, false, false);
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
 
@@ -871,14 +897,14 @@ namespace MapMaker
             }
             return Floats;
         }
-        public static Spawner CreateSpawner(Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity,  Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, ushort Signal = 0, bool IsTriggerSignal = false)
+        public static Spawner CreateSpawner(Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity,  Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, ulong Signal = 0, bool IsTriggerSignal = false)
         {
             var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, new Vec2(Fix.Zero, (Fix)30));
             spawner.spawnType = spawnType;
             spawner.UseSignal = UseSignal;
             var input = new LogicInput
             {
-                Signal = Signal,
+                UUid = Signal,
                 gate = spawner,
                 IsOn = false
             };
@@ -895,20 +921,20 @@ namespace MapMaker
         {
             var trigger = FixTransform.InstantiateFixed<Trigger>(TriggerPrefab, new Vec2(Fix.Zero, (Fix)30));
             trigger.layersToDetect = LayersToDetect;
-            trigger.LogicOutput.Signal = Signal;
+            trigger.LogicOutput.UUid = Signal;
             trigger.LogicOutput.IsOn = false;
             trigger.SetPos(Pos);
             trigger.SetExtents(Extents);
             trigger.Register();
             return trigger;
         }
-        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, ushort Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
+        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, ulong Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
         {
             var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, new Vec2(Fix.Zero, Fix.Zero));
             Disappear.platform = platform;
             var input = new LogicInput
             {
-                Signal = Signal,
+                UUid = Signal,
                 gate = Disappear,
                 IsOn = false
             };
@@ -922,12 +948,12 @@ namespace MapMaker
             return Disappear;
 
         }
-        public static MovingPlatformSignalStuff AddMovingPlatformSignalStuff(GameObject platform, ushort Signal, bool SignalIsInverted = false)
+        public static MovingPlatformSignalStuff AddMovingPlatformSignalStuff(GameObject platform, ulong Signal, bool SignalIsInverted = false)
         {
             var SignalStuff = platform.AddComponent<MovingPlatformSignalStuff>();
             var input = new LogicInput
             {
-                Signal = Signal,
+                UUid = Signal,
                 gate = SignalStuff,
                 IsOn = false
             };
@@ -937,15 +963,15 @@ namespace MapMaker
             return SignalStuff;
 
         }
-        public static AndGate CreateAndGate(ushort[] InputSignals, ushort OutputSignal, Vec2 pos)
+        public static AndGate CreateAndGate(ulong[] InputUUids, ulong OutputUUid, Vec2 pos)
         {
             var And = FixTransform.InstantiateFixed<AndGate>(andGatePrefab, pos);
             var LogicInputs = new List<LogicInput>();
-            foreach (var InputSignal in InputSignals)
+            foreach (var InputSignal in InputUUids)
             {
                 var input = new LogicInput
                 {
-                    Signal = InputSignal,
+                    UUid = InputSignal,
                     gate = And,
                     IsOn = false
                 };
@@ -953,7 +979,7 @@ namespace MapMaker
             }
             var output = new LogicOutput
             {
-                Signal = OutputSignal,
+                UUid = OutputUUid,
                 gate = And,
                 IsOn = false
             };
@@ -962,18 +988,18 @@ namespace MapMaker
             And.Register();
             return And;
         }
-        public static SignalDelay CreateSignalDelay(ushort InputSignal, ushort OutputSignal, Fix delay, Vec2 pos)
+        public static SignalDelay CreateSignalDelay(ulong InputSignal, ulong OutputSignal, Fix delay, Vec2 pos)
         {
             var Delay = FixTransform.InstantiateFixed<SignalDelay>(SignalDelayPrefab, pos);
             var input = new LogicInput
             {
-                Signal = InputSignal,
+                UUid = InputSignal,
                 gate = Delay,
                 IsOn = false
             };
             var output = new LogicOutput
             {
-                Signal = OutputSignal,
+                UUid = OutputSignal,
                 gate = Delay,
                 IsOn = false
             };
@@ -983,6 +1009,51 @@ namespace MapMaker
             Delay.Register();
             return Delay;
 
+        }
+        public static OrGate CreateOrGate(ulong[] InputUUids, ulong OutputUUid, Vec2 pos) 
+        {
+            var Or = FixTransform.InstantiateFixed<OrGate>(OrGatePrefab, pos);
+            var LogicInputs = new List<LogicInput>();
+            foreach (var InputSignal in InputUUids)
+            {
+                var input = new LogicInput
+                {
+                    UUid = InputSignal,
+                    gate = Or,
+                    IsOn = false
+                };
+                LogicInputs.Add(input);
+            }
+            var output = new LogicOutput
+            {
+                UUid = OutputUUid,
+                gate = Or,
+                IsOn = false
+            };
+            Or.InputSignals.AddRange(LogicInputs);
+            Or.OutputSignals.Add(output);
+            Or.Register();
+            return Or;
+        }
+        public static NotGate CreateNotGate(ulong InputUUid, ulong OutputUUid, Vec2 pos)
+        {
+            var Not = FixTransform.InstantiateFixed<NotGate>(NotGatePrefab, pos);
+            var input = new LogicInput
+            {
+                UUid = InputUUid,
+                gate = Not,
+                IsOn = false
+            };
+            var output = new LogicOutput
+            {
+                UUid = OutputUUid,
+                gate = Not,
+                IsOn = false
+            };
+            Not.InputSignals.Add(input);
+            Not.OutputSignals.Add(output);
+            Not.Register();
+            return Not;
         }
     }
     [HarmonyPatch(typeof(MachoThrow2))]

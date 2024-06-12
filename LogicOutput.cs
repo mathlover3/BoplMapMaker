@@ -13,8 +13,7 @@ namespace MapMaker
         {
             outputs = new List<LogicInput>();
         }
-        //up to 65536 signals! more then enoth for amost anything! even building a computer???
-        public ushort Signal;
+        public ulong UUid;
         //must be set before registering your gate
         public LogicGate gate;
         public bool IsOn;
