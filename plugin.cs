@@ -692,10 +692,10 @@ namespace MapMaker
                 };
                 CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
                 CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
-                ulong[] UUids = { 0, 4 };
+                int[] UUids = { 0, 4 };
                 CreateOrGate(UUids, 6, new Vec2(Fix.Zero, Fix.Zero));
                 CreateNotGate(6, 2, new Vec2(Fix.Zero, Fix.Zero));
-                ulong[] UUids2 = { 1, 5 };
+                int[] UUids2 = { 1, 5 };
                 CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, Fix.Zero));
                 CreateNotGate(7, 3, new Vec2(Fix.Zero, Fix.Zero));
                 CreateSignalDelay(2, 5, Fix.Zero, Vec2.zero);
@@ -897,7 +897,7 @@ namespace MapMaker
             }
             return Floats;
         }
-        public static Spawner CreateSpawner(Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity,  Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, ulong Signal = 0, bool IsTriggerSignal = false)
+        public static Spawner CreateSpawner(Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity,  Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
         {
             var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, new Vec2(Fix.Zero, (Fix)30));
             spawner.spawnType = spawnType;
@@ -928,7 +928,7 @@ namespace MapMaker
             trigger.Register();
             return trigger;
         }
-        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, ulong Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
+        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, int Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
         {
             var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, new Vec2(Fix.Zero, Fix.Zero));
             Disappear.platform = platform;
@@ -948,7 +948,7 @@ namespace MapMaker
             return Disappear;
 
         }
-        public static MovingPlatformSignalStuff AddMovingPlatformSignalStuff(GameObject platform, ulong Signal, bool SignalIsInverted = false)
+        public static MovingPlatformSignalStuff AddMovingPlatformSignalStuff(GameObject platform, int Signal, bool SignalIsInverted = false)
         {
             var SignalStuff = platform.AddComponent<MovingPlatformSignalStuff>();
             var input = new LogicInput
@@ -963,7 +963,7 @@ namespace MapMaker
             return SignalStuff;
 
         }
-        public static AndGate CreateAndGate(ulong[] InputUUids, ulong OutputUUid, Vec2 pos)
+        public static AndGate CreateAndGate(int[] InputUUids, int OutputUUid, Vec2 pos)
         {
             var And = FixTransform.InstantiateFixed<AndGate>(andGatePrefab, pos);
             var LogicInputs = new List<LogicInput>();
@@ -988,7 +988,7 @@ namespace MapMaker
             And.Register();
             return And;
         }
-        public static SignalDelay CreateSignalDelay(ulong InputSignal, ulong OutputSignal, Fix delay, Vec2 pos)
+        public static SignalDelay CreateSignalDelay(int InputSignal, int OutputSignal, Fix delay, Vec2 pos)
         {
             var Delay = FixTransform.InstantiateFixed<SignalDelay>(SignalDelayPrefab, pos);
             var input = new LogicInput
@@ -1010,7 +1010,7 @@ namespace MapMaker
             return Delay;
 
         }
-        public static OrGate CreateOrGate(ulong[] InputUUids, ulong OutputUUid, Vec2 pos) 
+        public static OrGate CreateOrGate(int[] InputUUids, int OutputUUid, Vec2 pos) 
         {
             var Or = FixTransform.InstantiateFixed<OrGate>(OrGatePrefab, pos);
             var LogicInputs = new List<LogicInput>();
@@ -1035,7 +1035,7 @@ namespace MapMaker
             Or.Register();
             return Or;
         }
-        public static NotGate CreateNotGate(ulong InputUUid, ulong OutputUUid, Vec2 pos)
+        public static NotGate CreateNotGate(int InputUUid, int OutputUUid, Vec2 pos)
         {
             var Not = FixTransform.InstantiateFixed<NotGate>(NotGatePrefab, pos);
             var input = new LogicInput

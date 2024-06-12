@@ -83,9 +83,9 @@ namespace MapMaker
                 //if we are in the delay stage
                 if (delaying)
                 {
-                    UnityEngine.Debug.Log("delaying");
+                    //UnityEngine.Debug.Log("delaying");
                     TimeDelayed += GameTime.PlayerTimeScale * SimDeltaTime;
-                    UnityEngine.Debug.Log("TimeDelayed: " + TimeDelayed);
+                    //UnityEngine.Debug.Log("TimeDelayed: " + TimeDelayed);
                     age = Fix.Zero;
                     if (platform.CompareTag("ResizablePlatform"))
                     {

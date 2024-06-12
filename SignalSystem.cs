@@ -1,4 +1,6 @@
 ﻿using BoplFixedMath;
+using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -59,7 +61,7 @@ namespace MapMaker
             LogicGatesToAlwaysUpdate.Add(gate);
         }
         //returns the id of the first LogicOutput with that UUid id. assumes the List is sorted
-        public static int BinarySearchLogicOutputSignalId(ulong UUid)
+        public static int BinarySearchLogicOutputSignalId(int UUid)
         {
             UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
             var LowerBound = 0;
@@ -100,7 +102,7 @@ namespace MapMaker
 
         }
         //returns the id of the first LogicInput with that UUid id. assumes the List is sorted
-        public static int BinarySearchLogicInputSignalId(ulong UUid)
+        public static int BinarySearchLogicInputSignalId(int UUid)
         {
             UnityEngine.Debug.Log("BinarySearchLogicInputSignalId");
             var min = 0;
@@ -142,7 +144,7 @@ namespace MapMaker
 
         }
         //returns the id of the first LogicOutput with that UUid id. assumes the List is sorted
-        public static int BinarySearchLogicTriggerOutputSignalId(ulong UUid)
+        public static int BinarySearchLogicTriggerOutputSignalId(int UUid)
         {
             UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
             var LowerBound = 0;
@@ -182,7 +184,7 @@ namespace MapMaker
             return 0;
 
         }
-        public static List<LogicInput> GetLogicInputs(ulong UUid)
+        public static List<LogicInput> GetLogicInputs(int UUid)
         {
             //if there are no LogicInputs return a empty list
             if (LogicInputs.Count == 0)
@@ -210,7 +212,7 @@ namespace MapMaker
             }
             return inputs;
         }
-        public static List<LogicOutput> GetLogicOutputs(ulong UUid)
+        public static List<LogicOutput> GetLogicOutputs(int UUid)
         {
             var allOutputs = new List<LogicOutput>();
             allOutputs.AddRange(LogicOutputs);
@@ -241,9 +243,22 @@ namespace MapMaker
         }
         public void SetUpDicts()
         {
+            //this should attach all inputs to all corsponding outputs in one go.
             var allOutputs = new List<LogicOutput>();
             allOutputs.AddRange(LogicOutputs);
             allOutputs.AddRange(LogicStartingOutputs);
+            List<int> UUids = new List<int>();
+            foreach (var output in allOutputs)
+            {
+                //if it already contanes the UUid then there are outputs with the same UUid witch isnt allowed.
+                if (UUids.Contains(output.UUid))
+                {
+                    throw new InvalidOperationException("Logic Output UUids must be unique! not generating the logic connectsons!");
+                }
+                UUids.Add(output.UUid);
+            }
+            Graph graph = new Graph(UUids.Count);
+
             foreach (var output in allOutputs)
             {
                 UnityEngine.Debug.Log($"allOutputs has length of {allOutputs.Count}");
@@ -259,15 +274,19 @@ namespace MapMaker
                     UnityEngine.Debug.Log($"added output to inputs");
                     //they have the same UUid so lets just get them both out of the way in one fail swoop.
                     output.outputs.Add(input);
-                    UnityEngine.Debug.Log($"added input to outputs");
-                    //this should attact all inputs to all corsponding outputs in one go so we shouldnt need this. keeping it here just in case though.
-                    /*
-                    foreach (var output2 in GetLogicOutputs(input.UUid))
+                    //if its not a dealy then add it to the graph to check for cycles
+                    if ((input.gate != null && input.gate.GetComponent<SignalDelay>() == null && input.gate.OutputSignals.Count != 0) && (output.gate != null && output.gate.GetComponent<SignalDelay>() == null))
                     {
-                        SetUpDictsRecusive(output2);
+                        graph.addEdge(output.UUid, input.gate.OutputSignals[0].UUid);
                     }
-                    */
+
+                    UnityEngine.Debug.Log($"added input to outputs");
+
                 }
+            }
+            if (graph.isCyclic())
+            {
+                throw new InvalidOperationException("Logic Gate Loops Must Have a Delay In Them!");
             }
             Updater.RegisterUpdatable(this);
         }
@@ -293,7 +312,7 @@ namespace MapMaker
             //triggers dont have gates
             if (output.gate)
             {
-                //if this isnt a first call then on line 315 we will have already done this
+                //if this isnt a first call then we will have already done this
                 if (FirstCall)
                 {
                     output.gate.Logic(SimDeltaTime);
@@ -310,7 +329,7 @@ namespace MapMaker
             {
                 return;
             }
-            UnityEngine.Debug.Log($"CallAllLogic");
+            //UnityEngine.Debug.Log($"CallAllLogic");
             for (int i = 0; i < output.outputs.Count; i++)
             {
                 //UnityEngine.Debug.Log($"output.outputs is of length {output.outputs.Count}");

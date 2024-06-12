@@ -12,7 +12,7 @@ namespace MapMaker
         {
             inputs = new List<LogicOutput>();
         }
-        public ulong UUid;
+        public int UUid;
         //must be set before registering your gate
         public LogicGate gate;
         public bool IsOn;
