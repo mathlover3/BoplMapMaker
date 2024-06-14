@@ -15,6 +15,8 @@ namespace MapMaker
         public void Register()
         {
             SignalSystem.RegisterLogicGate(this);
+            //should update its connectson line so it always points to the platform
+            SignalSystem.RegisterInputThatUpdatesConnectson(InputSignals[0]);
         }
         public bool IsOn()
         {

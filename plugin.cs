@@ -693,6 +693,8 @@ namespace MapMaker
                     SignalSystem.LogicOutputs = new List<LogicOutput>();
                     SignalSystem.LogicStartingOutputs = new List<LogicOutput>();
                     SignalSystem.LogicGatesToAlwaysUpdate = new List<LogicGate>();
+                    SignalSystem.LineRenderers = new();
+                    SignalSystem.LogicInputsThatAlwaysUpdateThereLineConnectsons = new();
                 }
                 catch (Exception ex)
                 {
@@ -703,10 +705,6 @@ namespace MapMaker
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
                 var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
-
-                
-                
-                
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")

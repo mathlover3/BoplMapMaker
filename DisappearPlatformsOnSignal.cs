@@ -36,6 +36,8 @@ namespace MapMaker
             SignalSystem.RegisterLogicGate(this);
             //must always run so that it can do its logic
             SignalSystem.RegisterGateThatAlwaysRuns(this);
+            //should update its connectson line so it always points to the platform
+            SignalSystem.RegisterInputThatUpdatesConnectson(InputSignals[0]);
         }
         public bool IsOn()
         {

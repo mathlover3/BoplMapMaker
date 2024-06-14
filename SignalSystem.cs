@@ -18,7 +18,9 @@ namespace MapMaker
         //if true it shows all of the logic gates and there connectsons
         public static bool LogicDebugMode = true;
         //this is for rendering the connectsons.
-        public static Dictionary<LogicInput, LineRenderer> LineRenderers = new(); 
+        public static Dictionary<LogicInput, LineRenderer> LineRenderers = new();
+        //these are for the connectsons connected to platforms.
+        public static List<LogicInput> LogicInputsThatAlwaysUpdateThereLineConnectsons = new();
         //registers the trigger and returns the id
         public static void RegisterLogicGate(LogicGate LogicGate)
         {
@@ -64,6 +66,10 @@ namespace MapMaker
         public static void RegisterGateThatAlwaysRuns(LogicGate gate)
         {
             LogicGatesToAlwaysUpdate.Add(gate);
+        }
+        public static void RegisterInputThatUpdatesConnectson(LogicInput input)
+        {
+            LogicInputsThatAlwaysUpdateThereLineConnectsons.Add(input);
         }
         //returns the id of the first LogicOutput with that UUid id. assumes the List is sorted
         public static int BinarySearchLogicOutputSignalId(int UUid)
@@ -378,6 +384,12 @@ namespace MapMaker
             {
                 gate.Logic(SimDeltaTime);
             }
+            foreach(var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
+            {
+                var Line = LineRenderers[input];
+                var output = input.inputs[0];
+                SetLinePosForLine(Line, input, output);
+            }
         }
         private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
         {
@@ -396,29 +408,25 @@ namespace MapMaker
                     return;
                 }
             }
-
+            //if the state hasnt changed dont keep going wasting time.
+            if (output.IsOn == output.WasOnLastTick)
+            {
+                return;
+            }
             //for all of the inputs the output outputs to...
             for (int i = 0; i < output.outputs.Count; i++)
             {
+                //if set the inputs IsOn to the output that is inputing into it and then run the Logic
                 LogicInput input = output.outputs[i];
+                input.IsOn = output.IsOn;
+                //update the line color
                 var Line = LineRenderers[input];
-                //reposison the lines if they are connected to a DisaperPlatformsOnSignal or a MovingPlatformSignalStuff
-                if (input.gate.GetComponent<DisappearPlatformsOnSignal>() != null || input.gate.GetComponent<MovingPlatformSignalStuff>() != null)
-                {
-                    SetLinePosForLine(Line, input, output);
-                }
-                //if the state hasnt changed dont keep going wasting time.
-                if (output.IsOn == output.WasOnLastTick)
-                {
-                    return;
-                }
                 if (input.IsOn)
                 {
                     Line.endColor = (Line.startColor = Color.green);
                 }
                 else Line.endColor = (Line.startColor = Color.red);
-                //if set the inputs IsOn to the output that is inputing into it and then run the Logic
-                input.IsOn = output.IsOn;
+                //run the gates logic
                 input.gate.Logic(SimDeltaTime);
                 //for all of this gates outputs keep looping recusivly
                 for (int j = 0; j < input.gate.OutputSignals.Count; j++)
@@ -434,13 +442,10 @@ namespace MapMaker
             var PivotVec2 = (Vec2)pivot;
             //offset the point by the pivot so the pivot is at 0,0
             PointVec2 -= PivotVec2;
-            Debug.Log($"PointVec2 is now {PointVec2}");
             //multiply the Point by the complex number representing the rotatson of the angle
             PointVec2 = Vec2.ComplexMul(PointVec2, new Vec2((Fix)angle * (Fix)PhysTools.DegreesToRadians));
-            Debug.Log($"PointVec2 is now {PointVec2} after rotating it");
             //offset it back
             PointVec2 += PivotVec2;
-            Debug.Log($"PointVec2 is now {PointVec2} after adding back the pivot");
             return (Vector3)PointVec2;
         }
     }
