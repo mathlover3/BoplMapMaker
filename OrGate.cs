@@ -33,7 +33,6 @@ namespace MapMaker
             }
             output.WasOnLastTick = output.IsOn;
             output.IsOn = CurrentValue;
-            UnityEngine.Debug.Log($"Or gate. IsOn: {output.IsOn}, WasOn: {output.WasOnLastTick}");
 
         }
     }

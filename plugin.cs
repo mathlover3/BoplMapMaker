@@ -631,7 +631,8 @@ namespace MapMaker
                     // Add the components to the GameObject
                     DisappearGameObject.AddComponent<FixTransform>();
                     DisappearPlatformsOnSignalPrefab = DisappearGameObject.AddComponent<DisappearPlatformsOnSignal>();
-
+                    //reset this at the begiening of every round.
+                    DisappearPlatformsOnSignal.DisappearPlatformsOnSignals = new();
                     // Create a new GameObject
                     GameObject AndGateObject = new GameObject("AndGateObject");
 
@@ -721,7 +722,7 @@ namespace MapMaker
                 CreateSignalDelay(2, 5, Fix.Zero, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
                 CreateSignalDelay(3, 4, Fix.Zero, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 AddMovingPlatformSignalStuff(platform, 2);
-                CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, Fix.One, false, false, false);
+                CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false, false, false);
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
@@ -1185,6 +1186,40 @@ namespace MapMaker
             }
             //no MovingPlatformSignalStuff comp found
             return true;
+        }
+    }
+    [HarmonyPatch(typeof(QuantumTunnel))]
+    public class QuantumTunnelPatches
+    {
+        [HarmonyPatch("UpdateSim")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug(QuantumTunnel __instance)
+        {
+            //for all of the DisappearPlatformsOnSignals check if the platform is the same as the Victim
+            foreach (var Disappear in DisappearPlatformsOnSignal.DisappearPlatformsOnSignals)
+            {
+                var VictimId = __instance.Victim.GetInstanceID();
+                var DissappearId = Disappear.platform.GetInstanceID();
+                if (VictimId == DissappearId)
+                {
+                    //if we are effecting the same platform and the Disappear platform is going to make the platform disapear when we are done
+                    //then dont have the reapearing animatson
+                    //delay it by the time it takes to do the animatsons so we dont stop mid animatson
+                    float time = __instance.ScaleAnim.keys[__instance.ScaleAnim.keys.Length - 1].time;
+                    float time2 = __instance.OpacityAnim.keys[__instance.OpacityAnim.keys.Length - 1].time;
+                    var ExstraDelay = Mathf.Max(time, time2);
+                    //the __instance.IsInitialized is so that it works fine if delay is 0/less then ExstraDelay
+                    //&& (DisappearPlatformsOnSignal.HasBeenInit[__instance])
+                    if (Disappear.TimeDelayed > Disappear.delay - (Fix)ExstraDelay && (__instance.IsInitialized || __instance.age > __instance.LifeSpan))
+                    {
+                        var spriteRen = __instance.GetComponent<SpriteRenderer>();
+                        Debug.Log($"__instance.IsInitialized is {__instance.IsInitialized}");
+                        __instance.transform.localScale = new Vector3(__instance.originalScale.x, __instance.originalScale.y, __instance.originalScale.z);
+                        __instance.spriteRen.color = new UnityEngine.Color(spriteRen.color.r, spriteRen.color.g, spriteRen.color.b, 0);
+                        __instance.Victim.SetActive(false);
+                    }
+                }
+            }
         }
     }
 }

@@ -17,7 +17,6 @@ namespace MapMaker
         {
             OutputSignals[0].WasOnLastTick = OutputSignals[0].IsOn;
             OutputSignals[0].IsOn = !InputSignals[0].IsOn;
-            UnityEngine.Debug.Log($"Not gate. IsOn: {OutputSignals[0].IsOn}, WasOn: {OutputSignals[0].WasOnLastTick}");
         }
     }
 }

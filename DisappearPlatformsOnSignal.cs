@@ -11,6 +11,8 @@ namespace MapMaker
 {
     public class DisappearPlatformsOnSignal : LogicGate
     {
+        //used so that the blink gun knows when its about to reapear if it should do its reapear animatson or not.
+        public static List<DisappearPlatformsOnSignal> DisappearPlatformsOnSignals = new();
         public GameObject platform = null;
         public bool SignalIsInverse = false;
         //if true it only is gone when the signal/inverse signal is on and if its not it imeaditly comes back. if false it takes SecondsToReapper seconds to reapear.
@@ -26,13 +28,16 @@ namespace MapMaker
         public static Material onHitWallMaterail;
         public static QuantumTunnel QuantumTunnelPrefab;
         public QuantumTunnel currentTunnel = null;
-        private Fix TimeDelayed;
+        //public so that the blink patch can acsess it
+        public Fix TimeDelayed;
         private Fix age;
         private bool delaying = false;
         private Material originalMaterial;
         private bool update1 = true;
+        private bool ShouldBeActive = true;
         public void Register()
         {
+            DisappearPlatformsOnSignals.Add(this);
             SignalSystem.RegisterLogicGate(this);
             //must always run so that it can do its logic
             SignalSystem.RegisterGateThatAlwaysRuns(this);
@@ -55,39 +60,51 @@ namespace MapMaker
                     originalMaterial = platform.GetComponent<SpriteRenderer>().material;
                     update1 = false;
                 }
+                QuantumTunnel quantumTunnel = null;
+                for (int i = 0; i < ShootQuantum.spawnedQuantumTunnels.Count; i++)
+                {
+                    if (ShootQuantum.spawnedQuantumTunnels[i].Victim.GetInstanceID() == platform.GetInstanceID())
+                    {
+                        quantumTunnel = ShootQuantum.spawnedQuantumTunnels[i];
+                    }
+                }
                 var IsOnReal = (IsOn() && !SignalIsInverse || !IsOn() && SignalIsInverse);
-                //if its being activated and its not being delayed already and its not already disapered
-                if (IsOnReal && !delaying && platform.activeInHierarchy)
+                //if its being activated and its not being delayed already and its not already disapered by us
+                if (IsOnReal && !delaying && ShouldBeActive)
                 {
                     delaying = true;
                 }
                 //if its time to reapper
-                if (age - delay > SecondsToReapper && OnlyDisappearWhenSignalTurnsOn)
+                if (age - delay > SecondsToReapper && OnlyDisappearWhenSignalTurnsOn && !quantumTunnel)
                 {
+                    ShouldBeActive = true;
                     platform.SetActive(true);
                     TimeDelayed = Fix.Zero;
                     age = Fix.Zero;
                     platform.GetComponent<SpriteRenderer>().material = originalMaterial;
                 }
                 //if its time to reapper
-                if (age - delay > Fix.Zero && DisappearOnlyWhenSignal && OnlyDisappearWhenSignalTurnsOn)
+                if (age - delay > Fix.Zero && DisappearOnlyWhenSignal && OnlyDisappearWhenSignalTurnsOn && !quantumTunnel)
                 {
+                    ShouldBeActive = true;
                     platform.SetActive(true);
                     TimeDelayed = Fix.Zero;
                     age = Fix.Zero;
                     platform.GetComponent<SpriteRenderer>().material = originalMaterial;
                 }
                 //if its time to reapper
-                if (age > SecondsToReapper && !OnlyDisappearWhenSignalTurnsOn)
+                if (age > SecondsToReapper && !OnlyDisappearWhenSignalTurnsOn && !quantumTunnel)
                 {
+                    ShouldBeActive = true;
                     platform.SetActive(true);
                     TimeDelayed = Fix.Zero;
                     age = Fix.Zero;
                     platform.GetComponent<SpriteRenderer>().material = originalMaterial;
                 }
                 //if its time to reapper
-                if (age > Fix.Zero && DisappearOnlyWhenSignal && !OnlyDisappearWhenSignalTurnsOn)
+                if (age > Fix.Zero && DisappearOnlyWhenSignal && !OnlyDisappearWhenSignalTurnsOn && !quantumTunnel)
                 {
+                    ShouldBeActive = true;
                     platform.SetActive(true);
                     TimeDelayed = Fix.Zero;
                     age = Fix.Zero;
@@ -124,8 +141,8 @@ namespace MapMaker
                 }
 
 
-                //if the delay is done
-                if (TimeDelayed > delay)
+                //if the delay is done and theres not a blink ray removing it.
+                if (TimeDelayed > delay && !quantumTunnel)
                 {
                     //if this isnt a OnlyDisappearWhenSignalTurnsOn one.
                     if (!OnlyDisappearWhenSignalTurnsOn)
@@ -136,6 +153,7 @@ namespace MapMaker
                             UnityEngine.Debug.Log("GAME OBJECT IS NULL!");
                         }
                         delaying = false;
+                        ShouldBeActive = false;
                         platform.SetActive(false);
                     }
                 }
