@@ -695,6 +695,7 @@ namespace MapMaker
                     SignalSystem.LogicGatesToAlwaysUpdate = new List<LogicGate>();
                     SignalSystem.LineRenderers = new();
                     SignalSystem.LogicInputsThatAlwaysUpdateThereLineConnectsons = new();
+                    SignalSystem.FirstUpdateOfTheRound = true;
                 }
                 catch (Exception ex)
                 {

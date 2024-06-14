@@ -21,6 +21,8 @@ namespace MapMaker
         public static Dictionary<LogicInput, LineRenderer> LineRenderers = new();
         //these are for the connectsons connected to platforms.
         public static List<LogicInput> LogicInputsThatAlwaysUpdateThereLineConnectsons = new();
+        //is it the first update of the round?
+        public static bool FirstUpdateOfTheRound = true;
         //registers the trigger and returns the id
         public static void RegisterLogicGate(LogicGate LogicGate)
         {
@@ -380,6 +382,10 @@ namespace MapMaker
                 LogicOutput output = LogicStartingOutputs[i];
                 CallAllLogic(output, SimDeltaTime, true);
             }
+            if (FirstUpdateOfTheRound)
+            {
+                FirstUpdateOfTheRound = false;
+            }
             foreach (var gate in LogicGatesToAlwaysUpdate)
             {
                 gate.Logic(SimDeltaTime);
@@ -390,13 +396,14 @@ namespace MapMaker
                 var output = input.inputs[0];
                 SetLinePosForLine(Line, input, output);
             }
+            
         }
         private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
         {
             //triggers dont have gates
             if (output.gate)
             {
-                //if this isnt a first call then we will have already done this
+                //if this isnt a first call then we will have already done this 
                 if (FirstCall)
                 {
                     output.gate.Logic(SimDeltaTime);
@@ -408,8 +415,8 @@ namespace MapMaker
                     return;
                 }
             }
-            //if the state hasnt changed dont keep going wasting time.
-            if (output.IsOn == output.WasOnLastTick)
+            //if the state hasnt changed dont keep going wasting time. unless its the first update in witch case we want everything to update.
+            if (output.IsOn == output.WasOnLastTick && !FirstUpdateOfTheRound)
             {
                 return;
             }
