@@ -62,7 +62,7 @@ namespace MapMaker
                     delaying = true;
                 }
                 //if its time to reapper
-                if (age - delay > SecondsToReapper)
+                if (age - delay > SecondsToReapper && OnlyDisappearWhenSignalTurnsOn)
                 {
                     platform.SetActive(true);
                     TimeDelayed = Fix.Zero;
@@ -70,7 +70,23 @@ namespace MapMaker
                     platform.GetComponent<SpriteRenderer>().material = originalMaterial;
                 }
                 //if its time to reapper
-                if (age - delay > Fix.Zero && DisappearOnlyWhenSignal)
+                if (age - delay > Fix.Zero && DisappearOnlyWhenSignal && OnlyDisappearWhenSignalTurnsOn)
+                {
+                    platform.SetActive(true);
+                    TimeDelayed = Fix.Zero;
+                    age = Fix.Zero;
+                    platform.GetComponent<SpriteRenderer>().material = originalMaterial;
+                }
+                //if its time to reapper
+                if (age > SecondsToReapper && !OnlyDisappearWhenSignalTurnsOn)
+                {
+                    platform.SetActive(true);
+                    TimeDelayed = Fix.Zero;
+                    age = Fix.Zero;
+                    platform.GetComponent<SpriteRenderer>().material = originalMaterial;
+                }
+                //if its time to reapper
+                if (age > Fix.Zero && DisappearOnlyWhenSignal && !OnlyDisappearWhenSignalTurnsOn)
                 {
                     platform.SetActive(true);
                     TimeDelayed = Fix.Zero;
