@@ -24,6 +24,7 @@ namespace MapMaker
             UnityEngine.Debug.Log("Trigger Awake");
             if (gameObject.name != "TriggerObject")
             {
+                LogicOutput.Owner = gameObject;
                 //i have no clue why but there are 2 if i dont have this check causing a LOT of errors.
                 if (GetComponent<LineRenderer>() == null)
                 {
@@ -120,10 +121,6 @@ namespace MapMaker
                     lineRenderer.SetPosition(2, vector5);
                     lineRenderer.SetPosition(3, vector4);
                     lineRenderer.SetPosition(4, vector2);
-                    Gizmos.DrawLine(vector2, vector3);
-                    Gizmos.DrawLine(vector3, vector5);
-                    Gizmos.DrawLine(vector5, vector4);
-                    Gizmos.DrawLine(vector4, vector2);
                 }
                 catch (Exception ex)
                 {

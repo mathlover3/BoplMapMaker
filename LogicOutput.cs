@@ -16,6 +16,7 @@ namespace MapMaker
         public int UUid;
         //must be set before registering your gate
         public LogicGate gate;
+        public GameObject Owner;
         public bool IsOn;
         public bool WasOnLastTick;
         //these are connected to the output of this gate

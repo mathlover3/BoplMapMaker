@@ -622,7 +622,7 @@ namespace MapMaker
                     // Create a new GameObject
                     GameObject spawnerGameObject = new GameObject("SpawnerObject");
 
-                    // Add the FixTransform and Spawner components to the GameObject
+                    // Add the components to the GameObject
                     spawnerGameObject.AddComponent<FixTransform>();
                     SpawnerPrefab = spawnerGameObject.AddComponent<Spawner>();
                     // Create a new GameObject
@@ -635,31 +635,52 @@ namespace MapMaker
                     // Create a new GameObject
                     GameObject AndGateObject = new GameObject("AndGateObject");
 
-                    // Add the FixTransform and Spawner components to the GameObject
+                    // Add the components to the GameObject
                     AndGateObject.AddComponent<FixTransform>();
+                    //put it offscreen
+                    AndGateObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    AndGateObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     andGatePrefab = AndGateObject.AddComponent<AndGate>();
+                    var AndGateRender = AndGateObject.AddComponent<SpriteRenderer>();
+                    Debug.Log(MyAssetBundle.LoadAsset("assets/assetbundleswanted/andgate.prefab"));
+                    var AndGateSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/andgate.prefab");
+                    AndGateRender.sprite = AndGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
                     GameObject SignalDelayObject = new GameObject("SignalDelayObject");
-
-                    // Add the FixTransform and Spawner components to the GameObject
+                    // Add the components to the GameObject
                     SignalDelayObject.AddComponent<FixTransform>();
+                    //put it offscreen
+                    SignalDelayObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    SignalDelayObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     SignalDelayPrefab = SignalDelayObject.AddComponent<SignalDelay>();
+                    var SignalDelaySpriteRender = SignalDelayObject.AddComponent<SpriteRenderer>();
+                    var SignalDelaySpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/delaygate.prefab");
+                    SignalDelaySpriteRender.sprite = SignalDelaySpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
                     GameObject OrGateObject = new GameObject("OrGateObject");
-
                     // Add the FixTransform and Spawner components to the GameObject
                     OrGateObject.AddComponent<FixTransform>();
+                    //put it offscreen
+                    OrGateObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    OrGateObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     OrGatePrefab = OrGateObject.AddComponent<OrGate>();
+                    var OrGateSpriteRender = OrGateObject.AddComponent<SpriteRenderer>();
+                    var OrGateSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/orgate.prefab");
+                    OrGateSpriteRender.sprite = OrGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
                     GameObject NotGateObject = new GameObject("NotGateObject");
-
                     // Add the FixTransform and Spawner components to the GameObject
                     NotGateObject.AddComponent<FixTransform>();
+                    //put it offscreen
+                    NotGateObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    NotGateObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     NotGatePrefab = NotGateObject.AddComponent<NotGate>();
-
+                    var NotGateSpriteRender = NotGateObject.AddComponent<SpriteRenderer>();
+                    var NotGateSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/notgate.prefab");
+                    NotGateSpriteRender.sprite = NotGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
                     GameObject SignalSystemObject = new GameObject("SignalSystemObject");
@@ -693,18 +714,18 @@ namespace MapMaker
                 CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
                 CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
                 int[] UUids = { 0, 4 };
-                CreateOrGate(UUids, 6, new Vec2(Fix.Zero, Fix.Zero));
-                CreateNotGate(6, 2, new Vec2(Fix.Zero, Fix.Zero));
+                CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
+                CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
                 int[] UUids2 = { 1, 5 };
-                CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, Fix.Zero));
-                CreateNotGate(7, 3, new Vec2(Fix.Zero, Fix.Zero));
-                CreateSignalDelay(2, 5, Fix.Zero, Vec2.zero);
-                CreateSignalDelay(3, 4, Fix.Zero, Vec2.zero);
+                CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
+                CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
+                CreateSignalDelay(2, 5, Fix.Zero, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
+                CreateSignalDelay(3, 4, Fix.Zero, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 AddMovingPlatformSignalStuff(platform, 2);
                 CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, Fix.One, false, false, false);
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
-
+                Debug.Log("signal stuff is done!");
                 //TESTING END!
                 CurrentMapId = GetMapIdFromSceneName(scene.name);
                 var DoWeHaveMapWithMapId = CheckIfWeHaveCustomMapWithMapId();
@@ -897,16 +918,17 @@ namespace MapMaker
             }
             return Floats;
         }
-        public static Spawner CreateSpawner(Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity,  Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
+        public static Spawner CreateSpawner(Vec2 Pos, Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity, Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
         {
-            var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, new Vec2(Fix.Zero, (Fix)30));
+            var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, Pos);
             spawner.spawnType = spawnType;
             spawner.UseSignal = UseSignal;
             var input = new LogicInput
             {
                 UUid = Signal,
                 gate = spawner,
-                IsOn = false
+                IsOn = false,
+                Owner = spawner.gameObject
             };
             spawner.InputSignals.Add(input);
             spawner.IsTriggerSignal = IsTriggerSignal;
@@ -921,8 +943,14 @@ namespace MapMaker
         {
             var trigger = FixTransform.InstantiateFixed<Trigger>(TriggerPrefab, new Vec2(Fix.Zero, (Fix)30));
             trigger.layersToDetect = LayersToDetect;
-            trigger.LogicOutput.UUid = Signal;
-            trigger.LogicOutput.IsOn = false;
+            var output = new LogicOutput
+            {
+                UUid = Signal,
+                gate = null,
+                IsOn = false,
+                Owner = trigger.gameObject
+            };
+            trigger.LogicOutput = output;
             trigger.SetPos(Pos);
             trigger.SetExtents(Extents);
             trigger.Register();
@@ -930,13 +958,14 @@ namespace MapMaker
         }
         public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, int Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
         {
-            var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, new Vec2(Fix.Zero, Fix.Zero));
+            var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, (Vec2)platform.transform.position);
             Disappear.platform = platform;
             var input = new LogicInput
             {
                 UUid = Signal,
                 gate = Disappear,
-                IsOn = false
+                IsOn = false,
+                Owner = Disappear.gameObject
             };
             Disappear.InputSignals.Add(input);
             Disappear.SignalIsInverse = SignalIsInverse;
@@ -955,7 +984,8 @@ namespace MapMaker
             {
                 UUid = Signal,
                 gate = SignalStuff,
-                IsOn = false
+                IsOn = false,
+                Owner = SignalStuff.gameObject
             };
             SignalStuff.InputSignals.Add(input);
             SignalStuff.SignalIsInverted = SignalIsInverted;
@@ -963,9 +993,10 @@ namespace MapMaker
             return SignalStuff;
 
         }
-        public static AndGate CreateAndGate(int[] InputUUids, int OutputUUid, Vec2 pos)
+        public static AndGate CreateAndGate(int[] InputUUids, int OutputUUid, Vec2 pos, Fix rot)
         {
-            var And = FixTransform.InstantiateFixed<AndGate>(andGatePrefab, pos);
+            
+            var And = FixTransform.InstantiateFixed<AndGate>(andGatePrefab, pos, (Fix)ConvertToRadians((double)rot));
             var LogicInputs = new List<LogicInput>();
             foreach (var InputSignal in InputUUids)
             {
@@ -973,7 +1004,8 @@ namespace MapMaker
                 {
                     UUid = InputSignal,
                     gate = And,
-                    IsOn = false
+                    IsOn = false,
+                    Owner = And.gameObject
                 };
                 LogicInputs.Add(input);
             }
@@ -981,27 +1013,30 @@ namespace MapMaker
             {
                 UUid = OutputUUid,
                 gate = And,
-                IsOn = false
+                IsOn = false,
+                Owner = And.gameObject
             };
             And.InputSignals.AddRange(LogicInputs);
             And.OutputSignals.Add(output);
             And.Register();
             return And;
         }
-        public static SignalDelay CreateSignalDelay(int InputSignal, int OutputSignal, Fix delay, Vec2 pos)
+        public static SignalDelay CreateSignalDelay(int InputSignal, int OutputSignal, Fix delay, Vec2 pos, Fix rot)
         {
-            var Delay = FixTransform.InstantiateFixed<SignalDelay>(SignalDelayPrefab, pos);
+            var Delay = FixTransform.InstantiateFixed<SignalDelay>(SignalDelayPrefab, pos, (Fix)ConvertToRadians((double)rot));
             var input = new LogicInput
             {
                 UUid = InputSignal,
                 gate = Delay,
-                IsOn = false
+                IsOn = false,
+                Owner = Delay.gameObject
             };
             var output = new LogicOutput
             {
                 UUid = OutputSignal,
                 gate = Delay,
-                IsOn = false
+                IsOn = false,
+                Owner = Delay.gameObject
             };
             Delay.delay = delay;
             Delay.InputSignals.Add(input);
@@ -1010,9 +1045,9 @@ namespace MapMaker
             return Delay;
 
         }
-        public static OrGate CreateOrGate(int[] InputUUids, int OutputUUid, Vec2 pos) 
+        public static OrGate CreateOrGate(int[] InputUUids, int OutputUUid, Vec2 pos, Fix rot) 
         {
-            var Or = FixTransform.InstantiateFixed<OrGate>(OrGatePrefab, pos);
+            var Or = FixTransform.InstantiateFixed<OrGate>(OrGatePrefab, pos, (Fix)ConvertToRadians((double)rot));
             var LogicInputs = new List<LogicInput>();
             foreach (var InputSignal in InputUUids)
             {
@@ -1020,7 +1055,8 @@ namespace MapMaker
                 {
                     UUid = InputSignal,
                     gate = Or,
-                    IsOn = false
+                    IsOn = false,
+                    Owner = Or.gameObject
                 };
                 LogicInputs.Add(input);
             }
@@ -1028,27 +1064,30 @@ namespace MapMaker
             {
                 UUid = OutputUUid,
                 gate = Or,
-                IsOn = false
+                IsOn = false,
+                Owner = Or.gameObject
             };
             Or.InputSignals.AddRange(LogicInputs);
             Or.OutputSignals.Add(output);
             Or.Register();
             return Or;
         }
-        public static NotGate CreateNotGate(int InputUUid, int OutputUUid, Vec2 pos)
+        public static NotGate CreateNotGate(int InputUUid, int OutputUUid, Vec2 pos, Fix rot)
         {
-            var Not = FixTransform.InstantiateFixed<NotGate>(NotGatePrefab, pos);
+            var Not = FixTransform.InstantiateFixed<NotGate>(NotGatePrefab, pos, (Fix)ConvertToRadians((double)rot));
             var input = new LogicInput
             {
                 UUid = InputUUid,
                 gate = Not,
-                IsOn = false
+                IsOn = false,
+                Owner = Not.gameObject
             };
             var output = new LogicOutput
             {
                 UUid = OutputUUid,
                 gate = Not,
-                IsOn = false
+                IsOn = false,
+                Owner = Not.gameObject
             };
             Not.InputSignals.Add(input);
             Not.OutputSignals.Add(output);

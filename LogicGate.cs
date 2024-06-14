@@ -9,7 +9,7 @@ using static UnityEngine.UIElements.UIRAtlasManager;
 
 namespace MapMaker
 {
-    public abstract class LogicGate: MonoBehaviour
+    public abstract class LogicGate : MonoBehaviour
     {
         public readonly List<LogicInput> InputSignals = new();
         public readonly List<LogicOutput> OutputSignals = new();

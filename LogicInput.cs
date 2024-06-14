@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace MapMaker
 {
@@ -15,6 +16,7 @@ namespace MapMaker
         public int UUid;
         //must be set before registering your gate
         public LogicGate gate;
+        public GameObject Owner;
         public bool IsOn;
         //these are the inputs to this input
 
