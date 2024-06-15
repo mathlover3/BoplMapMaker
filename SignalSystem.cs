@@ -317,7 +317,7 @@ namespace MapMaker
             var OutputOwner = output.Owner;
             //input gate checking.
             //if they should just be in the middle
-            if (InputOwner.GetComponent<Trigger>() != null || InputOwner.GetComponent<Spawner>() != null || InputOwner.GetComponent<DisappearPlatformsOnSignal>() != null || InputOwner.GetComponent<MovingPlatformSignalStuff>() != null)
+            if (InputOwner.GetComponent<Trigger>() != null || InputOwner.GetComponent<Spawner>() != null || InputOwner.GetComponent<DisappearPlatformsOnSignal>() != null || InputOwner.GetComponent<MovingPlatformSignalStuff>() != null || InputOwner.GetComponent<ShootRay>() != null)
             {
                 lineRenderer.SetPosition(0, (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position);
                 //if its a DisappearPlatformsOnSignal then use the platforms posison instead

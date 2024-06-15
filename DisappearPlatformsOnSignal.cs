@@ -15,14 +15,9 @@ namespace MapMaker
         public static List<DisappearPlatformsOnSignal> DisappearPlatformsOnSignals = new();
         public GameObject platform = null;
         public bool SignalIsInverse = false;
-        //if true it only is gone when the signal/inverse signal is on and if its not it imeaditly comes back. if false it takes SecondsToReapper seconds to reapear.
-        public bool DisappearOnlyWhenSignal = true;
         public Fix SecondsToReapper = Fix.One;
         // delay before it disapers. gives a little bit of a warning if you want to.
         public Fix delay = Fix.One;
-        //if true it only disapers when the signal first turns on. then after SecondsToReapper seconds it reapers even if the signal is still on.
-        //if you try to activate the signal agien while its still reappering then it doesnt change the timer.
-        public bool OnlyDisappearWhenSignalTurnsOn = false;
         //prefabs set in awake in the plugin.cs
         public static Material onHitResizableWallMaterail;
         public static Material onHitWallMaterail;
@@ -75,7 +70,7 @@ namespace MapMaker
                     delaying = true;
                 }
                 //if its time to reapper
-                if (age - delay > SecondsToReapper && OnlyDisappearWhenSignalTurnsOn && !quantumTunnel)
+                if (age - delay > SecondsToReapper && !quantumTunnel)
                 {
                     ShouldBeActive = true;
                     platform.SetActive(true);
@@ -84,7 +79,7 @@ namespace MapMaker
                     platform.GetComponent<SpriteRenderer>().material = originalMaterial;
                 }
                 //if its time to reapper
-                if (age - delay > Fix.Zero && DisappearOnlyWhenSignal && OnlyDisappearWhenSignalTurnsOn && !quantumTunnel)
+                if (age > SecondsToReapper && !quantumTunnel)
                 {
                     ShouldBeActive = true;
                     platform.SetActive(true);
@@ -92,25 +87,7 @@ namespace MapMaker
                     age = Fix.Zero;
                     platform.GetComponent<SpriteRenderer>().material = originalMaterial;
                 }
-                //if its time to reapper
-                if (age > SecondsToReapper && !OnlyDisappearWhenSignalTurnsOn && !quantumTunnel)
-                {
-                    ShouldBeActive = true;
-                    platform.SetActive(true);
-                    TimeDelayed = Fix.Zero;
-                    age = Fix.Zero;
-                    platform.GetComponent<SpriteRenderer>().material = originalMaterial;
-                }
-                //if its time to reapper
-                if (age > Fix.Zero && DisappearOnlyWhenSignal && !OnlyDisappearWhenSignalTurnsOn && !quantumTunnel)
-                {
-                    ShouldBeActive = true;
-                    platform.SetActive(true);
-                    TimeDelayed = Fix.Zero;
-                    age = Fix.Zero;
-                    platform.GetComponent<SpriteRenderer>().material = originalMaterial;
-                }
-                if (!IsOnReal || OnlyDisappearWhenSignalTurnsOn)
+                if (!IsOnReal)
                 {
                     age += GameTime.PlayerTimeScale * SimDeltaTime;
                 }
@@ -144,18 +121,14 @@ namespace MapMaker
                 //if the delay is done and theres not a blink ray removing it.
                 if (TimeDelayed > delay && !quantumTunnel)
                 {
-                    //if this isnt a OnlyDisappearWhenSignalTurnsOn one.
-                    if (!OnlyDisappearWhenSignalTurnsOn)
+                    //UnityEngine.Debug.Log("making platform disaper.");
+                    if (!platform)
                     {
-                        //UnityEngine.Debug.Log("making platform disaper.");
-                        if (!platform)
-                        {
-                            UnityEngine.Debug.Log("GAME OBJECT IS NULL!");
-                        }
-                        delaying = false;
-                        ShouldBeActive = false;
-                        platform.SetActive(false);
+                        UnityEngine.Debug.Log("GAME OBJECT IS NULL!");
                     }
+                    delaying = false;
+                    ShouldBeActive = false;
+                    platform.SetActive(false);
                 }
             }
         }

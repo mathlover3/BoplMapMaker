@@ -64,6 +64,7 @@ namespace MapMaker
         private static SignalDelay SignalDelayPrefab = null;
         private static OrGate OrGatePrefab = null;
         private static NotGate NotGatePrefab = null;
+        private static ShootRay ShootRayPrefab = null;
         public static SignalSystem signalSystem;
         public enum MapIdCheckerThing
         {
@@ -136,6 +137,18 @@ namespace MapMaker
                     DisappearPlatformsOnSignal.QuantumTunnelPrefab = obj.GetComponent<ShootQuantum>().QuantumTunnelPrefab;
                     DisappearPlatformsOnSignal.onHitResizableWallMaterail = obj.GetComponent<ShootQuantum>().onHitResizableWallMaterail;
                     DisappearPlatformsOnSignal.onHitWallMaterail = obj.GetComponent<ShootQuantum>().onHitWallMaterail;
+                    ShootBlink.collisionMask = obj.GetComponent<ShootQuantum>().collisionMask;
+                    ShootBlink.onDissapearResizableWallMaterail = obj.GetComponent<ShootQuantum>().onDissapearResizableWallMaterail;
+                    ShootBlink.onHitBlackHoleMaterial = obj.GetComponent<ShootQuantum>().onHitBlackHoleMaterial;
+                    ShootBlink.onHitResizableWallMaterail = obj.GetComponent<ShootQuantum>().onHitResizableWallMaterail;
+                    ShootBlink.onHitWallMaterail = obj.GetComponent<ShootQuantum>().onHitWallMaterail;
+                    ShootBlink.QuantumTunnelPrefab = obj.GetComponent<ShootQuantum>().QuantumTunnelPrefab;
+                    ShootBlink.RayCastEffect = obj.GetComponent<ShootQuantum>().RayCastEffect;
+                    ShootBlink.raycastEffectSpacing = obj.GetComponent<ShootQuantum>().raycastEffectSpacing;
+                    ShootBlink.RaycastParticleHitPrefab = obj.GetComponent<ShootQuantum>().RaycastParticleHitPrefab;
+                    ShootBlink.WaterExplosion = obj.GetComponent<ShootQuantum>().WaterExplosion;
+                    ShootBlink.RaycastParticlePrefab = obj.GetComponent<ShootQuantum>().RaycastParticlePrefab;
+                    ShootBlink.WaterRing = obj.GetComponent<ShootQuantum>().WaterRing;
                     UnityEngine.Debug.Log("Found the object: " + obj.name);
                     objectsFound++;
                     if (objectsFound == ObjectsToFind)
@@ -625,6 +638,7 @@ namespace MapMaker
                     // Add the components to the GameObject
                     spawnerGameObject.AddComponent<FixTransform>();
                     SpawnerPrefab = spawnerGameObject.AddComponent<Spawner>();
+
                     // Create a new GameObject
                     GameObject DisappearGameObject = new GameObject("DisappearPlatformsObject");
 
@@ -684,6 +698,13 @@ namespace MapMaker
                     NotGateSpriteRender.sprite = NotGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
+                    GameObject ShootRayGameObject = new GameObject("ShootRayObject");
+                    // Add the components to the GameObject
+                    ShootRayGameObject.AddComponent<FixTransform>();
+                    ShootRayGameObject.AddComponent<ShootBlink>();
+                    ShootRayPrefab = ShootRayGameObject.AddComponent<ShootRay>();
+
+                    // Create a new GameObject
                     GameObject SignalSystemObject = new GameObject("SignalSystemObject");
 
 
@@ -702,7 +723,7 @@ namespace MapMaker
                 {
                     Debug.LogError($"Error in spawning triggers/spawners at scene load: {ex}");
                 }
-                //TODO remove this when done testing with spawners
+                //TODO remove this when done testing signal stuff
                 //TESTING START!
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
@@ -722,11 +743,13 @@ namespace MapMaker
                 CreateSignalDelay(2, 5, Fix.Zero, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
                 CreateSignalDelay(3, 4, Fix.Zero, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 AddMovingPlatformSignalStuff(platform, 2);
-                CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false, false, false);
+                CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
+                CreateShootRay(3, new Vec2((Fix)0, (Fix)20), (Fix)90, ShootRay.RayType.Blink, (Fix)10, (Fix)1, (Fix)0.5, (Fix)3, (Fix)1);
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
                 //TESTING END!
+
                 CurrentMapId = GetMapIdFromSceneName(scene.name);
                 var DoWeHaveMapWithMapId = CheckIfWeHaveCustomMapWithMapId();
                 //error if there are multiple maps with the same id
@@ -956,7 +979,7 @@ namespace MapMaker
             trigger.Register();
             return trigger;
         }
-        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, int Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false, bool DisappearOnlyWhenSignal = false, bool OnlyDisappearWhenSignalTurnsOn = false)
+        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, int Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false)
         {
             var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, (Vec2)platform.transform.position);
             Disappear.platform = platform;
@@ -971,8 +994,6 @@ namespace MapMaker
             Disappear.SignalIsInverse = SignalIsInverse;
             Disappear.delay = delay;
             Disappear.SecondsToReapper = SecondsToReapper;
-            Disappear.DisappearOnlyWhenSignal = DisappearOnlyWhenSignal;
-            Disappear.OnlyDisappearWhenSignalTurnsOn = OnlyDisappearWhenSignalTurnsOn;
             Disappear.Register();
             return Disappear;
 
@@ -1093,6 +1114,26 @@ namespace MapMaker
             Not.OutputSignals.Add(output);
             Not.Register();
             return Not;
+        }
+        public static ShootRay CreateShootRay(int InputUUid, Vec2 pos, Fix rot, ShootRay.RayType rayType, Fix VarenceInDegrees, Fix BlinkWallDelay, Fix BlinkMinPlayerDuration, Fix BlinkWallDuration, Fix BlinkWallShake)
+        {
+            var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
+            var input = new LogicInput
+            {
+                UUid = InputUUid,
+                gate = shootRay,
+                IsOn = false,
+                Owner = shootRay.gameObject
+            };
+            shootRay.InputSignals.Add(input);
+            shootRay.rayType = rayType;
+            shootRay.VarenceInDegrees = VarenceInDegrees;
+            shootRay.BlinkWallDelay = BlinkWallDelay;
+            shootRay.BlinkMinPlayerDuration = BlinkMinPlayerDuration;
+            shootRay.BlinkWallDuration = BlinkWallDuration;
+            shootRay.BlinkWallShake = BlinkWallShake;
+            shootRay.Register();
+            return shootRay;
         }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
