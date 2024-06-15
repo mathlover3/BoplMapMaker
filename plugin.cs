@@ -744,7 +744,7 @@ namespace MapMaker
                 CreateSignalDelay(3, 4, Fix.Zero, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 AddMovingPlatformSignalStuff(platform, 2);
                 CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
-                CreateShootRay(3, new Vec2((Fix)0, (Fix)20), (Fix)90, ShootRay.RayType.Blink, (Fix)10, (Fix)1, (Fix)0.5, (Fix)3, (Fix)1);
+                CreateShootRay(3, new Vec2((Fix)0, (Fix)20), (Fix)90, ShootRay.RayType.Blink, (Fix)10, (Fix)5, (Fix)2, (Fix)5, (Fix)2.5);
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
