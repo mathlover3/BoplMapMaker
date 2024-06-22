@@ -734,7 +734,7 @@ namespace MapMaker
                 };
                 CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
                 CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
-                int[] UUids = { 0, 4 };
+                int[] UUids = { 4, 0 };
                 CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
                 CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
                 int[] UUids2 = { 1, 5 };
@@ -744,7 +744,7 @@ namespace MapMaker
                 CreateSignalDelay(3, 4, Fix.Zero, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 AddMovingPlatformSignalStuff(platform, 2);
                 CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
-                CreateShootRay(3, new Vec2((Fix)0, (Fix)20), (Fix)90, ShootRay.RayType.Blink, (Fix)10, (Fix)5, (Fix)2, (Fix)5, (Fix)2.5);
+                CreateShootRay(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, ShootRay.RayType.Blink, (Fix)360, (Fix)5, (Fix)2, (Fix)5, (Fix)2.5);
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
@@ -1250,11 +1250,9 @@ namespace MapMaker
                     float time2 = __instance.OpacityAnim.keys[__instance.OpacityAnim.keys.Length - 1].time;
                     var ExstraDelay = Mathf.Max(time, time2);
                     //the __instance.IsInitialized is so that it works fine if delay is 0/less then ExstraDelay
-                    //&& (DisappearPlatformsOnSignal.HasBeenInit[__instance])
                     if (Disappear.TimeDelayed > Disappear.delay - (Fix)ExstraDelay && (__instance.IsInitialized || __instance.age > __instance.LifeSpan))
                     {
                         var spriteRen = __instance.GetComponent<SpriteRenderer>();
-                        Debug.Log($"__instance.IsInitialized is {__instance.IsInitialized}");
                         __instance.transform.localScale = new Vector3(__instance.originalScale.x, __instance.originalScale.y, __instance.originalScale.z);
                         __instance.spriteRen.color = new UnityEngine.Color(spriteRen.color.r, spriteRen.color.g, spriteRen.color.b, 0);
                         __instance.Victim.SetActive(false);

@@ -342,13 +342,23 @@ namespace MapMaker
             if (InputOwner.GetComponent<AndGate>() != null || InputOwner.GetComponent<OrGate>() != null)
             {
                 var center1 = (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position;
-                var InputLength = input.gate.InputSignals.Count;
-                var InputIndex = input.gate.InputSignals.IndexOf(input);
+                var NumberOfLines = input.gate.InputSignals.Count;
+                //it needs to be a 1 based index.
+                var LineIndex = input.gate.InputSignals.IndexOf(input) + 1;
                 //offset it as these gates can have multiple inputs
-                var MaxOffset = 2;
-                var spaceing = MaxOffset / (InputLength);
-                //the *2 - 1 is so it is in the center.
-                var center = center1 + new Vector3(-1, (float)spaceing * (InputIndex) - MaxOffset/2);
+                
+                var MaxOffset = 0.6;
+                var bottom = center1.y - MaxOffset;
+                var centerY = center1.y;
+                Debug.Log("NumberOfLines is " + NumberOfLines);
+                Debug.Log("centerY is " + centerY);
+                Debug.Log("bottom is " + bottom);
+                Debug.Log("LineIndex is " + LineIndex);
+                //thanks to my dad for the math for this.
+                var Y = (LineIndex - 1) * ((2*(centerY - bottom))/(NumberOfLines - 1)) + bottom;
+                Debug.Log("Y is " + Y);
+                //safe to use normal float math instead of Fixes because it doesnt effect gameplay at all.
+                var center = new Vector3(center1.x - 1.7f, (float)Y);
                 var rot1 = InputOwner.GetComponent<FixTransform>().rotationInner;
                 var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
                 var scale = InputOwner.transform.localScale.x;
