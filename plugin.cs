@@ -1302,4 +1302,69 @@ namespace MapMaker
 #pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
         }
     }
+    [HarmonyPatch(typeof(Missile))]
+    public class MissilePatches
+    {
+        [HarmonyPatch("OnCollide")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CollisionInformation collision, Missile __instance)
+        {
+#pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
+            if (collision.layer == LayerMask.NameToLayer("RigidBodyAffector") || collision.layer == LayerMask.NameToLayer("Rope") || collision.layer == (LayerMask)3)
+            {
+                return false;
+            }
+#pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
+            FixTransform.InstantiateFixed<Explosion>(__instance.onHitExplosionPrefab, __instance.body.position).GetComponent<IPhysicsCollider>().Scale = __instance.fixTrans.Scale;
+            if (!string.IsNullOrEmpty(__instance.soundEffectOnCol))
+            {
+                AudioManager.Get().Play(__instance.soundEffectOnCol);
+            }
+            Updater.DestroyFix(__instance.gameObject);
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(SmokeGrenadeExplode2))]
+    public class SmokeGrenadeExplode2Patches
+    {
+        [HarmonyPatch("OnCollide")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CollisionInformation collision, SmokeGrenadeExplode2 __instance)
+        {
+            if (!__instance.grenade.DetonatesOnOwner || __instance.IsDestroyed)
+            {
+                return false;
+            }
+#pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
+            if (collision.layer == LayerMask.NameToLayer("Projectile") && collision.colliderPP.fixTrans != null)
+            {
+                Projectile component = collision.colliderPP.fixTrans.GetComponent<Projectile>();
+                if (component != null && !component.IgnitesExplosives)
+                {
+                    return false;
+                }
+            }
+            if (collision.layer == (LayerMask)3)
+            {
+                return false;
+            }
+#pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
+            __instance.Detonate();
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(ShakablePlatform))]
+    public class ShakablePlatformPatches
+    {
+        [HarmonyPatch("AddShake")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(ShakablePlatform __instance, Fix duration, Fix shakeAmount, int shakePriority = 1, Material newMaterialDuringShake = null, AnimationCurveFixed shakeCurve = null)
+        {
+            if (shakePriority >= __instance.currentShakePriority)
+            {
+                return true;
+            }
+            return false;
+        }
+    }
 }
