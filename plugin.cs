@@ -732,9 +732,10 @@ namespace MapMaker
                 {
                     LayerMask.NameToLayer("Player")
                 };
+                //CREATE ALL TRIGGERS BEFORE CREATING SIGNAL DELAYS!!!
                 CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
                 CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
-                int[] UUids = { 4, 0 };
+                int[] UUids = { 4, 0, 5 };
                 CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
                 CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
                 int[] UUids2 = { 1, 5 };

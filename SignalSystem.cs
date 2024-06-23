@@ -350,13 +350,8 @@ namespace MapMaker
                 var MaxOffset = 0.6;
                 var bottom = center1.y - MaxOffset;
                 var centerY = center1.y;
-                Debug.Log("NumberOfLines is " + NumberOfLines);
-                Debug.Log("centerY is " + centerY);
-                Debug.Log("bottom is " + bottom);
-                Debug.Log("LineIndex is " + LineIndex);
                 //thanks to my dad for the math for this.
                 var Y = (LineIndex - 1) * ((2*(centerY - bottom))/(NumberOfLines - 1)) + bottom;
-                Debug.Log("Y is " + Y);
                 //safe to use normal float math instead of Fixes because it doesnt effect gameplay at all.
                 var center = new Vector3(center1.x - 1.7f, (float)Y);
                 var rot1 = InputOwner.GetComponent<FixTransform>().rotationInner;
