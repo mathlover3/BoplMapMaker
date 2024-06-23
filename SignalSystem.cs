@@ -389,6 +389,7 @@ namespace MapMaker
             }
             if (FirstUpdateOfTheRound)
             {
+                var test = (LayerMask)1;
                 FirstUpdateOfTheRound = false;
             }
             foreach (var gate in LogicGatesToAlwaysUpdate)

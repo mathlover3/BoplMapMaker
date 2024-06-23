@@ -30,8 +30,6 @@ namespace MapMaker
             if (Updater.SimTimeSinceLevelLoaded != lastSimTime)
             {
                 lastSimTime = Updater.SimTimeSinceLevelLoaded;
-
-                //TODO: Fix it not working correctly when it is called multiple times in one frame (this causes odd behavor like having the buffer be 4 big when the delay is 0 when it should only be 1 big (at the end of the frame anyways))
                 SignalBuffer.Add(IsOn());
                 SignalTimeBuffer.Add(Updater.SimTimeSinceLevelLoaded);
                 if (SignalTimeBuffer[0] + delay < Updater.SimTimeSinceLevelLoaded)

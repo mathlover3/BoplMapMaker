@@ -23,6 +23,7 @@ using System.Text;
 using UnityEngine.UI;
 using System.Reflection.Emit;
 using PlatformApi;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace MapMaker
 {
@@ -53,7 +54,7 @@ namespace MapMaker
         public const int StartingNextPlatformTypeValue = 5;
         public static Sprite BoulderSprite;
         //used to make CustomBoulderSmokeColors start with a value.
-        public static UnityEngine.Color[] ignore = {new UnityEngine.Color(1,1,1,1)};
+        public static UnityEngine.Color[] ignore = { new UnityEngine.Color(1, 1, 1, 1) };
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
         public static AssetBundle MyAssetBundle;
         public static PlatformApi.PlatformApi platformApi = new PlatformApi.PlatformApi();
@@ -74,7 +75,7 @@ namespace MapMaker
         }
         private void Awake()
         {
-            
+
             Logger.LogInfo("MapLoader Has been loaded");
             Harmony harmony = new Harmony("com.MLT.MapLoader");
 
@@ -168,7 +169,7 @@ namespace MapMaker
         //see if there is a custom map we should load (returns enum) (david) (this was annoying to make but at least i learned about predicits!)
         public static MapIdCheckerThing CheckIfWeHaveCustomMapWithMapId()
         {
-            int[] MapIds = {};
+            int[] MapIds = { };
             foreach (string mapJson in MapJsons)
             {
                 try
@@ -176,12 +177,12 @@ namespace MapMaker
                     Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
                     //add it to a array to be checked
                     int mapid = int.Parse((string)Dict["mapId"]);
-                    Debug.Log("Map has Mapid of " +  mapid);
+                    Debug.Log("Map has Mapid of " + mapid);
                     MapIds = MapIds.Append(mapid).ToArray();
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Failed to get MapId from Json: {mapJson} with exseptson: {ex}" );
+                    Debug.LogError($"Failed to get MapId from Json: {mapJson} with exseptson: {ex}");
                 }
             }
             //define a predicit (basicly a funcsion that checks if a value meets a critera. in this case being = to CurrentMapId)
@@ -208,12 +209,12 @@ namespace MapMaker
         public static bool ValueEqualsCurrentMapId(int ValueToCheck)
         {
             if (ValueToCheck == CurrentMapId)
-            { 
-                return true; 
-            }
-            else 
             {
-                return false; 
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
         //CALL ONLY ON LEVEL LOAD!
@@ -229,7 +230,7 @@ namespace MapMaker
                     {
                         SpawnPlatformsFromMap(mapJson, i);
                     }
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -305,7 +306,7 @@ namespace MapMaker
             {
                 sprite = null;
                 BoulderSprite = null;
-                
+
                 try
                 {
                     //set optsonal values to null/0/defults 
@@ -320,7 +321,7 @@ namespace MapMaker
                     double DeadZoneDist = 1;
                     double OrbitAccelerationMulitplier = 1;
                     double targetRadius = 5;
-                    double ovalness01 =  1;
+                    double ovalness01 = 1;
                     Vec2[] teamSpawns = new Vec2[4];
                     // Extract platform data (david)
                     Dictionary<string, object> transform = (Dictionary<string, object>)platform["transform"];
@@ -537,23 +538,23 @@ namespace MapMaker
                         {
                             UseSlimeCam = (bool)platform["UseSlimeCam"];
                         }
-                        Vector4[] color2 = {color};
-                        Vec2[] centerPoint2 = {centerPoint};
+                        Vector4[] color2 = { color };
+                        Vec2[] centerPoint2 = { centerPoint };
                         //spawn platform
                         PlatformApi.PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
 
                         Debug.Log("Platform spawned successfully");
                     }
-                    
+
                     // if it is a preset platform then we do it difrently
                     else
                     {
                         string PresetPlatformName = Convert.ToString(platform["PresetPlatformName"]);
-                        var Platform = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/"+ PresetPlatformName + ".prefab");
+                        var Platform = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/" + PresetPlatformName + ".prefab");
                         //idk if this is gonna work to fix the posable desink as it is converted back to a float...
                         var x2 = FloorToThousandnths(x);
                         var y2 = FloorToThousandnths(y);
-                        Vector3 pos = new Vector3 ((float)x2, (float)y2, 0);
+                        Vector3 pos = new Vector3((float)x2, (float)y2, 0);
                         //the rest of the FloorToThousandnths should work fine for fixing it though
                         //fix shader
                         Platform.GetComponent<SpriteRenderer>().material = PlatformMat;
@@ -593,7 +594,7 @@ namespace MapMaker
 
                 }
                 catch (Exception ex)
-                {   
+                {
                     Debug.LogError($"Failed to spawn platform. Error: {ex.Message}");
                 }
             }
@@ -621,7 +622,7 @@ namespace MapMaker
             Debug.Log("OnSceneLoaded: " + scene.name);
             if (IsLevelName(scene.name))
             {
-                
+
                 try
                 {
 
@@ -735,7 +736,7 @@ namespace MapMaker
                 //CREATE ALL TRIGGERS BEFORE CREATING SIGNAL DELAYS!!!
                 CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
                 CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
-                int[] UUids = { 4, 0, 5 };
+                int[] UUids = { 4, 0 };
                 CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
                 CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
                 int[] UUids2 = { 1, 5 };
@@ -804,7 +805,7 @@ namespace MapMaker
             if (string.IsNullOrEmpty(s)) return 0;
             string cleaned = rxNonDigits.Replace(s, "");
             //subtract 1 as scene names start with 1 but ids start with 0
-            return int.Parse(cleaned)-1;
+            return int.Parse(cleaned) - 1;
         }
         //in part chatgpt code
         public static ZipArchive UnzipFile(string zipFilePath)
@@ -813,24 +814,24 @@ namespace MapMaker
             // Open the zip file for reading
             FileStream zipStream = new FileStream(zipFilePath, FileMode.Open);
             ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
-            
-                // Iterate through each entry in the zip file
-                /*foreach (ZipArchiveEntry entry in archive.Entries)
-                {
-                    // If entry is a directory, skip it
-                    if (entry.FullName.EndsWith("/"))
-                        continue;
 
-                    // Read the contents of the entry
-                    using (StreamReader reader = new StreamReader(entry.Open()))
-                    {
-                        string contents = reader.ReadToEnd();
-                        Console.WriteLine($"Contents of {entry.FullName}:");
-                        Console.WriteLine(contents);
-                    }
-                }*/
-                    return archive;
-            
+            // Iterate through each entry in the zip file
+            /*foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                // If entry is a directory, skip it
+                if (entry.FullName.EndsWith("/"))
+                    continue;
+
+                // Read the contents of the entry
+                using (StreamReader reader = new StreamReader(entry.Open()))
+                {
+                    string contents = reader.ReadToEnd();
+                    Console.WriteLine($"Contents of {entry.FullName}:");
+                    Console.WriteLine(contents);
+                }
+            }*/
+            return archive;
+
         }
         //finds all the files with a path that the predicate acsepts as a string array 
         public static string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
@@ -980,7 +981,7 @@ namespace MapMaker
             trigger.Register();
             return trigger;
         }
-        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, int Signal, Fix SecondsToReapper, Fix delay,  bool SignalIsInverse = false)
+        public static DisappearPlatformsOnSignal CreateDisappearPlatformsOnSignal(GameObject platform, int Signal, Fix SecondsToReapper, Fix delay, bool SignalIsInverse = false)
         {
             var Disappear = FixTransform.InstantiateFixed<DisappearPlatformsOnSignal>(DisappearPlatformsOnSignalPrefab, (Vec2)platform.transform.position);
             Disappear.platform = platform;
@@ -1017,7 +1018,7 @@ namespace MapMaker
         }
         public static AndGate CreateAndGate(int[] InputUUids, int OutputUUid, Vec2 pos, Fix rot)
         {
-            
+
             var And = FixTransform.InstantiateFixed<AndGate>(andGatePrefab, pos, (Fix)ConvertToRadians((double)rot));
             var LogicInputs = new List<LogicInput>();
             foreach (var InputSignal in InputUUids)
@@ -1067,7 +1068,7 @@ namespace MapMaker
             return Delay;
 
         }
-        public static OrGate CreateOrGate(int[] InputUUids, int OutputUUid, Vec2 pos, Fix rot) 
+        public static OrGate CreateOrGate(int[] InputUUids, int OutputUUid, Vec2 pos, Fix rot)
         {
             var Or = FixTransform.InstantiateFixed<OrGate>(OrGatePrefab, pos, (Fix)ConvertToRadians((double)rot));
             var LogicInputs = new List<LogicInput>();
@@ -1260,6 +1261,45 @@ namespace MapMaker
                     }
                 }
             }
+        }
+    }
+    [HarmonyPatch(typeof(SpikeAttack))]
+    public class SpikeAttackPatches
+    {
+        [HarmonyPatch("OnCollide")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CollisionInformation collision, SpikeAttack __instance)
+        {
+#pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
+            if (__instance.timePassed < __instance.pushTime && !GameTime.IsTimeStopped() && collision.colliderPP.monobehaviourCollider != null && !collision.colliderPP.monobehaviourCollider.IsDestroyed && collision.colliderPP.monobehaviourCollider.initHasBeenCalled && collision.colliderPP.instanceId != __instance.attachedGround.gameObject.GetInstanceID())
+            {
+                if (collision.layer == LayerMask.NameToLayer("wall"))
+                {
+                    Vec2 v = Vec2.NormalizedSafe(collision.contactPoint - __instance.fixTrans.position);
+                    collision.colliderPP.monobehaviourCollider.AddForceAtPosition(v * __instance.knockAwayWallStr, collision.contactPoint, ForceMode2D.Force);
+                    if (!__instance.pushedThisFrame)
+                    {
+                        __instance.hitbox.AddForceAtPosition(-v * __instance.knockAwayWallStr * __instance.selfPushMultiplier, collision.contactPoint, ForceMode2D.Force);
+                        __instance.pushedThisFrame = true;
+                        return false;
+                    }
+                }
+                //dont react if its a trigger
+                else if (collision.layer != (LayerMask)3)
+                {
+                    Vec2 v2 = Vec2.NormalizedSafe(collision.contactPoint - __instance.fixTrans.position);
+
+                    collision.colliderPP.monobehaviourCollider.AddForceAtPosition(v2 * __instance.knockAwayStr, collision.contactPoint, ForceMode2D.Force);
+
+                    if (!__instance.pushedThisFrame)
+                    {
+                        __instance.hitbox.AddForceAtPosition(-v2 * __instance.knockAwayStr * __instance.selfPushMultiplier, collision.contactPoint, ForceMode2D.Force);
+                        __instance.pushedThisFrame = true;
+                    }
+                }
+            }
+            return false;
+#pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
         }
     }
 }
