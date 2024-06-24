@@ -116,7 +116,7 @@ namespace MapMaker
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
             UnityEngine.Debug.Log("getting Bow object");
             var objectsFound = 0;
-            var ObjectsToFind = 2;
+            var ObjectsToFind = 4;
             foreach (GameObject obj in allObjects)
             {
                 if (obj.name == "invisibleHitbox")
@@ -157,7 +157,30 @@ namespace MapMaker
                         break;
                     }
                 }
-                //Blink gun
+                if (obj.name == "Growth ray")
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    ShootRay.GrowGameObjectPrefab = obj;
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    objectsFound++;
+                    if (objectsFound == ObjectsToFind)
+                    {
+                        break;
+                    }
+                }
+                if (obj.name == "Shrink ray")
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    ShootRay.StrinkGameObjectPrefab = obj;
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    objectsFound++;
+                    if (objectsFound == ObjectsToFind)
+                    {
+                        break;
+                    }
+                }
             }
         }
         public static bool IsBoplMap(string path)
@@ -728,7 +751,7 @@ namespace MapMaker
                 //TESTING START!
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
-                var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
+                //var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")
@@ -742,11 +765,13 @@ namespace MapMaker
                 int[] UUids2 = { 1, 5 };
                 CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
                 CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
-                CreateSignalDelay(2, 5, Fix.Zero, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
-                CreateSignalDelay(3, 4, Fix.Zero, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
-                AddMovingPlatformSignalStuff(platform, 2);
-                CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
-                CreateShootRay(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, ShootRay.RayType.Blink, (Fix)360, (Fix)5, (Fix)2, (Fix)5, (Fix)2.5);
+                CreateSignalDelay(2, 5, (Fix)0.25, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
+                CreateSignalDelay(3, 4, (Fix)0.25, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
+                //AddMovingPlatformSignalStuff(platform, 2);
+                //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
+                CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)1);
+                CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
+                CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
@@ -1117,7 +1142,7 @@ namespace MapMaker
             Not.Register();
             return Not;
         }
-        public static ShootRay CreateShootRay(int InputUUid, Vec2 pos, Fix rot, ShootRay.RayType rayType, Fix VarenceInDegrees, Fix BlinkWallDelay, Fix BlinkMinPlayerDuration, Fix BlinkWallDuration, Fix BlinkWallShake)
+        public static ShootRay CreateShootBlink(int InputUUid, Vec2 pos, Fix rot, Fix VarenceInDegrees, Fix BlinkWallDelay, Fix BlinkMinPlayerDuration, Fix BlinkWallDuration, Fix BlinkWallShake)
         {
             var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
             var input = new LogicInput
@@ -1128,12 +1153,52 @@ namespace MapMaker
                 Owner = shootRay.gameObject
             };
             shootRay.InputSignals.Add(input);
-            shootRay.rayType = rayType;
+            shootRay.rayType = ShootRay.RayType.Blink;
             shootRay.VarenceInDegrees = VarenceInDegrees;
             shootRay.BlinkWallDelay = BlinkWallDelay;
             shootRay.BlinkMinPlayerDuration = BlinkMinPlayerDuration;
             shootRay.BlinkWallDuration = BlinkWallDuration;
             shootRay.BlinkWallShake = BlinkWallShake;
+            shootRay.Register();
+            return shootRay;
+        }
+        public static ShootRay CreateShootGrow(int InputUUid, Vec2 pos, Fix rot, Fix VarenceInDegrees, Fix blackHoleGrowth, Fix ScaleMultiplyer, Fix PlayerMultiplyer)
+        {
+            var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
+            var input = new LogicInput
+            {
+                UUid = InputUUid,
+                gate = shootRay,
+                IsOn = false,
+                Owner = shootRay.gameObject
+            };
+            shootRay.InputSignals.Add(input);
+            shootRay.rayType = ShootRay.RayType.Grow;
+            shootRay.VarenceInDegrees = VarenceInDegrees;
+            shootRay.blackHoleGrowth = blackHoleGrowth;
+            shootRay.ScaleMultiplyer = ScaleMultiplyer;
+            shootRay.PlayerMultiplyer = PlayerMultiplyer;
+            shootRay.smallNonPlayersMultiplier = ScaleMultiplyer;
+            shootRay.Register();
+            return shootRay;
+        }
+        public static ShootRay CreateShootStrink(int InputUUid, Vec2 pos, Fix rot, Fix VarenceInDegrees, Fix blackHoleGrowth, Fix ScaleMultiplyer, Fix PlayerMultiplyer)
+        {
+            var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
+            var input = new LogicInput
+            {
+                UUid = InputUUid,
+                gate = shootRay,
+                IsOn = false,
+                Owner = shootRay.gameObject
+            };
+            shootRay.InputSignals.Add(input);
+            shootRay.rayType = ShootRay.RayType.Shrink;
+            shootRay.VarenceInDegrees = VarenceInDegrees;
+            shootRay.blackHoleGrowth = blackHoleGrowth;
+            shootRay.ScaleMultiplyer = ScaleMultiplyer;
+            shootRay.PlayerMultiplyer = PlayerMultiplyer;
+            shootRay.smallNonPlayersMultiplier = ScaleMultiplyer;
             shootRay.Register();
             return shootRay;
         }
@@ -1361,6 +1426,20 @@ namespace MapMaker
         private static bool Awake_MapMaker_Plug(ShakablePlatform __instance, Fix duration, Fix shakeAmount, int shakePriority = 1, Material newMaterialDuringShake = null, AnimationCurveFixed shakeCurve = null)
         {
             if (shakePriority >= __instance.currentShakePriority)
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(ShootScaleChange))]
+    public class ShootScaleChangePatches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(ShootScaleChange __instance)
+        {
+            if (__instance.RaycastParticlePrefab != null)
             {
                 return true;
             }

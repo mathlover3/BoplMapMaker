@@ -382,27 +382,29 @@ namespace MapMaker
 
         public override void UpdateSim(Fix SimDeltaTime)
         {
-            for (int i = 0; i < LogicStartingOutputs.Count; i++)
+            if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress)
             {
-                LogicOutput output = LogicStartingOutputs[i];
-                CallAllLogic(output, SimDeltaTime, true);
+                for (int i = 0; i < LogicStartingOutputs.Count; i++)
+                {
+                    LogicOutput output = LogicStartingOutputs[i];
+                    CallAllLogic(output, SimDeltaTime, true);
+                }
+                if (FirstUpdateOfTheRound)
+                {
+                    var test = (LayerMask)1;
+                    FirstUpdateOfTheRound = false;
+                }
+                foreach (var gate in LogicGatesToAlwaysUpdate)
+                {
+                    gate.Logic(SimDeltaTime);
+                }
+                foreach (var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
+                {
+                    var Line = LineRenderers[input];
+                    var output = input.inputs[0];
+                    SetLinePosForLine(Line, input, output);
+                }
             }
-            if (FirstUpdateOfTheRound)
-            {
-                var test = (LayerMask)1;
-                FirstUpdateOfTheRound = false;
-            }
-            foreach (var gate in LogicGatesToAlwaysUpdate)
-            {
-                gate.Logic(SimDeltaTime);
-            }
-            foreach(var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
-            {
-                var Line = LineRenderers[input];
-                var output = input.inputs[0];
-                SetLinePosForLine(Line, input, output);
-            }
-            
         }
         private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
         {
