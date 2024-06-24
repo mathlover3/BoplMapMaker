@@ -307,7 +307,6 @@ namespace MapMaker
             if (InputOwner == null && lineRenderer != null)
             {
                 Destroy(lineRenderer);
-                Debug.Log("Destroyed lineRenderer");
                 return;
             }
             if (lineRenderer != null)
@@ -329,7 +328,6 @@ namespace MapMaker
                         {
                             //if the platform is distroyed we want to remove the line
                             Destroy(lineRenderer);
-                            Debug.Log("Destroyed lineRenderer2");
                         }
                     }
                     var drop = InputOwner.GetComponent<DropPlayers>();
@@ -343,7 +341,6 @@ namespace MapMaker
                         {
                             //if the platform is distroyed we want to remove the line
                             Destroy(lineRenderer);
-                            Debug.Log("Destroyed lineRenderer3");
                         }
                     }
                     var shake = InputOwner.GetComponent<ShakePlatform>();
@@ -357,7 +354,6 @@ namespace MapMaker
                         {
                             //if the platform is distroyed we want to remove the line
                             Destroy(lineRenderer);
-                            Debug.Log("Destroyed lineRenderer4");
                         }
                     }
                 }
