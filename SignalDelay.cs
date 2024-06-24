@@ -42,6 +42,11 @@ namespace MapMaker
                     SignalTimeBuffer.RemoveAt(0);
                 }
             }
+            //if its already been called this frame then we dont want to add more but we want to replace the one for this frame with the new input in case it changed.
+            else
+            {
+                SignalBuffer[SignalBuffer.Count - 1] = IsOn();
+            }
         }
     }
 }

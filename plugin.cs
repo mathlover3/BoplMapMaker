@@ -765,8 +765,8 @@ namespace MapMaker
                 int[] UUids2 = { 1, 5 };
                 CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
                 CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
-                CreateSignalDelay(2, 5, (Fix)0.25, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
-                CreateSignalDelay(3, 4, (Fix)0.25, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
+                CreateSignalDelay(2, 5, (Fix)0, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
+                CreateSignalDelay(3, 4, (Fix)0, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 //AddMovingPlatformSignalStuff(platform, 2);
                 //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
                 CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)1);
