@@ -66,7 +66,11 @@ namespace MapMaker
         private static OrGate OrGatePrefab = null;
         private static NotGate NotGatePrefab = null;
         private static ShootRay ShootRayPrefab = null;
+        private static ShakePlatform ShakePlatformPrefab = null;
+        private static DropPlayers DropPlayersPrefab = null;
         public static SignalSystem signalSystem;
+        //used to make shakeable platform to know its being called by a blink gun.
+        public static bool CurrentlyBlinking;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -729,6 +733,18 @@ namespace MapMaker
                     ShootRayPrefab = ShootRayGameObject.AddComponent<ShootRay>();
 
                     // Create a new GameObject
+                    GameObject DropPlayersGameObject = new GameObject("DropPlayersObject");
+                    // Add the components to the GameObject
+                    DropPlayersGameObject.AddComponent<FixTransform>();
+                    DropPlayersPrefab = DropPlayersGameObject.AddComponent<DropPlayers>();
+
+                    // Create a new GameObject
+                    GameObject ShakePlatformGameObject = new GameObject("ShakePlatformObject");
+                    // Add the components to the GameObject
+                    ShakePlatformGameObject.AddComponent<FixTransform>();
+                    ShakePlatformPrefab = ShakePlatformGameObject.AddComponent<ShakePlatform>();
+
+                    // Create a new GameObject
                     GameObject SignalSystemObject = new GameObject("SignalSystemObject");
 
 
@@ -751,7 +767,7 @@ namespace MapMaker
                 //TESTING START!
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
-                //var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
+                var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")
@@ -765,13 +781,15 @@ namespace MapMaker
                 int[] UUids2 = { 1, 5 };
                 CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
                 CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
-                CreateSignalDelay(2, 5, (Fix)0, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
-                CreateSignalDelay(3, 4, (Fix)0, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
-                //AddMovingPlatformSignalStuff(platform, 2);
-                //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
-                CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)1);
-                CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
-                CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
+                CreateSignalDelay(2, 5, (Fix)1, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
+                CreateSignalDelay(3, 4, (Fix)1, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
+                AddMovingPlatformSignalStuff(platform, 2);
+                CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
+                CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);
+                CreateDropPlayers(platform, 2, (Fix)100, true);
+                //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
+                //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
+                //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
@@ -1202,6 +1220,41 @@ namespace MapMaker
             shootRay.Register();
             return shootRay;
         }
+        public static ShakePlatform CreateShakePlatform(GameObject platform, int InputUUid, Fix duration, bool OnlyActivateOnRise, Fix shakeAmount)
+        {
+            var shakePlatform = FixTransform.InstantiateFixed<ShakePlatform>(ShakePlatformPrefab, (Vec2)platform.transform.position);
+            var input = new LogicInput
+            {
+                UUid = InputUUid,
+                gate = shakePlatform,
+                IsOn = false,
+                Owner = shakePlatform.gameObject
+            };
+            shakePlatform.InputSignals.Add(input);
+            shakePlatform.duration = duration;
+            shakePlatform.shakablePlatform = platform.GetComponent<ShakablePlatform>();
+            shakePlatform.OnlyActivateOnRise = OnlyActivateOnRise;
+            shakePlatform.shakeAmount = shakeAmount;
+            shakePlatform.Register();
+            return shakePlatform;
+        }
+        public static DropPlayers CreateDropPlayers(GameObject platform, int InputUUid, Fix DropForce, bool OnlyActivateOnRise)
+        {
+            var dropPlayers = FixTransform.InstantiateFixed<DropPlayers>(DropPlayersPrefab, (Vec2)platform.transform.position);
+            var input = new LogicInput
+            {
+                UUid = InputUUid,
+                gate = dropPlayers,
+                IsOn = false,
+                Owner = dropPlayers.gameObject
+            };
+            dropPlayers.InputSignals.Add(input);
+            dropPlayers.DropForce = DropForce;
+            dropPlayers.stickyRoundedRectangle = platform.GetComponent<StickyRoundedRectangle>();
+            dropPlayers.OnlyActivateOnRise = OnlyActivateOnRise;
+            dropPlayers.Register();
+            return dropPlayers;
+        }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
     public class MachoThrow2Patches
@@ -1425,6 +1478,22 @@ namespace MapMaker
         [HarmonyPrefix]
         private static bool Awake_MapMaker_Plug(ShakablePlatform __instance, Fix duration, Fix shakeAmount, int shakePriority = 1, Material newMaterialDuringShake = null, AnimationCurveFixed shakeCurve = null)
         {
+            //for all of the DisappearPlatformsOnSignals check if the platform is the same as the platform we are attached to.
+            foreach (var Quantum in ShootQuantum.spawnedQuantumTunnels)
+            {
+                if (Quantum != null && Quantum.Victim != null)
+                {
+                    var VictimId = Quantum.Victim.GetInstanceID();
+                    Debug.Log($"VictimId: {VictimId}");
+                    var DissappearId = __instance.gameObject.GetInstanceID();
+                    Debug.Log($"DissappearId: {DissappearId}");
+                    //if this is already being blinked and its not being called from a blink dont shake it as if its shorter then it will go back to normal too soon.
+                    if (VictimId == DissappearId && !Plugin.CurrentlyBlinking)
+                    {
+                        return false;
+                    }
+                }
+            }
             if (shakePriority >= __instance.currentShakePriority)
             {
                 return true;
@@ -1437,6 +1506,7 @@ namespace MapMaker
     {
         [HarmonyPatch("Awake")]
         [HarmonyPrefix]
+        //so that it doesnt error out when copying the component for the ShootRay.
         private static bool Awake_MapMaker_Plug(ShootScaleChange __instance)
         {
             if (__instance.RaycastParticlePrefab != null)
@@ -1444,6 +1514,22 @@ namespace MapMaker
                 return true;
             }
             return false;
+        }
+    }
+    [HarmonyPatch(typeof(ShootQuantum))]
+    public class ShootQuantumPatches
+    {
+        [HarmonyPatch("Shoot")]
+        [HarmonyPrefix]
+        private static void Shoot(ShootQuantum __instance, Vec2 firepointFIX, Vec2 directionFIX, ref bool hasFired, int playerId, bool alreadyHitWater = false)
+        {
+            Plugin.CurrentlyBlinking = true;
+        }
+        [HarmonyPatch("Shoot")]
+        [HarmonyPostfix]
+        private static void Shoot2(ShootQuantum __instance, Vec2 firepointFIX, Vec2 directionFIX, ref bool hasFired, int playerId, bool alreadyHitWater = false)
+        {
+            Plugin.CurrentlyBlinking = false;
         }
     }
 }

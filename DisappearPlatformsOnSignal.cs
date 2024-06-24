@@ -46,8 +46,8 @@ namespace MapMaker
 
         public override void Logic(Fix SimDeltaTime)
         {
-            //UnityEngine.Debug.Log("DisappearPlatforms Logic");
-            if (!(gameObject.name == "DisappearPlatformsObject"))
+            //platform is null if its been eaten by a black hole
+            if (!(gameObject.name == "DisappearPlatformsObject") && platform != null)
             {
                 //update1
                 if (update1)

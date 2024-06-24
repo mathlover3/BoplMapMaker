@@ -291,6 +291,6 @@
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="taskkill /f /im &quot;BoplBattle.exe&quot; /t 2&gt;nul &amp;set errorlevel=0 &amp;&amp; copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BepInEx\plugins\mapMaker&quot; &amp;&amp; start &quot;&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle.exe&quot;" />
+    <Exec Command="taskkill /f /im &quot;BoplBattle.exe&quot; /t 2&gt;nul &amp; set errorlevel=0 &amp;&amp; copy &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BepInEx\plugins\mapMaker&quot; &amp;&amp; copy &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BepInEx\plugins\mapMaker&quot; &amp;&amp; start &quot;&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle.exe&quot;&#xA;" />
   </Target>
 </Project>

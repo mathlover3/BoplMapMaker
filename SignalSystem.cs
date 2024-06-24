@@ -26,10 +26,8 @@ namespace MapMaker
         //registers the trigger and returns the id
         public static void RegisterLogicGate(LogicGate LogicGate)
         {
-            UnityEngine.Debug.Log("RegisterLogicGate");
             for (int i = 0; i < LogicGate.OutputSignals.Count; i++)
             {
-                UnityEngine.Debug.Log("RegisterOutput");
                 if (LogicOutputs.Count == 0)
                 {
                     LogicOutputs.Insert(0, LogicGate.OutputSignals[i]);
@@ -45,7 +43,6 @@ namespace MapMaker
         }
         public static void RegisterTrigger(LogicOutput logicOutput)
         {
-            UnityEngine.Debug.Log("RegisterTrigger");
             if (LogicStartingOutputs.Count == 0)
             {
                 LogicStartingOutputs.Insert(0, logicOutput);
@@ -56,7 +53,6 @@ namespace MapMaker
         }
         public static void RegisterInput(LogicInput input)
         {
-            UnityEngine.Debug.Log("RegisterInput");
             if (LogicInputs.Count == 0)
             {
                 LogicInputs.Insert(0, input);
@@ -76,7 +72,6 @@ namespace MapMaker
         //returns the id of the first LogicOutput with that UUid id. assumes the List is sorted
         public static int BinarySearchLogicOutputSignalId(int UUid)
         {
-            UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
             var LowerBound = 0;
             var UpperBound = LogicOutputs.Count - 1;
             var Middle = 0;
@@ -117,7 +112,6 @@ namespace MapMaker
         //returns the id of the first LogicInput with that UUid id. assumes the List is sorted
         public static int BinarySearchLogicInputSignalId(int UUid)
         {
-            UnityEngine.Debug.Log("BinarySearchLogicInputSignalId");
             var min = 0;
             var max = LogicInputs.Count - 1;
             var mid = 0;
@@ -126,7 +120,6 @@ namespace MapMaker
             {
                 //rounding down results in 0 when there is 2 or less items.
                 mid = Mathf.CeilToInt((float)((min + max) / 2));
-                UnityEngine.Debug.Log("mid is " + mid);
                 var SignalAtMiddle = LogicInputs[mid].UUid;
                 if (UUid < SignalAtMiddle)
                 {
@@ -142,14 +135,12 @@ namespace MapMaker
                 }
             }
             //get the first
-            UnityEngine.Debug.Log("mid is " + mid);
             if (LogicInputs.Count != 0)
             {
                 //if its index 0 and the UUid is greater we want it to run one. hence the >= instead of a ==
                 while (mid >= 0 && LogicInputs[mid].UUid >= UUid)
                 {
                     mid--;
-                    UnityEngine.Debug.Log("New mid is " + mid);
                 }
                 return mid + 1;
             }
@@ -159,7 +150,6 @@ namespace MapMaker
         //returns the id of the first LogicOutput with that UUid id. assumes the List is sorted
         public static int BinarySearchLogicTriggerOutputSignalId(int UUid)
         {
-            UnityEngine.Debug.Log("BinarySearchLogicOutputSignalId");
             var LowerBound = 0;
             var UpperBound = LogicStartingOutputs.Count - 1;
             var Middle = 0;
@@ -219,7 +209,6 @@ namespace MapMaker
             //while its not past the last old LogicInput and this LogicInputs UUid is correct check if its IsOn is true and if so add it to the list
             while (CurrentLogicInputIndex < LogicInputs.Count && LogicInputs[CurrentLogicInputIndex].UUid == UUid)
             {
-                UnityEngine.Debug.Log($"adding LogicInput to inputs");
                 inputs.Add(LogicInputs[CurrentLogicInputIndex]);
                 CurrentLogicInputIndex++;
             }
@@ -315,65 +304,110 @@ namespace MapMaker
         {
             var InputOwner = input.Owner;
             var OutputOwner = output.Owner;
-            //input gate checking.
-            //if they should just be in the middle
-            if (InputOwner.GetComponent<Trigger>() != null || InputOwner.GetComponent<Spawner>() != null || InputOwner.GetComponent<DisappearPlatformsOnSignal>() != null || InputOwner.GetComponent<MovingPlatformSignalStuff>() != null || InputOwner.GetComponent<ShootRay>() != null)
+            if (InputOwner == null && lineRenderer != null)
             {
-                lineRenderer.SetPosition(0, (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position);
-                //if its a DisappearPlatformsOnSignal then use the platforms posison instead
-                if (InputOwner.GetComponent<DisappearPlatformsOnSignal>() != null)
+                Destroy(lineRenderer);
+                Debug.Log("Destroyed lineRenderer");
+                return;
+            }
+            if (lineRenderer != null)
+            {
+                //input gate checking.
+                //if they should just be in the middle
+                if (InputOwner.GetComponent<Trigger>() != null || InputOwner.GetComponent<Spawner>() != null || InputOwner.GetComponent<DisappearPlatformsOnSignal>() != null || InputOwner.GetComponent<MovingPlatformSignalStuff>() != null || InputOwner.GetComponent<ShootRay>() != null || InputOwner.GetComponent<ShakePlatform>() != null || InputOwner.GetComponent<DropPlayers>() != null)
                 {
+                    lineRenderer.SetPosition(0, (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position);
+                    //if its a DisappearPlatformsOnSignal then use the platforms posison instead
                     var dis = InputOwner.GetComponent<DisappearPlatformsOnSignal>();
-                    lineRenderer.SetPosition(0, (UnityEngine.Vector3)dis.platform.GetComponent<FixTransform>().position);
+                    if (dis != null)
+                    {
+                        if (dis.platform != null)
+                        {
+                            lineRenderer.SetPosition(0, (UnityEngine.Vector3)dis.platform.GetComponent<FixTransform>().position);
+                        }
+                        else
+                        {
+                            //if the platform is distroyed we want to remove the line
+                            Destroy(lineRenderer);
+                            Debug.Log("Destroyed lineRenderer2");
+                        }
+                    }
+                    var drop = InputOwner.GetComponent<DropPlayers>();
+                    if (drop != null)
+                    {
+                        if (drop.stickyRoundedRectangle != null && drop.stickyRoundedRectangle.gameObject != null)
+                        {
+                            lineRenderer.SetPosition(0, (UnityEngine.Vector3)drop.stickyRoundedRectangle.gameObject.GetComponent<FixTransform>().position);
+                        }
+                        else
+                        {
+                            //if the platform is distroyed we want to remove the line
+                            Destroy(lineRenderer);
+                            Debug.Log("Destroyed lineRenderer3");
+                        }
+                    }
+                    var shake = InputOwner.GetComponent<ShakePlatform>();
+                    if (shake != null)
+                    {
+                        if (shake.shakablePlatform != null && shake.shakablePlatform.gameObject != null)
+                        {
+                            lineRenderer.SetPosition(0, (UnityEngine.Vector3)shake.shakablePlatform.gameObject.GetComponent<FixTransform>().position);
+                        }
+                        else
+                        {
+                            //if the platform is distroyed we want to remove the line
+                            Destroy(lineRenderer);
+                            Debug.Log("Destroyed lineRenderer4");
+                        }
+                    }
                 }
+                if (InputOwner.GetComponent<NotGate>() != null || InputOwner.GetComponent<SignalDelay>() != null)
+                {
+                    var center = (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position;
+                    var rot1 = InputOwner.GetComponent<FixTransform>().rotationInner;
+                    var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
+                    var scale = InputOwner.transform.localScale.x;
+                    var pos1 = center + new Vector3(-2, 0);
+                    var pos = RotatePointAroundPivot(pos1, center, rot);
+                    lineRenderer.SetPosition(0, pos);
+                }
+                //multiple inputs
+                if (InputOwner.GetComponent<AndGate>() != null || InputOwner.GetComponent<OrGate>() != null)
+                {
+                    var center1 = (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position;
+                    var NumberOfLines = input.gate.InputSignals.Count;
+                    //it needs to be a 1 based index.
+                    var LineIndex = input.gate.InputSignals.IndexOf(input) + 1;
+                    //offset it as these gates can have multiple inputs
 
-            }
-            if (InputOwner.GetComponent<NotGate>() != null || InputOwner.GetComponent<SignalDelay>() != null)
-            {
-                var center = (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position;
-                var rot1 = InputOwner.GetComponent<FixTransform>().rotationInner;
-                var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
-                var scale = InputOwner.transform.localScale.x;
-                var pos1 = center + new Vector3(-2, 0);
-                var pos = RotatePointAroundPivot(pos1, center, rot);
-                lineRenderer.SetPosition(0, pos);
-            }
-            //multiple inputs
-            if (InputOwner.GetComponent<AndGate>() != null || InputOwner.GetComponent<OrGate>() != null)
-            {
-                var center1 = (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position;
-                var NumberOfLines = input.gate.InputSignals.Count;
-                //it needs to be a 1 based index.
-                var LineIndex = input.gate.InputSignals.IndexOf(input) + 1;
-                //offset it as these gates can have multiple inputs
-                
-                var MaxOffset = 0.6;
-                var bottom = center1.y - MaxOffset;
-                var centerY = center1.y;
-                //thanks to my dad for the math for this.
-                var Y = (LineIndex - 1) * ((2*(centerY - bottom))/(NumberOfLines - 1)) + bottom;
-                //safe to use normal float math instead of Fixes because it doesnt effect gameplay at all.
-                var center = new Vector3(center1.x - 1.7f, (float)Y);
-                var rot1 = InputOwner.GetComponent<FixTransform>().rotationInner;
-                var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
-                var scale = InputOwner.transform.localScale.x;
-                var pos = RotatePointAroundPivot(center, center1, rot);
-                lineRenderer.SetPosition(0, pos);
-            }
-            //output checking
-            if (OutputOwner.GetComponent<Trigger>() != null || OutputOwner.GetComponent<Spawner>() != null || OutputOwner.GetComponent<DisappearPlatformsOnSignal>() != null || OutputOwner.GetComponent<MovingPlatformSignalStuff>() != null)
-            {
-                lineRenderer.SetPosition(1, (UnityEngine.Vector3)OutputOwner.GetComponent<FixTransform>().position);
-            }
-            if (OutputOwner.GetComponent<NotGate>() != null || OutputOwner.GetComponent<SignalDelay>() != null || OutputOwner.GetComponent<AndGate>() != null || OutputOwner.GetComponent<OrGate>() != null)
-            {
-                var center = (UnityEngine.Vector3)OutputOwner.GetComponent<FixTransform>().position;
-                var rot1 = OutputOwner.GetComponent<FixTransform>().rotationInner;
-                var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
-                var scale = InputOwner.transform.localScale.x;
-                var pos1 = center + new Vector3(2f, 0);
-                var pos = RotatePointAroundPivot(pos1, center, rot);
-                lineRenderer.SetPosition(1, pos);
+                    var MaxOffset = 0.6;
+                    var bottom = center1.y - MaxOffset;
+                    var centerY = center1.y;
+                    //thanks to my dad for the math for this.
+                    var Y = (LineIndex - 1) * ((2 * (centerY - bottom)) / (NumberOfLines - 1)) + bottom;
+                    //safe to use normal float math instead of Fixes because it doesnt effect gameplay at all.
+                    var center = new Vector3(center1.x - 1.7f, (float)Y);
+                    var rot1 = InputOwner.GetComponent<FixTransform>().rotationInner;
+                    var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
+                    var scale = InputOwner.transform.localScale.x;
+                    var pos = RotatePointAroundPivot(center, center1, rot);
+                    lineRenderer.SetPosition(0, pos);
+                }
+                //output checking
+                if (OutputOwner.GetComponent<Trigger>() != null || OutputOwner.GetComponent<Spawner>() != null || OutputOwner.GetComponent<DisappearPlatformsOnSignal>() != null || OutputOwner.GetComponent<MovingPlatformSignalStuff>() != null)
+                {
+                    lineRenderer.SetPosition(1, (UnityEngine.Vector3)OutputOwner.GetComponent<FixTransform>().position);
+                }
+                if (OutputOwner.GetComponent<NotGate>() != null || OutputOwner.GetComponent<SignalDelay>() != null || OutputOwner.GetComponent<AndGate>() != null || OutputOwner.GetComponent<OrGate>() != null)
+                {
+                    var center = (UnityEngine.Vector3)OutputOwner.GetComponent<FixTransform>().position;
+                    var rot1 = OutputOwner.GetComponent<FixTransform>().rotationInner;
+                    var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
+                    var scale = InputOwner.transform.localScale.x;
+                    var pos1 = center + new Vector3(2f, 0);
+                    var pos = RotatePointAroundPivot(pos1, center, rot);
+                    lineRenderer.SetPosition(1, pos);
+                }
             }
         }
         public override void Init()
@@ -402,6 +436,7 @@ namespace MapMaker
                 {
                     var Line = LineRenderers[input];
                     var output = input.inputs[0];
+
                     SetLinePosForLine(Line, input, output);
                 }
             }
@@ -436,11 +471,15 @@ namespace MapMaker
                 input.IsOn = output.IsOn;
                 //update the line color
                 var Line = LineRenderers[input];
-                if (input.IsOn)
+                //if the line isnt null update the colors.
+                if (Line)
                 {
-                    Line.endColor = (Line.startColor = Color.green);
+                    if (input.IsOn)
+                    {
+                        Line.endColor = (Line.startColor = Color.green);
+                    }
+                    else Line.endColor = (Line.startColor = Color.red);
                 }
-                else Line.endColor = (Line.startColor = Color.red);
                 //run the gates logic
                 input.gate.Logic(SimDeltaTime);
                 //for all of this gates outputs keep looping recusivly

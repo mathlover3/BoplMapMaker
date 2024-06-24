@@ -1,4 +1,5 @@
 ﻿using BoplFixedMath;
+using MapMaker;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ public class ShootBlink : MonoBehaviour
     // Token: 0x0600046A RID: 1130 RVA: 0x0002FBD8 File Offset: 0x0002DDD8
     public void Shoot(Vec2 firepointFIX, Vec2 directionFIX, ref bool hasFired, bool alreadyHitWater = false)
     {
+        Plugin.CurrentlyBlinking = true;
         Vec2 vec = directionFIX;
         AudioManager.Get().Play("laserShoot");
         Debug.DrawRay((Vector2)firepointFIX, (float)this.maxDistance * (Vector2)vec, new Color(255f, 255f, 0f));
@@ -134,6 +136,7 @@ public class ShootBlink : MonoBehaviour
             this.spawnRayCastEffect((Vector2)firepointFIX, (Vector2)vec, (float)this.maxDistance, false, Vec2.up, false);
         }
         hasFired = true;
+        Plugin.CurrentlyBlinking = false;
     }
 
     // Token: 0x0600046B RID: 1131 RVA: 0x00030280 File Offset: 0x0002E480

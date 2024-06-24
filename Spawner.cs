@@ -32,7 +32,7 @@ namespace MapMaker
         private FixTransform fixTransform;
         private Fix RelitiveSimTime;
         public bool UseSignal = false;
-        //if true then it will only activate once when the signal is on
+        //if true then it will only activate on rising edge.
         public bool IsTriggerSignal = false;
         private bool HasTrigged = false;
         //up to 65536 signals! more then enoth for amost anything! even building a computer???
