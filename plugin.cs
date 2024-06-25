@@ -24,6 +24,7 @@ using UnityEngine.UI;
 using System.Reflection.Emit;
 using PlatformApi;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using System.Web;
 
 namespace MapMaker
 {
@@ -352,9 +353,6 @@ namespace MapMaker
                     Vec2[] teamSpawns = new Vec2[4];
                     // Extract platform data (david)
                     Dictionary<string, object> transform = (Dictionary<string, object>)platform["transform"];
-                    Dictionary<string, object> size = (Dictionary<string, object>)platform["size"];
-
-                    //doesnt work if any of them is a int for some reson? invalid cast error. // PLEASE USE TO CODE TO MAKE IT WORK!
                     double x = Convert.ToDouble(transform["x"]);
                     double y = Convert.ToDouble(transform["y"]);
                     //defult to 0 rotatson incase the json is missing it
@@ -364,30 +362,28 @@ namespace MapMaker
                         rotatson = ConvertToRadians(Convert.ToDouble(platform["rotation"]));
                     }
                     Debug.Log("getting IsPresetPatform");
-                    bool IsPresetPatform = (bool)platform["IsPresetPatform"];
+                    bool IsPresetPatform = platform.ContainsKey("PresetPlatform");
                     Debug.Log("IsPresetPatform is: " + IsPresetPatform);
 
                     //path stuff
 
                     PlatformApi.PlatformApi.PathType pathType = PlatformApi.PlatformApi.PathType.None;
-                    if (platform.ContainsKey("PathType"))
+                    if (platform.ContainsKey("AntiLockPlatform"))
                     {
-                        if (Convert.ToString(platform["PathType"]) == "AntiLockPlatform")
-                        {
-                            pathType = PlatformApi.PlatformApi.PathType.AntiLockPlatform;
-                        }
-                        else if (Convert.ToString(platform["PathType"]) == "VectorFieldPlatform")
-                        {
-                            pathType = PlatformApi.PlatformApi.PathType.VectorFieldPlatform;
-                        }
+                        pathType = PlatformApi.PlatformApi.PathType.AntiLockPlatform;
+                    }
+                    if (platform.ContainsKey("VectorFieldPlatform"))
+                    {
+                        pathType = PlatformApi.PlatformApi.PathType.VectorFieldPlatform;
                     }
                     //AntiLockPlatform
                     if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                     {
-                        OrbitForce = Convert.ToDouble(platform["OrbitForce"]);
+                        var AntiLockPlatform = (Dictionary<string, object>)platform["AntiLockPlatform"];
+                        OrbitForce = Convert.ToDouble(AntiLockPlatform["OrbitForce"]);
                         //object time! (objects are so confusing)
                         //convert object to list of objects
-                        List<System.Object> OrbitPathObjects = (List<System.Object>)platform["OrbitPath"];
+                        List<System.Object> OrbitPathObjects = (List<System.Object>)AntiLockPlatform["OrbitPath"];
                         //now to convert eatch object in the list to a list of 2 objects
                         List<Vec2> Vecs1 = new List<Vec2>();
                         for (int i = 0; i < OrbitPathObjects.Count; i++)
@@ -403,45 +399,51 @@ namespace MapMaker
                         //now we have a Vec2 array for orbit path
                         OrbitPath = Vecs;
                         //the rest is easy
-                        isBird = (bool)platform["isBird"];
+                        isBird = (bool)AntiLockPlatform["isBird"];
+                        DelaySeconds = Convert.ToDouble(AntiLockPlatform["DelaySeconds"]);
                     }
-                    //this is used in both types of paths
-                    if (platform.ContainsKey("DelaySeconds"))
+                    if (pathType == PlatformApi.PlatformApi.PathType.VectorFieldPlatform)
                     {
-                        DelaySeconds = Convert.ToDouble(platform["DelaySeconds"]);
+                        var VectorFieldPlatform = (Dictionary<string, object>)platform["VectorFieldPlatform"];
+                        if (VectorFieldPlatform.ContainsKey("expandSpeed"))
+                        {
+                            expandSpeed = Convert.ToDouble(VectorFieldPlatform["expandSpeed"]);
+                        }
+                        if (VectorFieldPlatform.ContainsKey("centerPoint"))
+                        {
+                            var floats = ListOfObjectsToListOfFloats((List<object>)VectorFieldPlatform["centerPoint"]);
+                            centerPoint = new Vec2(FloorToThousandnths(floats[0]), FloorToThousandnths(floats[1]));
+                        }
+                        if (VectorFieldPlatform.ContainsKey("normalSpeedFriction"))
+                        {
+                            normalSpeedFriction = Convert.ToDouble(VectorFieldPlatform["normalSpeedFriction"]);
+                        }
+                        if (VectorFieldPlatform.ContainsKey("DeadZoneDist"))
+                        {
+                            DeadZoneDist = Convert.ToDouble(VectorFieldPlatform["DeadZoneDist"]);
+                        }
+                        if (VectorFieldPlatform.ContainsKey("OrbitAccelerationMulitplier"))
+                        {
+                            OrbitAccelerationMulitplier = Convert.ToDouble(VectorFieldPlatform["OrbitAccelerationMulitplier"]);
+                        }
+                        if (VectorFieldPlatform.ContainsKey("targetRadius"))
+                        {
+                            targetRadius = Convert.ToDouble(VectorFieldPlatform["targetRadius"]);
+                        }
+                        if (VectorFieldPlatform.ContainsKey("ovalness01"))
+                        {
+                            ovalness01 = Convert.ToDouble(VectorFieldPlatform["ovalness01"]);
+                        }
+                        if (VectorFieldPlatform.ContainsKey("DelaySeconds"))
+                        {
+                            DelaySeconds = Convert.ToDouble(VectorFieldPlatform["DelaySeconds"]);
+                        }
                     }
-                    if (platform.ContainsKey("expandSpeed"))
-                    {
-                        expandSpeed = Convert.ToDouble(platform["expandSpeed"]);
-                    }
-                    if (platform.ContainsKey("centerPoint"))
-                    {
-                        var floats = ListOfObjectsToListOfFloats((List<object>)platform["centerPoint"]);
-                        centerPoint = new Vec2(FloorToThousandnths(floats[0]), FloorToThousandnths(floats[1]));
-                    }
-                    if (platform.ContainsKey("normalSpeedFriction"))
-                    {
-                        normalSpeedFriction = Convert.ToDouble(platform["normalSpeedFriction"]);
-                    }
-                    if (platform.ContainsKey("DeadZoneDist"))
-                    {
-                        DeadZoneDist = Convert.ToDouble(platform["DeadZoneDist"]);
-                    }
-                    if (platform.ContainsKey("OrbitAccelerationMulitplier"))
-                    {
-                        OrbitAccelerationMulitplier = Convert.ToDouble(platform["OrbitAccelerationMulitplier"]);
-                    }
-                    if (platform.ContainsKey("targetRadius"))
-                    {
-                        targetRadius = Convert.ToDouble(platform["targetRadius"]);
-                    }
-                    if (platform.ContainsKey("ovalness01"))
-                    {
-                        ovalness01 = Convert.ToDouble(platform["ovalness01"]);
-                    }
+
                     //if its a preset platform dont do any of this.
                     if (!IsPresetPatform)
                     {
+                        Dictionary<string, object> size = (Dictionary<string, object>)platform["size"];
                         double width = Convert.ToDouble(size["width"]);
                         double height = Convert.ToDouble(size["height"]);
                         double radius = Convert.ToDouble(platform["radius"]);
@@ -468,16 +470,25 @@ namespace MapMaker
                         {
                             CustomMassScale = Convert.ToDouble(platform["CustomMassScale"]);
                         }
-                        //custom Texture 
-                        if (platform.ContainsKey("UseCustomTexture") && platform.ContainsKey("CustomTextureName") && platform.ContainsKey("PixelsPerUnit"))
+                        Dictionary<string, object> CustomTexture = null;
+                        if (platform.ContainsKey("CustomTexture"))
                         {
-                            UseCustomTexture = (bool)platform["UseCustomTexture"];
+                            CustomTexture = (Dictionary<string, object>)platform["CustomTexture"];
+                        }
+                        //custom Texture 
+                        if (CustomTexture != null && CustomTexture.ContainsKey("CustomTextureName") && CustomTexture.ContainsKey("PixelsPerUnit"))
+                        {
+                            UseCustomTexture = true;
+                        }
+                        else
+                        {
+                            UseCustomTexture = false;
                         }
                         Debug.Log($"UseCustomTexture is {UseCustomTexture}");
                         if (UseCustomTexture)
                         {
-                            float PixelsPerUnit = (float)Convert.ToDouble(platform["PixelsPerUnit"]);
-                            CustomTextureName = (String)platform["CustomTextureName"];
+                            float PixelsPerUnit = (float)Convert.ToDouble(CustomTexture["PixelsPerUnit"]);
+                            CustomTextureName = (String)CustomTexture["CustomTextureName"];
                             Debug.Log(CustomTextureName);
                             //doesnt work if there are multiple files ending with the file name
                             //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
@@ -516,14 +527,15 @@ namespace MapMaker
                         }
                         color = new Vector4(Red, Green, Blue, Opacity);
                         //UseCustomDrillColorAndBolderTexture
-                        if (platform.ContainsKey("UseCustomDrillColorAndBolderTexture"))
+                        if (platform.ContainsKey("CustomDrillColorAndBolderTexture"))
                         {
-                            UseCustomDrillColorAndBolderTexture = (bool)platform["UseCustomDrillColorAndBolderTexture"];
+                            UseCustomDrillColorAndBolderTexture = true;
                         }
                         if (UseCustomDrillColorAndBolderTexture)
                         {
+                            var CustomDrillColorAndBolderTexture = (Dictionary<string, object>)platform["CustomDrillColorAndBolderTexture"];
                             //get drill colors dict to pass.
-                            var dict = (Dictionary<string, object>)platform["CustomDrillColors"];
+                            var dict = (Dictionary<string, object>)CustomDrillColorAndBolderTexture["CustomDrillColors"];
                             //if this platform fails to generate then the custom boulder texsters will get mixed up.
                             var MyPlatformId = NextPlatformTypeValue;
                             NextPlatformTypeValue = NextPlatformTypeValue + 1;
@@ -533,8 +545,8 @@ namespace MapMaker
                             platformType = (PlatformType)MyPlatformId;
                             CustomDrillColors.Add(colors);
                             //custom Boulder time
-                            float PixelsPerUnit = (float)Convert.ToDouble(platform["BoulderPixelsPerUnit"]);
-                            CustomTextureName = (String)platform["CustomBoulderTexture"];
+                            float PixelsPerUnit = (float)Convert.ToDouble(CustomDrillColorAndBolderTexture["BoulderPixelsPerUnit"]);
+                            CustomTextureName = (String)CustomDrillColorAndBolderTexture["CustomBoulderTexture"];
                             //Debug.Log(CustomTextureName);
                             //doesnt work if there are multiple files ending with the file name
                             //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
@@ -557,13 +569,13 @@ namespace MapMaker
                                 Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
                                 return;
                             }
-                            var BoulderSmokeColorList = ListOfObjectsToListOfFloats((List<object>)platform["BoulderSmokeColor"]);
+                            var BoulderSmokeColorList = ListOfObjectsToListOfFloats((List<object>)CustomDrillColorAndBolderTexture["BoulderSmokeColor"]);
                             UnityEngine.Color BoulderSmokeColor = new UnityEngine.Color(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
                             CustomBoulderSmokeColors.Add(BoulderSmokeColor);
                         }
-                        if (platform.ContainsKey("UseSlimeCam"))
+                        if (CustomTexture != null && CustomTexture.ContainsKey("UseSlimeCam"))
                         {
-                            UseSlimeCam = (bool)platform["UseSlimeCam"];
+                            UseSlimeCam = (bool)CustomTexture["UseSlimeCam"];
                         }
                         Vector4[] color2 = { color };
                         Vec2[] centerPoint2 = { centerPoint };
@@ -576,7 +588,8 @@ namespace MapMaker
                     // if it is a preset platform then we do it difrently
                     else
                     {
-                        string PresetPlatformName = Convert.ToString(platform["PresetPlatformName"]);
+                        Dictionary<string, object> PresetPlatform = (Dictionary<string, object>)platform["PresetPlatform"];
+                        string PresetPlatformName = Convert.ToString(PresetPlatform["PresetPlatformName"]);
                         var Platform = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/" + PresetPlatformName + ".prefab");
                         //idk if this is gonna work to fix the posable desink as it is converted back to a float...
                         var x2 = FloorToThousandnths(x);
@@ -585,14 +598,18 @@ namespace MapMaker
                         //the rest of the FloorToThousandnths should work fine for fixing it though
                         //fix shader
                         Platform.GetComponent<SpriteRenderer>().material = PlatformMat;
+                        //set home
+                        PlatformApi.PlatformApi.SetHome(Platform, (Vec2)pos);
+                        
                         //scale object
-                        //AddComponent(typeof(namespace.className)); 
-                        var ScaleFactor = FloorToThousandnths(Convert.ToDouble(platform["ScaleFactor"]));
+                        var ScaleFactor = FloorToThousandnths(Convert.ToDouble(PresetPlatform["ScaleFactor"]));
                         var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
                         GrowOnStartComp.scaleUp = ScaleFactor;
                         Debug.Log("added GrowOnStart");
                         //spawn object
+                        Debug.Log($"pos is {pos}");
                         Platform = UnityEngine.Object.Instantiate<GameObject>(Platform, pos, Quaternion.identity);
+                        PlatformApi.PlatformApi.SetPos(Platform, (Vec2)pos);
                         //rotate object
                         StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
                         StickyRect.GetGroundBody().rotation = FloorToThousandnths(rotatson);
@@ -622,7 +639,7 @@ namespace MapMaker
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Failed to spawn platform. Error: {ex.Message}");
+                    Debug.LogError($"Failed to spawn platform. Error: {ex}");
                 }
             }
             if (Dict.ContainsKey("boulders"))
