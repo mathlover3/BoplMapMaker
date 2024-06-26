@@ -19,22 +19,9 @@ namespace MapMaker.Lua_stuff
                 { "mynumber", 5 }
             };
             RunScript(@"    
-        debug.setmetatable(0, {
-            __mul = function(a, b)
-                return custom_multiply(a, b)
-            end
-        })
-        
 		-- defines a factorial function
-		function fact (n)
-			if (n == 0) then
-				return 1
-			else
-				return n*fact(n - 2 + 1)
-			end
-		end
 
-		return fact(mynumber)", paramiters);
+		return math.abs(mynumber)", paramiters);
         }
         public static DynValue RunScript(string scriptCode, Dictionary<string, object> paramiters)
         {

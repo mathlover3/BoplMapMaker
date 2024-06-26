@@ -26,6 +26,7 @@ using PlatformApi;
 using static UnityEngine.ParticleSystem.PlaybackState;
 using System.Web;
 using MapMaker.Lua_stuff;
+using MoonSharp.Interpreter;
 
 namespace MapMaker
 {
@@ -1276,6 +1277,37 @@ namespace MapMaker
             dropPlayers.Register();
             return dropPlayers;
         }
+        //lua stuff
+        public static DynValue exec1(CallbackArguments args, string funcName, Func<double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
+        {
+            MethodInfo dynMethod = __instance.GetType().GetMethod("exec1",
+BindingFlags.NonPublic | BindingFlags.Static);
+            return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
+        }
+        public static DynValue exec2(CallbackArguments args, string funcName, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
+        {
+            MethodInfo dynMethod = __instance.GetType().GetMethod("exec2",
+BindingFlags.NonPublic | BindingFlags.Static);
+            return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
+        }
+        public static DynValue exec2n(CallbackArguments args, string funcName, double defVal, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
+        {
+            MethodInfo dynMethod = __instance.GetType().GetMethod("exec2n",
+BindingFlags.NonPublic | BindingFlags.Static);
+            return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
+        }
+        public static DynValue execaccum(CallbackArguments args, string funcName, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
+        {
+            MethodInfo dynMethod = __instance.GetType().GetMethod("exec2n",
+BindingFlags.NonPublic | BindingFlags.Static);
+            return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
+        }
+        public static Fix Tanh(Fix d)
+        {
+            var cosh = (Fix.Pow((Fix)2.718281828459045, (Fix)(d)) + Fix.Pow((Fix)2.718281828459045, (Fix)(-d))) / (Fix)2;
+            var sinh = (Fix.Pow((Fix)2.718281828459045, (Fix)d) - Fix.Pow((Fix)2.718281828459045, (Fix)(-d))) / (Fix)2;
+            return sinh / cosh;
+        }
     }
     [HarmonyPatch(typeof(MachoThrow2))]
     public class MachoThrow2Patches
@@ -1551,6 +1583,227 @@ namespace MapMaker
         private static void Shoot2(ShootQuantum __instance, Vec2 firepointFIX, Vec2 directionFIX, ref bool hasFired, int playerId, bool alreadyHitWater = false)
         {
             Plugin.CurrentlyBlinking = false;
+        }
+    }
+    [HarmonyPatch(typeof(MoonSharp.Interpreter.CoreLib.MathModule))]
+    public class MoonSharpPatches
+    {
+
+        [HarmonyPatch("abs")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void abs(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("abs");
+            __result = Plugin.exec1(args, "abs", d => (double)Fix.Abs((Fix)d), __instance);
+        }
+        [HarmonyPatch("acos")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void acos(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("acos");
+            __result = Plugin.exec1(args, "acos", d => (double)Fix.Acos((Fix)d), __instance);
+        }
+        [HarmonyPatch("asin")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void asin(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("asin");
+            //Fix doesnt have a asin so thanks to chatgpt i use Acon and sqrt and exsponents to get Asin
+            __result = Plugin.exec1(args, "asin", d => (double)Fix.Acos(Fix.Sqrt(Fix.One - Fix.Pow2((Fix)d))), __instance);
+        }
+        [HarmonyPatch("atan")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void atan(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("atan");
+            __result = Plugin.exec1(args, "atan", d => (double)Fix.Atan((Fix)d), __instance);
+        }
+        [HarmonyPatch("atan2")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void atan2(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("atan2");
+            __result = Plugin.exec2(args, "atan2", (d1, d2) => (double)Fix.Atan2((Fix)d1, (Fix)d2), __instance);
+        }
+        [HarmonyPatch("ceil")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void ceil(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("ceil");
+            __result = Plugin.exec1(args, "ceil", d => (double)Fix.Ceiling((Fix)d), __instance);
+        }
+        [HarmonyPatch("cos")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void cos(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("cos");
+            __result = Plugin.exec1(args, "cos", d => (double)Fix.Cos((Fix)d), __instance);
+        }
+        [HarmonyPatch("cosh")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void cosh(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("cosh");
+            //i sure hope this works...
+            __result = Plugin.exec1(args, "cosh", d => (double)((Fix.Pow((Fix)2.718281828459045, (Fix)(d)) + Fix.Pow((Fix)2.718281828459045, (Fix)(-d))) / (Fix)2), __instance);
+        }
+        [HarmonyPatch("deg")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void deg(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("deg");
+            __result = Plugin.exec1(args, "deg", d => (double)((Fix)d * (Fix)180 / Fix.Pi), __instance);
+        }
+        [HarmonyPatch("exp")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void exp(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("exp");
+            //i sure hope this works...
+            __result = Plugin.exec1(args, "exp", d => (double)Fix.Pow((Fix)2.718281828459045, (Fix)d), __instance);
+        }
+        [HarmonyPatch("floor")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void floor(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("floor");
+            __result = Plugin.exec1(args, "floor", d => (double)Fix.Floor((Fix)d), __instance);
+        }
+        [HarmonyPatch("fmod")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void fmod(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("fmod");
+            __result = Plugin.exec2(args, "fmod", (d1, d2) => (double)Fix.SlowMod((Fix)d1, (Fix)d2), __instance);
+        }
+        [HarmonyPatch("ldexp")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void ldexp(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("ldexp");
+            __result = Plugin.exec2(args, "ldexp", (d1, d2) => (double)((Fix)d1 * Fix.Pow((Fix)2, (Fix)d2)), __instance);
+        }
+        [HarmonyPatch("log")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void log(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("log");
+            //i THINK Log2(n) is the same as ln(n)???
+            __result = Plugin.exec2n(args, "log", Math.E, (d1, d2) => (double)(Fix.Log2((Fix)d1) / Fix.Log2((Fix)d2)), __instance);
+        }
+        [HarmonyPatch("max")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void max(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("max");
+            __result = Plugin.execaccum(args, "max", (d1, d2) => (double)Fix.Max((Fix)d1, (Fix)d2), __instance);
+        }
+        [HarmonyPatch("min")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void min(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("min");
+            __result = Plugin.execaccum(args, "min", (d1, d2) => (double)Fix.Min((Fix)d1, (Fix)d2), __instance);
+        }
+        [HarmonyPatch("modf")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void modf(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("modf");
+            DynValue arg = args.AsType(0, "modf", DataType.Number, false);
+            __result = DynValue.NewTuple(DynValue.NewNumber((double)Fix.Floor((Fix)arg.Number)), DynValue.NewNumber((double)((Fix)arg.Number - Fix.Floor((Fix)arg.Number))));
+        }
+        [HarmonyPatch("pow")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void pow(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("pow");
+            __result = Plugin.exec2(args, "pow", (d1, d2) => (double)Fix.Pow((Fix)d1, (Fix)d2), __instance);
+        }
+        [HarmonyPatch("rad")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void rad(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("rad");
+            __result = Plugin.exec1(args, "rad", d => (double)((Fix)d * Fix.Pi / (Fix)180), __instance);
+        }
+        [HarmonyPatch("random")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void random(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            
+            Debug.Log("random");
+            double d;
+            DynValue m = args.AsType(0, "random", DataType.Number, true);
+            DynValue n = args.AsType(1, "random", DataType.Number, true);
+            Fix a = n.IsNil() ? (Fix)1 : (Fix)n.Number;
+            Fix b = (Fix)m.Number;
+            if (a < b)
+                d = (double)Updater.RandomFix(a, b);
+            else
+                d = (double)Updater.RandomFix(b, a);
+            __result = DynValue.NewNumber(d);
+        }
+        [HarmonyPatch("sin")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void sin(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("sin");
+            __result = Plugin.exec1(args, "sin", d => (double)(Fix.Sin((Fix)d)), __instance);
+        }
+        //Fix.Pow((Fix)2.718281828459045, (Fix)d)
+        [HarmonyPatch("sinh")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void sinh(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("sinh");
+            __result = Plugin.exec1(args, "sinh", d => (double)((Fix.Pow((Fix)2.718281828459045, (Fix)d) - Fix.Pow((Fix)2.718281828459045, (Fix)(-d)))/(Fix)2), __instance);
+        }
+        [HarmonyPatch("sqrt")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void sqrt(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("sqrt");
+            __result = Plugin.exec1(args, "sqrt", d => (double)(Fix.Sqrt((Fix)d)), __instance);
+        }
+        [HarmonyPatch("tan")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void tan(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("tan");
+            __result = Plugin.exec1(args, "tan", d => (double)(Fix.Tan((Fix)d)), __instance);
+        }
+        [HarmonyPatch("tanh")]
+        [HarmonyPostfix]
+        //make it use Fix math instead of floating point math.
+        private static void tanh(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
+        {
+            Debug.Log("tanh");
+            __result = Plugin.exec1(args, "tanh", d => (double)Plugin.Tanh((Fix)d), __instance);
         }
     }
 }
