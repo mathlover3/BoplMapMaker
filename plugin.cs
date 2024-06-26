@@ -25,6 +25,7 @@ using System.Reflection.Emit;
 using PlatformApi;
 using static UnityEngine.ParticleSystem.PlaybackState;
 using System.Web;
+using MapMaker.Lua_stuff;
 
 namespace MapMaker
 {
@@ -775,6 +776,9 @@ namespace MapMaker
                     SignalSystem.LineRenderers = new();
                     SignalSystem.LogicInputsThatAlwaysUpdateThereLineConnectsons = new();
                     SignalSystem.FirstUpdateOfTheRound = true;
+
+                    GameObject Test = new GameObject("LuaTestObject");
+                    Test.AddComponent<LuaMain>();
                 }
                 catch (Exception ex)
                 {

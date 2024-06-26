@@ -39,3 +39,4 @@ C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.pdb
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.IgnoresAccessChecksTo.cs
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\PlatformApi.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\PlatformApi.pdb
+C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\MoonSharp.Interpreter.dll

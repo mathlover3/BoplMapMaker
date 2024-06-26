@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "4XbfzFA5m92hKJ4fwfISEOV3XTYoLxAEdjUVxnjQV3C3b/rw4KL5TmT/U5BsGJ8ESIAuY9fTW1QRsIfN1FWOkA==",
+  "dgSpecHash": "0yOtd8Uhfr7UCM6Q/1cCZ0+eGUyE3sMEO090pOPItIHx22YJA3d+LNbl9KtgucoW+LLUUigGW+2koJmZgpi/zA==",
   "success": true,
   "projectFilePath": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MapMaker.csproj",
   "expectedPackageFiles": [
@@ -15,6 +15,7 @@
     "C:\\Users\\djhlo\\.nuget\\packages\\mono.cecil\\0.11.4\\mono.cecil.0.11.4.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\monomod.runtimedetour\\21.12.13.1\\monomod.runtimedetour.21.12.13.1.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\monomod.utils\\21.12.13.1\\monomod.utils.21.12.13.1.nupkg.sha512",
+    "C:\\Users\\djhlo\\.nuget\\packages\\moonsharp\\2.0.0\\moonsharp.2.0.0.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\system.io.compression\\4.3.0\\system.io.compression.4.3.0.nupkg.sha512",
     "C:\\Users\\djhlo\\.nuget\\packages\\unityengine.modules\\2019.4.5\\unityengine.modules.2019.4.5.nupkg.sha512"
   ],
