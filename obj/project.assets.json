@@ -147,19 +147,6 @@
           }
         }
       },
-      "MoonSharp/2.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net40-client/MoonSharp.Interpreter.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/net40-client/MoonSharp.Interpreter.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "System.IO.Compression/4.3.0": {
         "type": "package",
         "frameworkAssemblies": [
@@ -809,34 +796,6 @@
         "monomod.utils.nuspec"
       ]
     },
-    "MoonSharp/2.0.0": {
-      "sha512": "uiAcRh7d+53k3xW9pFDJfAFVw4RnjHVCJG05M3oPAVEVwPtFavhg1H/IpC6So4X1j9kJlzuLlA3OghhPcIvc5A==",
-      "type": "package",
-      "path": "moonsharp/2.0.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "lib/net35-client/MoonSharp.Interpreter.dll",
-        "lib/net35-client/MoonSharp.Interpreter.pdb",
-        "lib/net35-client/MoonSharp.Interpreter.xml",
-        "lib/net40-client/MoonSharp.Interpreter.dll",
-        "lib/net40-client/MoonSharp.Interpreter.pdb",
-        "lib/net40-client/MoonSharp.Interpreter.xml",
-        "lib/netcore/MoonSharp.Interpreter.deps.json",
-        "lib/netcore/MoonSharp.Interpreter.dll",
-        "lib/netcore/MoonSharp.Interpreter.pdb",
-        "lib/netcore/MoonSharp.Interpreter.xml",
-        "lib/netstandard1.6/MoonSharp.Interpreter.deps.json",
-        "lib/netstandard1.6/MoonSharp.Interpreter.dll",
-        "lib/netstandard1.6/MoonSharp.Interpreter.pdb",
-        "lib/netstandard1.6/MoonSharp.Interpreter.xml",
-        "lib/portable-net4+sl5+wp8+win8/MoonSharp.Interpreter.dll",
-        "lib/portable-net4+sl5+wp8+win8/MoonSharp.Interpreter.pdb",
-        "lib/portable-net4+sl5+wp8+win8/MoonSharp.Interpreter.xml",
-        "moonsharp.2.0.0.nupkg.sha512",
-        "moonsharp.nuspec"
-      ]
-    },
     "System.IO.Compression/4.3.0": {
       "sha512": "YHndyoiV90iu4iKG115ibkhrG+S3jBm8Ap9OwoUAzO5oPDAWcr0SFwQFm0HjM8WkEZWo0zvLTyLmbvTkW1bXgg==",
       "type": "package",
@@ -1106,7 +1065,6 @@
       "BepInEx.Core >= 5.*",
       "BepInEx.PluginInfoProps >= 1.*",
       "Microsoft.NETFramework.ReferenceAssemblies >= 1.0.2",
-      "MoonSharp >= 2.0.0",
       "System.IO.Compression >= 4.3.0",
       "UnityEngine.Modules >= 2019.4.5"
     ]
@@ -1174,10 +1132,6 @@
             "suppressParent": "All",
             "target": "Package",
             "version": "[1.0.2, )"
-          },
-          "MoonSharp": {
-            "target": "Package",
-            "version": "[2.0.0, )"
           },
           "System.IO.Compression": {
             "target": "Package",

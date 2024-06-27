@@ -13,7 +13,6 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-    <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="UnityEngine.Modules" Version="2019.4.5" IncludeAssets="compile" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
@@ -38,6 +37,9 @@
     </Reference>
     <Reference Include="Mono.Security">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="MoonSharp.Interpreter">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BepInEx\plugins\mapMaker\MoonSharp.Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="PlatformApi">
       <HintPath>..\..\PlatformApi\PlatformApi\bin\Debug\net471\PlatformApi.dll</HintPath>

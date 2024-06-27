@@ -27,6 +27,7 @@ using static UnityEngine.ParticleSystem.PlaybackState;
 using System.Web;
 using MapMaker.Lua_stuff;
 using MoonSharp.Interpreter;
+using Mono.Cecil.Cil;
 
 namespace MapMaker
 {
@@ -88,6 +89,7 @@ namespace MapMaker
 
             Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
             harmony.PatchAll(); // Patch Harmony
+
             Logger.LogInfo("MapMaker Patch Compleate!");
 
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -602,7 +604,7 @@ namespace MapMaker
                         Platform.GetComponent<SpriteRenderer>().material = PlatformMat;
                         //set home
                         PlatformApi.PlatformApi.SetHome(Platform, (Vec2)pos);
-                        
+
                         //scale object
                         var ScaleFactor = FloorToThousandnths(Convert.ToDouble(PresetPlatform["ScaleFactor"]));
                         var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
@@ -803,15 +805,15 @@ namespace MapMaker
                 int[] UUids2 = { 1, 5 };
                 CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
                 CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
-                CreateSignalDelay(2, 5, (Fix)1, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
-                CreateSignalDelay(3, 4, (Fix)1, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
+                CreateSignalDelay(2, 5, (Fix)0.2, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
+                CreateSignalDelay(3, 4, (Fix)0.2, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 AddMovingPlatformSignalStuff(platform, 2);
                 CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
                 CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);
                 CreateDropPlayers(platform, 2, (Fix)100, true);
-                //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
-                //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
-                //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
+                CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
+                CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
+                CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
@@ -1280,25 +1282,25 @@ namespace MapMaker
         //lua stuff
         public static DynValue exec1(CallbackArguments args, string funcName, Func<double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
-            MethodInfo dynMethod = __instance.GetType().GetMethod("exec1",
+            MethodInfo dynMethod = typeof(MoonSharp.Interpreter.CoreLib.MathModule).GetMethod("exec1",
 BindingFlags.NonPublic | BindingFlags.Static);
             return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
         }
         public static DynValue exec2(CallbackArguments args, string funcName, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
-            MethodInfo dynMethod = __instance.GetType().GetMethod("exec2",
+            MethodInfo dynMethod = typeof(MoonSharp.Interpreter.CoreLib.MathModule).GetMethod("exec2",
 BindingFlags.NonPublic | BindingFlags.Static);
             return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
         }
         public static DynValue exec2n(CallbackArguments args, string funcName, double defVal, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
-            MethodInfo dynMethod = __instance.GetType().GetMethod("exec2n",
+            MethodInfo dynMethod = typeof(MoonSharp.Interpreter.CoreLib.MathModule).GetMethod("exec2n",
 BindingFlags.NonPublic | BindingFlags.Static);
             return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
         }
         public static DynValue execaccum(CallbackArguments args, string funcName, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
-            MethodInfo dynMethod = __instance.GetType().GetMethod("exec2n",
+            MethodInfo dynMethod = typeof(MoonSharp.Interpreter.CoreLib.MathModule).GetMethod("execaccum",
 BindingFlags.NonPublic | BindingFlags.Static);
             return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
         }
@@ -1318,7 +1320,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
         {
             Debug.Log("MatchoThrow2");
             //if there is something to add
-            if (Plugin.CustomMatchoManSprites.Count != 0)
+            if (Plugin.CustomMatchoManSprites != null && Plugin.CustomMatchoManSprites.Count != 0)
             {
                 __instance.boulders.sprites.AddRange(Plugin.CustomMatchoManSprites);
             }
@@ -1336,7 +1338,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
         {
             Debug.Log("Drill");
             //if there is something to add
-            if (Plugin.CustomDrillColors.Count != 0)
+            if (Plugin.CustomDrillColors != null && Plugin.CustomDrillColors.Count != 0)
             {
                 __instance.platformDependentColors.AddRange(Plugin.CustomDrillColors);
             }
@@ -1751,7 +1753,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
         //make it use Fix math instead of floating point math.
         private static void random(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
         {
-            
+
             Debug.Log("random");
             double d;
             DynValue m = args.AsType(0, "random", DataType.Number, true);
@@ -1779,7 +1781,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static void sinh(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
         {
             Debug.Log("sinh");
-            __result = Plugin.exec1(args, "sinh", d => (double)((Fix.Pow((Fix)2.718281828459045, (Fix)d) - Fix.Pow((Fix)2.718281828459045, (Fix)(-d)))/(Fix)2), __instance);
+            __result = Plugin.exec1(args, "sinh", d => (double)((Fix.Pow((Fix)2.718281828459045, (Fix)d) - Fix.Pow((Fix)2.718281828459045, (Fix)(-d))) / (Fix)2), __instance);
         }
         [HarmonyPatch("sqrt")]
         [HarmonyPostfix]
@@ -1804,6 +1806,242 @@ BindingFlags.NonPublic | BindingFlags.Static);
         {
             Debug.Log("tanh");
             __result = Plugin.exec1(args, "tanh", d => (double)Plugin.Tanh((Fix)d), __instance);
+        }
+    }
+    [HarmonyPatch(typeof(MoonSharp.Interpreter.Tree.Expressions.BinaryOperatorExpression))]
+    public class MoonSharpPatchThatHopefulyDoesntDoAnything
+    {
+        [HarmonyPatch("EvalArithmetic")]
+        [HarmonyPostfix]
+        //instance is a object as the type is private. and funcsons cant take in a type that chages at runtime drectly
+        public static void EvalArithmetic(DynValue v1, DynValue v2, MoonSharp.Interpreter.Tree.Expressions.BinaryOperatorExpression __instance)
+        {
+            //the Operator enum just HAS to be private... ugg lets hope this works
+            // Access the private field
+            Debug.Log("MATH");
+            FieldInfo privateField = __instance.GetType().GetField("Operator", BindingFlags.NonPublic | BindingFlags.Instance);
+            object privateFieldValue = privateField.GetValue(__instance);
+            int OperatorValue = (int)privateFieldValue;
+            Debug.Log("OPERATOR VALUE IS: " + OperatorValue);
+            throw new InvalidOperationException("IT TURNS OUT MoonSharp.Interpreter.Tree.Expressions.BinaryOperatorExpression.EvalArithmetic IS USED! WHO KNEW??? PLS PATCH IT SO IT USES FIX!!!");
+        }
+    }
+    [HarmonyPatch(typeof(MoonSharp.Interpreter.Execution.VM.Processor))]
+    public class MoonSharpMainMathOperatorsPatch
+    {
+        [HarmonyPatch("ExecAdd")]
+        [HarmonyPostfix]
+        public static void ExecAdd(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
+        {
+            Debug.Log("ExecAdd");
+            var m_ValueStack = __instance.m_ValueStack;
+            DynValue r = m_ValueStack.Pop().ToScalar();
+            DynValue l = m_ValueStack.Pop().ToScalar();
+
+            double? rn = r.CastToNumber();
+            double? ln = l.CastToNumber();
+
+            if (ln.HasValue && rn.HasValue)
+            {
+                m_ValueStack.Push(DynValue.NewNumber((double)((Fix)ln.Value + (Fix)rn.Value)));
+                __result = instructionPtr;
+                return;
+            }
+            else
+            {
+                int ip = __instance.Internal_InvokeBinaryMetaMethod(l, r, "__add", instructionPtr);
+                if (ip >= 0) __result = ip;
+                else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
+            }
+        }
+        [HarmonyPatch("ExecAdd")]
+        [HarmonyPrefix]
+        public static bool ExecAddPrefix(Instruction i, int instructionPtr)
+        {
+            return false;
+        }
+        [HarmonyPatch("ExecSub")]
+        [HarmonyPostfix]
+        public static void ExecSub(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
+        {
+            Debug.Log("ExecSub");
+            var m_ValueStack = __instance.m_ValueStack;
+            DynValue r = m_ValueStack.Pop().ToScalar();
+            DynValue l = m_ValueStack.Pop().ToScalar();
+
+            double? rn = r.CastToNumber();
+            double? ln = l.CastToNumber();
+
+            if (ln.HasValue && rn.HasValue)
+            {
+                m_ValueStack.Push(DynValue.NewNumber((double)((Fix)ln.Value - (Fix)rn.Value)));
+                __result = instructionPtr;
+                return;
+            }
+            else
+            {
+                int ip = __instance.Internal_InvokeBinaryMetaMethod(l, r, "__sub", instructionPtr);
+                if (ip >= 0) __result = ip;
+                else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
+            }
+        }
+        [HarmonyPatch("ExecSub")]
+        [HarmonyPrefix]
+        public static bool ExecSubPrefix(Instruction i, int instructionPtr)
+        {
+            return false;
+        }
+        [HarmonyPatch("ExecMul")]
+        [HarmonyPostfix]
+        public static void ExecMul(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
+        {
+            Debug.Log("ExecMul");
+            var m_ValueStack = __instance.m_ValueStack;
+            DynValue r = m_ValueStack.Pop().ToScalar();
+            DynValue l = m_ValueStack.Pop().ToScalar();
+
+            double? rn = r.CastToNumber();
+            double? ln = l.CastToNumber();
+
+            if (ln.HasValue && rn.HasValue)
+            {
+                m_ValueStack.Push(DynValue.NewNumber((double)((Fix)ln.Value * (Fix)rn.Value)));
+                __result = instructionPtr;
+                return;
+            }
+            else
+            {
+                int ip = __instance.Internal_InvokeBinaryMetaMethod(l, r, "__mul", instructionPtr);
+                if (ip >= 0) __result = ip;
+                else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
+            }
+        }
+        [HarmonyPatch("ExecMul")]
+        [HarmonyPrefix]
+        public static bool ExecMulPrefix(Instruction i, int instructionPtr)
+        {
+            return false;
+        }
+        [HarmonyPatch("ExecMod")]
+        [HarmonyPostfix]
+        public static void ExecMod(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
+        {
+            Debug.Log("ExecMod");
+            var m_ValueStack = __instance.m_ValueStack;
+            DynValue r = m_ValueStack.Pop().ToScalar();
+            DynValue l = m_ValueStack.Pop().ToScalar();
+
+            double? rn = r.CastToNumber();
+            double? ln = l.CastToNumber();
+
+            if (ln.HasValue && rn.HasValue)
+            {
+                m_ValueStack.Push(DynValue.NewNumber((double)((Fix)ln.Value % (Fix)rn.Value)));
+                __result = instructionPtr;
+                return;
+            }
+            else
+            {
+                int ip = __instance.Internal_InvokeBinaryMetaMethod(l, r, "__mod", instructionPtr);
+                if (ip >= 0) __result = ip;
+                else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
+            }
+        }
+        [HarmonyPatch("ExecMod")]
+        [HarmonyPrefix]
+        public static bool ExecModPrefix(Instruction i, int instructionPtr)
+        {
+            return false;
+        }
+        [HarmonyPatch("ExecDiv")]
+        [HarmonyPostfix]
+        public static void ExecDiv(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
+        {
+            Debug.Log("ExecDiv");
+            var m_ValueStack = __instance.m_ValueStack;
+            DynValue r = m_ValueStack.Pop().ToScalar();
+            DynValue l = m_ValueStack.Pop().ToScalar();
+
+            double? rn = r.CastToNumber();
+            double? ln = l.CastToNumber();
+
+            if (ln.HasValue && rn.HasValue)
+            {
+                m_ValueStack.Push(DynValue.NewNumber((double)((Fix)ln.Value / (Fix)rn.Value)));
+                __result = instructionPtr;
+                return;
+            }
+            else
+            {
+                int ip = __instance.Internal_InvokeBinaryMetaMethod(l, r, "__div", instructionPtr);
+                if (ip >= 0) __result = ip;
+                else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
+            }
+        }
+        [HarmonyPatch("ExecDiv")]
+        [HarmonyPrefix]
+        public static bool ExecDivPrefix(Instruction i, int instructionPtr)
+        {
+            return false;
+        }
+        [HarmonyPatch("ExecPower")]
+        [HarmonyPostfix]
+        public static void ExecPower(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
+        {
+            Debug.Log("ExecPower");
+            var m_ValueStack = __instance.m_ValueStack;
+            DynValue r = m_ValueStack.Pop().ToScalar();
+            DynValue l = m_ValueStack.Pop().ToScalar();
+
+            double? rn = r.CastToNumber();
+            double? ln = l.CastToNumber();
+
+            if (ln.HasValue && rn.HasValue)
+            {
+                m_ValueStack.Push(DynValue.NewNumber((double)Fix.Pow((Fix)ln.Value, (Fix)rn.Value)));
+                __result = instructionPtr;
+                return;
+            }
+            else
+            {
+                int ip = __instance.Internal_InvokeBinaryMetaMethod(l, r, "__pow", instructionPtr);
+                if (ip >= 0) __result = ip;
+                else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
+            }
+        }
+        [HarmonyPatch("ExecPower")]
+        [HarmonyPrefix]
+        public static bool ExecPowerPrefix(Instruction i, int instructionPtr)
+        {
+            return false;
+        }
+        [HarmonyPatch("ExecNeg")]
+        [HarmonyPostfix]
+        public static void ExecNeg(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
+        {
+            Debug.Log("ExecNeg");
+            var m_ValueStack = __instance.m_ValueStack;
+            DynValue r = m_ValueStack.Pop().ToScalar();
+            double? rn = r.CastToNumber();
+
+            if (rn.HasValue)
+            {
+                m_ValueStack.Push(DynValue.NewNumber(-rn.Value));
+                __result = instructionPtr;
+                return;
+            }
+            else
+            {
+                int ip = __instance.Internal_InvokeUnaryMetaMethod(r, "__unm", instructionPtr);
+                if (ip >= 0) __result = ip;
+                else throw ScriptRuntimeException.ArithmeticOnNonNumber(r);
+            }
+        }
+        [HarmonyPatch("ExecNeg")]
+        [HarmonyPrefix]
+        public static bool ExecNegPrefix(Instruction i, int instructionPtr)
+        {
+            return false;
         }
     }
 }

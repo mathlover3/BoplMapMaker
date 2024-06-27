@@ -21,7 +21,7 @@ namespace MapMaker.Lua_stuff
             RunScript(@"    
 		-- defines a factorial function
 
-		return math.abs(mynumber)", paramiters);
+		return mynumber + 1 - 3 / 2", paramiters);
         }
         public static DynValue RunScript(string scriptCode, Dictionary<string, object> paramiters)
         {
@@ -34,7 +34,7 @@ namespace MapMaker.Lua_stuff
 
 
             DynValue res = script.DoString(scriptCode);
-            foreach (var Key in script.Globals.Keys)
+            /*foreach (var Key in script.Globals.Keys)
             {
                 var value = script.Globals[Key];
                 UnityEngine.Debug.Log(value);
@@ -43,7 +43,7 @@ namespace MapMaker.Lua_stuff
                     var func = (MoonSharp.Interpreter.CallbackFunction)value;
                     UnityEngine.Debug.Log(func.Name);
                 }
-            }
+            }*/
             UnityEngine.Debug.Log(res.Number);
             return res;
         }
