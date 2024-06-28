@@ -16,6 +16,8 @@ namespace MapMaker
         public static List<LogicOutput> LogicStartingOutputs = new List<LogicOutput>();
         //if true this logic gate will run every update. used for stuff that needs updated every frame. NOT SORTED!
         public static List<LogicGate> LogicGatesToAlwaysUpdate = new List<LogicGate>();
+        //the orderd list of gates. run them in this order
+        public static List<LogicGate> LogicGatesInOrder = new List<LogicGate>();
         //if true it shows all of the logic gates and there connectsons
         public static bool LogicDebugMode = true;
         //this is for rendering the connectsons.
@@ -286,9 +288,9 @@ namespace MapMaker
                     SetLinePosForLine(lineRenderer, input, output);
                     LineRenderers.Add(input, lineRenderer);
                     //if its not a dealy then add it to the graph to check for cycles
-                    if ((input.gate != null && input.gate.GetComponent<SignalDelay>() == null && input.gate.OutputSignals.Count != 0) && (output.gate != null))
+                    if ((input.gate != null && input.gate.GetComponent<SignalDelay>() == null && input.gate.OutputSignals.Count != 0))
                     {
-                        graph.addEdge(output.UUid, input.gate.OutputSignals[0].UUid, input.gate, input.gate.GetComponent<LuaMain>() != null);
+                        graph.addEdge(output.UUid, input.gate.OutputSignals[0].UUid, input.Owner, input.gate, output.Owner, output.gate);
                     }
 
                     UnityEngine.Debug.Log($"added input to outputs");
@@ -299,6 +301,7 @@ namespace MapMaker
             {
                 throw new InvalidOperationException("Logic Gate Loops Must Have a Delay In Them!");
             }
+            LogicGatesInOrder = graph.BuildListOfGates();
             Updater.RegisterUpdatable(this);
         }
         public static void SetLinePosForLine(LineRenderer lineRenderer, LogicInput input, LogicOutput output)
