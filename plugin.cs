@@ -808,12 +808,12 @@ namespace MapMaker
                 CreateSignalDelay(2, 5, (Fix)0.2, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
                 CreateSignalDelay(3, 4, (Fix)0.2, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 AddMovingPlatformSignalStuff(platform, 2);
-                CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
+                //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
                 CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);
                 CreateDropPlayers(platform, 2, (Fix)100, true);
-                CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
-                CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
-                CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
+                //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
+                //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
+                //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");

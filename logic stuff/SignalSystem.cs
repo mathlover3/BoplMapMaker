@@ -1,4 +1,5 @@
 ﻿using BoplFixedMath;
+using MapMaker.Lua_stuff;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -285,9 +286,9 @@ namespace MapMaker
                     SetLinePosForLine(lineRenderer, input, output);
                     LineRenderers.Add(input, lineRenderer);
                     //if its not a dealy then add it to the graph to check for cycles
-                    if ((input.gate != null && input.gate.GetComponent<SignalDelay>() == null && input.gate.OutputSignals.Count != 0) && (output.gate != null && output.gate.GetComponent<SignalDelay>() == null))
+                    if ((input.gate != null && input.gate.GetComponent<SignalDelay>() == null && input.gate.OutputSignals.Count != 0) && (output.gate != null))
                     {
-                        graph.addEdge(output.UUid, input.gate.OutputSignals[0].UUid);
+                        graph.addEdge(output.UUid, input.gate.OutputSignals[0].UUid, input.gate, input.gate.GetComponent<LuaMain>() != null);
                     }
 
                     UnityEngine.Debug.Log($"added input to outputs");

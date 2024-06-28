@@ -1,22 +1,28 @@
 ﻿
 //based off of https://www.geeksforgeeks.org/detect-cycle-in-a-graph/
 // A C# Program to detect cycle in a graph
+using MapMaker;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Graph
 {
 
     private int V;
-    private Dictionary<int, List<int>> adj;
+    private Dictionary<int, List<GraphNode>> adj;
+    private Dictionary<int, List<int>> backwordsConnectsons;
 
     public Graph(int V)
     {
         this.V = V;
-        adj = new Dictionary<int, List<int>>();
 
+        adj = new Dictionary<int, List<GraphNode>>();
+        backwordsConnectsons = new Dictionary<int, List<int>>();
         for (int i = 0; i < V; i++)
-            adj.Add(i, new List<int>());
+            adj.Add(i, new List<GraphNode>());
+        for (int i = 0; i < V; i++)
+            backwordsConnectsons.Add(i, new List<int>());
     }
 
     // Function to check if cycle exists
@@ -34,19 +40,30 @@ public class Graph
         visited[i] = true;
 
         recStack[i] = true;
-        List<int> children = adj[i];
+        List<GraphNode> children = adj[i];
 
-        foreach (int c in children) if (
-            isCyclicUtil(c, visited, recStack)) return true;
+        foreach (GraphNode c in children) if (
+            isCyclicUtil(c.id, visited, recStack)) return true;
 
         recStack[i] = false;
 
         return false;
     }
-
-    public void addEdge(int sou, int dest)
+    public int NumberOfInputsToNode(int node)
     {
-        adj[sou].Add(dest);
+        return adj[node].Count;
+    }
+
+    public void addEdge(int sou, int dest, LogicGate gate, bool IsLuaGate)
+    {
+        var node = new GraphNode
+        {
+            id = dest,
+            gate = gate,
+            IsLuaGate = IsLuaGate,
+        };
+        adj[sou].Add(node);
+        backwordsConnectsons[dest].Add(sou);
     }
 
     // Returns true if the graph contains a
@@ -66,4 +83,11 @@ public class Graph
 
         return false;
     }
+    //returns a order of gates 
+}
+public class GraphNode
+{
+    public int id;
+    public LogicGate gate;
+    public bool IsLuaGate;
 }

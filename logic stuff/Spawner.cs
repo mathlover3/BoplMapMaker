@@ -138,13 +138,35 @@ namespace MapMaker
             SmokeGrenade,
             Explosion
         }
-        public void SpawnArrow(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
+        public void SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(arrow, pos, angle);
             boplBody.Scale = scale;
             boplBody.StartVelocity = StartVel;
-            boplBody.rotation = angle;
+            boplBody.rotation = CalculateAngle(StartVel);
             boplBody.StartAngularVelocity = StartAngularVelocity;
+        }
+        //modifyed chatgpt code
+        public static Fix CalculateAngle(Vec2 vec2)
+        {
+            // Vector (0, 1)
+            Fix refX = Fix.Zero;
+            Fix refY = Fix.One;
+
+            // Dot product
+            Fix dotProduct = vec2.x * refX + vec2.y * refY;
+
+            // Magnitudes
+            Fix magnitudeA = Fix.Sqrt(vec2.x * vec2.x + vec2.y * vec2.y);
+            Fix magnitudeB = Fix.Sqrt(refX * refX + refY * refY);
+
+            // Angle in radians
+            Fix angleRadians = Fix.Acos(dotProduct / (magnitudeA * magnitudeB));
+
+            // Convert to degrees
+            Fix angleDegrees = angleRadians * ((Fix)180.0 / (Fix)Fix.PI);
+
+            return angleDegrees;
         }
         public void SpawnGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
         {
@@ -154,6 +176,7 @@ namespace MapMaker
             boplBody.rotation = angle;
             boplBody.StartAngularVelocity = StartAngularVelocity;
             Item component = boplBody.GetComponent<Item>();
+            component.OwnerId = 255;
             var Grenade = component.GetComponent<Grenade>();
 
             Grenade.hasBeenThrown = true;
@@ -211,7 +234,7 @@ namespace MapMaker
                     // * dphysicsRoundedRect.inverseMass;
                     break;
                 case ObjectSpawnType.Arrow:
-                    SpawnArrow(pos, angle, scale, velocity, angularVelocity);
+                    SpawnArrow(pos, scale, velocity, angularVelocity);
                     break;
                 case ObjectSpawnType.Grenade:
                     SpawnGrenade(pos, angle, scale, velocity, angularVelocity);
