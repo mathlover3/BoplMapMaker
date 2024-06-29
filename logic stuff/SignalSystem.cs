@@ -428,6 +428,19 @@ namespace MapMaker
 
         public override void UpdateSim(Fix SimDeltaTime)
         {
+            foreach(var output in LogicOutputs)
+            {
+                output.WasOnLastTick = output.IsOn;
+            }
+            foreach (var gate in LogicGatesToAlwaysUpdate)
+            {
+                //we dont want to update them multiple times
+                if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
+                {
+                    gate.Logic(SimDeltaTime);
+                    gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
+                }
+            }
             if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress)
             {
                 //for all of the gates.
@@ -440,6 +453,7 @@ namespace MapMaker
 
                         if ((output.IsOn != output.WasOnLastTick) || FirstUpdateOfTheRound)
                         {
+                            
                             input.IsOn = output.IsOn;
                             //update the line color
                             var Line = LineRenderers[input];
@@ -453,8 +467,11 @@ namespace MapMaker
                                 else Line.endColor = (Line.startColor = Color.red);
                             }
                             //if the input has changed run the gates code
-                            gate.Logic(SimDeltaTime);
-                            gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
+                            if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
+                            {
+                                gate.Logic(SimDeltaTime);
+                                gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
+                            }
                         }
 
                     }
@@ -464,15 +481,7 @@ namespace MapMaker
                 {
                     FirstUpdateOfTheRound = false;
                 }
-                foreach (var gate in LogicGatesToAlwaysUpdate)
-                {
-                    //we dont want to update them multiple times
-                    if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
-                    {
-                        gate.Logic(SimDeltaTime);
-                        gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
-                    }
-                }
+
                 foreach (var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
                 {
                     var Line = LineRenderers[input];

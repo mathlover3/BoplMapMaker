@@ -28,6 +28,7 @@ using System.Web;
 using MapMaker.Lua_stuff;
 using MoonSharp.Interpreter;
 using Mono.Cecil.Cil;
+using UnityEngine.Events;
 
 namespace MapMaker
 {
@@ -820,8 +821,8 @@ namespace MapMaker
                     IsOn = false,
                     Owner = lua.gameObject
                 };
-                //lua.InputSignals.Add(input);
-                //lua.Register();
+                lua.InputSignals.Add(input);
+                lua.Register();
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
@@ -2052,6 +2053,63 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPrefix]
         public static bool ExecNegPrefix(Instruction i, int instructionPtr)
         {
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(QuickSpell))]
+    public class ReplacingFuncShowcase
+    {
+        [HarmonyPatch("Cast")]
+        [HarmonyPrefix]
+        public static bool ExecAdd(QuickSpell __instance)
+        {
+            GameObject gameObject = null;
+            Revive component = __instance.gameObject.GetComponent<Revive>();
+            if (__instance.spell != null)
+            {
+                Vec2 pos = __instance.body.position + __instance.shockwaveOffset * __instance.player.Scale;
+                if (component != null)
+                {
+                    Vec2 offset = new Vec2((Fix)10L, (Fix)10L);
+                    pos = pos + offset;
+                    pos = SceneBounds.ClampInsideCameraMaxBounds(pos, offset);
+                }
+                gameObject = FixTransform.InstantiateFixed(__instance.spell, pos);
+                IPlayerIdHolder component2 = gameObject.GetComponent<IPlayerIdHolder>();
+                if (component2 != null)
+                {
+                    component2.SetPlayerId(__instance.playerInfo.playerId);
+                }
+                IPhysicsCollider component3 = gameObject.GetComponent<IPhysicsCollider>();
+                if (component3 != null)
+                {
+                    component3.Scale = __instance.player.Scale;
+                }
+                Shockwave component4 = gameObject.GetComponent<Shockwave>();
+                if (component4 != null)
+                {
+                    component4.SetScale(__instance.player.Scale);
+                }
+            }
+            UnityEvent unityEvent = __instance.spellFunc;
+            if (unityEvent != null)
+            {
+                unityEvent.Invoke();
+            }
+            if (component != null)
+            {
+                component.SetReviveFlag(gameObject);
+            }
+            __instance.ParticleOnCast = UnityEngine.Object.Instantiate<ParticleSystem>(__instance.ParticleCastPrefab, __instance.gameObject.transform.position + (Vector3)(__instance.player.Scale * __instance.shockwaveOffset), Quaternion.identity);
+            if (__instance.ParticleOnCast != null && __instance.scaleParticleSize)
+            {
+                __instance.ParticleOnCast.transform.localScale = __instance.ParticleCastPrefab.transform.localScale * (float)__instance.player.Scale;
+            }
+            if (!string.IsNullOrEmpty(__instance.AudioToPlayOnCast))
+            {
+                AudioManager.Get().Play(__instance.AudioToPlayOnCast);
+            }
+            __instance.animator.beginAnimThenDoAction(__instance.animData.GetAnimation("exit"), new Action(__instance.EmptyExitInfo));
             return false;
         }
     }

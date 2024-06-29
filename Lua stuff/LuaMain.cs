@@ -120,11 +120,11 @@ namespace MapMaker.Lua_stuff
             };
             RunScript(@"    
 		-- defines a factorial function
-        -- SpawnArrow(20, 30, 5, 10, 10, 1)
-        -- SpawnGrenade(1, 30, 0, 5, 1, 10, 1)
-        -- SpawnAbilityPickup(10, 40, 5, 0, 20)
-        -- SpawnSmokeGrenade(-10, 30, 90, 1, -5, 0, 180)
-        -- SpawnExplosion(-20, 30, 1)
+        SpawnArrow(20, 30, 5, 10, 10, 1)
+        SpawnGrenade(1, 30, 0, 5, 1, 10, 1)
+        SpawnAbilityPickup(10, 40, 5, 0, 20)
+        SpawnSmokeGrenade(-10, 30, 90, 1, -5, 0, 180)
+        SpawnExplosion(-20, 30, 1)
 	    if (obj != nil) then
 		    obj.Scale = 2
 		end
