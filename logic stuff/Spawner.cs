@@ -122,6 +122,8 @@ namespace MapMaker
         }
         public void Register()
         {
+            UUID = Plugin.NextUUID;
+            Plugin.NextUUID++;
             SignalSystem.RegisterLogicGate(this);
         }
         public bool IsOn()

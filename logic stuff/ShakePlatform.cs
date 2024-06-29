@@ -18,6 +18,8 @@ namespace MapMaker
         private bool WasOnLastFrame = false;
         public void Register()
         {
+            UUID = Plugin.NextUUID;
+            Plugin.NextUUID++;
             SignalSystem.RegisterLogicGate(this);
             //should update its connectson line so it always points to the platform
             SignalSystem.RegisterInputThatUpdatesConnectson(InputSignals[0]);

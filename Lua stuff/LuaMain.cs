@@ -47,6 +47,8 @@ namespace MapMaker.Lua_stuff
         }
         public void Register()
         {
+            UUID = Plugin.NextUUID;
+            Plugin.NextUUID++;
         }
         public static DynValue RunScript(string scriptCode, Dictionary<string, object> paramiters, Script script)
         {

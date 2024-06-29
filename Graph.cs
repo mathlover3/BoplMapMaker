@@ -98,11 +98,6 @@ public class Graph
     //propeagtes forwords until it reaches a gate with a input from a gate that hasnt been registerd yet/a gate thats already registerd
     private void ForwordProbagate(GraphNode node)
     {
-        //if we were already visited return
-        if (visited.ContainsKey(node.id) && visited[node.id])
-        {
-            return;
-        }
         //for all of the nodes in frount of us
         foreach (var OutputNode in adj[node.id])
         {
@@ -114,7 +109,7 @@ public class Graph
             else
             {
                 //if its not visited already then we check if all of its parents have been visited
-                foreach (var parentNode in backwordsConnectsons[node.id])
+                foreach (var parentNode in backwordsConnectsons[OutputNode.id])
                 {
                     //if a parent hasnt been visited yet then we back propagate
                     if (!(visited.ContainsKey(parentNode.id) && visited[parentNode.id]))
@@ -123,8 +118,12 @@ public class Graph
                     }
                 }
                 //once all of the parents are visited we can add this node as visited and add the gate to the list
-                gates.Add(node.Gate);
-                visited.Add(node.id, true);
+                if (OutputNode.Gate != null)
+                {
+                    gates.Add(OutputNode.Gate);
+                }
+                visited.Add(OutputNode.id, true);
+                ForwordProbagate(OutputNode);
             }
         }
     }
@@ -149,7 +148,6 @@ public class Graph
         if (node.Gate != null)
         {
             gates.Add(node.Gate);
-
         }
         visited.Add(node.id, true);
     }

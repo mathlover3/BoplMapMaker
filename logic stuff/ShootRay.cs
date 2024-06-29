@@ -37,6 +37,8 @@ namespace MapMaker
         }
         public void Register()
         {
+            UUID = Plugin.NextUUID;
+            Plugin.NextUUID++;
             fixTransform = gameObject.GetComponent<FixTransform>();
             SignalSystem.RegisterLogicGate(this);
         }

@@ -18,6 +18,7 @@ namespace MapMaker
         public DPhysicsBox dPhysicsBox = null;
         public FixTransform fixTrans = null;
         public List<int> layersToDetect = new List<int>();
+        public int UUID;
         private bool Colliding = false;
         public void Awake()
         {
@@ -57,6 +58,8 @@ namespace MapMaker
         }
         public void Register()
         {
+            UUID = Plugin.NextUUID;
+            Plugin.NextUUID++;
             SignalSystem.RegisterTrigger(LogicOutput);
         }
         public void SetExtents(Vec2 extents)

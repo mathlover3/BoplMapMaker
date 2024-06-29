@@ -13,6 +13,8 @@ namespace MapMaker
     {
         public readonly List<LogicInput> InputSignals = new();
         public readonly List<LogicOutput> OutputSignals = new();
+        public Fix LastTimeUpdated = Fix.Zero;
+        public int UUID = 0;
         //called when all of the inputs have been updated
         public abstract void Logic(Fix SimDeltaTime);
     }

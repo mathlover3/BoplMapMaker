@@ -12,6 +12,8 @@ namespace MapMaker
         public void Register()
         {
             SignalSystem.RegisterLogicGate(this);
+            UUID = Plugin.NextUUID;
+            Plugin.NextUUID++;
         }
         public override void Logic(Fix SimDeltaTime)
         {

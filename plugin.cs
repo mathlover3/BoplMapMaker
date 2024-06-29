@@ -73,6 +73,7 @@ namespace MapMaker
         private static ShakePlatform ShakePlatformPrefab = null;
         private static DropPlayers DropPlayersPrefab = null;
         public static SignalSystem signalSystem;
+        public static int NextUUID = 0;
         //used to make shakeable platform to know its being called by a blink gun.
         public static bool CurrentlyBlinking;
         public enum MapIdCheckerThing
@@ -779,7 +780,7 @@ namespace MapMaker
                     SignalSystem.LineRenderers = new();
                     SignalSystem.LogicInputsThatAlwaysUpdateThereLineConnectsons = new();
                     SignalSystem.FirstUpdateOfTheRound = true;
-
+                    SignalSystem.AllLogicGates = new();
                     GameObject Test = new GameObject("LuaTestObject");
                     Test.AddComponent<LuaMain>();
                 }
@@ -787,6 +788,7 @@ namespace MapMaker
                 {
                     Debug.LogError($"Error in spawning triggers/spawners at scene load: {ex}");
                 }
+                NextUUID = 0;
                 //TODO remove this when done testing signal stuff
                 //TESTING START!
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
@@ -805,8 +807,8 @@ namespace MapMaker
                 int[] UUids2 = { 1, 5 };
                 CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
                 CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
-                CreateSignalDelay(2, 5, (Fix)0.2, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
-                CreateSignalDelay(3, 4, (Fix)0.2, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
+                CreateSignalDelay(2, 5, (Fix)0, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
+                CreateSignalDelay(3, 4, (Fix)0, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
                 AddMovingPlatformSignalStuff(platform, 2);
                 //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
                 CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);

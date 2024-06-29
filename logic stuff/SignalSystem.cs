@@ -16,6 +16,8 @@ namespace MapMaker
         public static List<LogicOutput> LogicStartingOutputs = new List<LogicOutput>();
         //if true this logic gate will run every update. used for stuff that needs updated every frame. NOT SORTED!
         public static List<LogicGate> LogicGatesToAlwaysUpdate = new List<LogicGate>();
+        //used for counting the number of gates.
+        public static List<LogicGate> AllLogicGates = new();
         //the orderd list of gates. run them in this order
         public static List<LogicGate> LogicGatesInOrder = new List<LogicGate>();
         //if true it shows all of the logic gates and there connectsons
@@ -29,6 +31,7 @@ namespace MapMaker
         //registers the trigger and returns the id
         public static void RegisterLogicGate(LogicGate LogicGate)
         {
+            AllLogicGates.Add(LogicGate);
             for (int i = 0; i < LogicGate.OutputSignals.Count; i++)
             {
                 if (LogicOutputs.Count == 0)
@@ -262,7 +265,7 @@ namespace MapMaker
                 }
                 UUids.Add(output.UUid);
             }
-            Graph graph = new Graph(UUids.Count);
+            Graph graph = new Graph(Plugin.NextUUID);
 
             foreach (var output in allOutputs)
             {
@@ -288,9 +291,18 @@ namespace MapMaker
                     SetLinePosForLine(lineRenderer, input, output);
                     LineRenderers.Add(input, lineRenderer);
                     //if its not a dealy then add it to the graph to check for cycles
-                    if ((input.gate != null && input.gate.GetComponent<SignalDelay>() == null && input.gate.OutputSignals.Count != 0))
+                    if ((input.gate != null && output.Owner.GetComponent<SignalDelay>() == null))
                     {
-                        graph.addEdge(output.UUid, input.gate.OutputSignals[0].UUid, input.Owner, input.gate, output.Owner, output.gate);
+                        if (output.gate != null)
+                        {
+                            graph.addEdge(output.gate.UUID, input.gate.UUID, input.Owner, input.gate, output.Owner, output.gate);
+                        }
+                        else
+                        {
+                            var trig = output.Owner.GetComponent<Trigger>();
+                            graph.addEdge(trig.UUID, input.gate.UUID, input.Owner, input.gate, output.Owner, output.gate);
+                        }
+                        
                     }
 
                     UnityEngine.Debug.Log($"added input to outputs");
@@ -418,30 +430,54 @@ namespace MapMaker
         {
             if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress)
             {
-                for (int i = 0; i < LogicStartingOutputs.Count; i++)
+                //for all of the gates.
+                foreach (var gate in LogicGatesInOrder)
                 {
-                    LogicOutput output = LogicStartingOutputs[i];
-                    CallAllLogic(output, SimDeltaTime, true);
+                    //check if the input has changed
+                    foreach(var input in gate.InputSignals)
+                    {
+                        var output = input.inputs[0];
+
+                        if ((output.IsOn != output.WasOnLastTick) || FirstUpdateOfTheRound)
+                        {
+                            input.IsOn = output.IsOn;
+                            //update the line color
+                            var Line = LineRenderers[input];
+                            //if the line isnt null update the colors.
+                            if (Line)
+                            {
+                                if (input.IsOn)
+                                {
+                                    Line.endColor = (Line.startColor = Color.green);
+                                }
+                                else Line.endColor = (Line.startColor = Color.red);
+                            }
+                            //we dont want to waste time if we dont need to.
+                            if (gate.LastTimeUpdated != SimDeltaTime)
+                            {
+                                gate.Logic(SimDeltaTime);
+                                gate.LastTimeUpdated = SimDeltaTime;
+                            }
+                        }
+
+                    }
                 }
                 if (FirstUpdateOfTheRound)
                 {
-                    var test = (LayerMask)1;
                     FirstUpdateOfTheRound = false;
                 }
                 foreach (var gate in LogicGatesToAlwaysUpdate)
                 {
-                    gate.Logic(SimDeltaTime);
                 }
                 foreach (var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
                 {
                     var Line = LineRenderers[input];
                     var output = input.inputs[0];
-
                     SetLinePosForLine(Line, input, output);
                 }
             }
         }
-        private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
+/*        private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
         {
             //triggers dont have gates
             if (output.gate)
@@ -490,6 +526,7 @@ namespace MapMaker
                 }
             }
         }
+*/
         public static Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Fix angle)
         {
             var PointVec2 = (Vec2)point;

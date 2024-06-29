@@ -32,6 +32,8 @@ namespace MapMaker
         private bool ShouldBeActive = true;
         public void Register()
         {
+            UUID = Plugin.NextUUID;
+            Plugin.NextUUID++;
             DisappearPlatformsOnSignals.Add(this);
             SignalSystem.RegisterLogicGate(this);
             //must always run so that it can do its logic
