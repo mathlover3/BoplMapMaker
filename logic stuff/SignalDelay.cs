@@ -24,6 +24,7 @@ namespace MapMaker
             SignalSystem.RegisterInput(InputSignals[0]);
             //this may change output even if the input doesnt change.
             SignalSystem.RegisterTrigger(OutputSignals[0]);
+            SignalSystem.RegisterGateThatAlwaysRuns(this);
         }
         public bool IsOn()
         {

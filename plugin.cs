@@ -781,8 +781,6 @@ namespace MapMaker
                     SignalSystem.LogicInputsThatAlwaysUpdateThereLineConnectsons = new();
                     SignalSystem.FirstUpdateOfTheRound = true;
                     SignalSystem.AllLogicGates = new();
-                    GameObject Test = new GameObject("LuaTestObject");
-                    Test.AddComponent<LuaMain>();
                 }
                 catch (Exception ex)
                 {
@@ -813,6 +811,17 @@ namespace MapMaker
                 //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
                 CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);
                 CreateDropPlayers(platform, 2, (Fix)100, true);
+                GameObject Test = new GameObject("LuaTestObject");
+                var lua = Test.AddComponent<LuaMain>();
+                var input = new LogicInput
+                {
+                    UUid = 2,
+                    gate = lua,
+                    IsOn = false,
+                    Owner = lua.gameObject
+                };
+                //lua.InputSignals.Add(input);
+                //lua.Register();
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));

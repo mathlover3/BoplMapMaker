@@ -22,18 +22,7 @@ namespace MapMaker.Lua_stuff
                 LuaSpawner = gameObject.AddComponent<LuaSpawner>();
             }
 
-            Dictionary<string, object> paramiters = new Dictionary<string, object>
-            {
-                { "mynumber", 5 }
-            };
-            RunScript(@"    
-		-- defines a factorial function
-        SpawnArrow(20, 30, 5, 10, 10, 1)
-        SpawnGrenade(1, 30, 0, 5, 1, 10, 1)
-        SpawnAbilityPickup(10, 40, 5, 0, 20)
-        SpawnSmokeGrenade(-10, 30, 90, 1, -5, 0, 180)
-        SpawnExplosion(-20, 30, 1)
-		return mynumber + 1 - 3 / 2", paramiters, SetUpScriptFuncsons());
+
         }
         public static Script SetUpScriptFuncsons()
         {
@@ -43,12 +32,22 @@ namespace MapMaker.Lua_stuff
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
             script.Globals["SpawnSmokeGrenade"] = (object)SpawnSmokeGrenadeDouble;
             script.Globals["SpawnExplosion"] = (object)SpawnExplosionDouble;
+            // Register just MyClass, explicitely.
+            UserData.RegisterType<Player>();
+            if (PlayerHandler.instance.GetPlayer(0) != null)
+            {
+                DynValue obj = UserData.Create(PlayerHandler.instance.GetPlayer(0));
+                script.Globals.Set("obj", obj);
+            }
+
             return script;
         }
         public void Register()
         {
             UUID = Plugin.NextUUID;
             Plugin.NextUUID++;
+            SignalSystem.RegisterLogicGate(this);
+            SignalSystem.RegisterGateThatAlwaysRuns(this);
         }
         public static DynValue RunScript(string scriptCode, Dictionary<string, object> paramiters, Script script)
         {
@@ -115,7 +114,21 @@ namespace MapMaker.Lua_stuff
 
         public override void Logic(Fix SimDeltaTime)
         {
-            throw new NotImplementedException();
+            Dictionary<string, object> paramiters = new Dictionary<string, object>
+            {
+                { "mynumber", 5 }
+            };
+            RunScript(@"    
+		-- defines a factorial function
+        -- SpawnArrow(20, 30, 5, 10, 10, 1)
+        -- SpawnGrenade(1, 30, 0, 5, 1, 10, 1)
+        -- SpawnAbilityPickup(10, 40, 5, 0, 20)
+        -- SpawnSmokeGrenade(-10, 30, 90, 1, -5, 0, 180)
+        -- SpawnExplosion(-20, 30, 1)
+	    if (obj != nil) then
+		    obj.Scale = 2
+		end
+		return mynumber + 1 - 3 / 2", paramiters, SetUpScriptFuncsons());
         }
     }
 }

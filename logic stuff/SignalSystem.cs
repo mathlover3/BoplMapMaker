@@ -454,7 +454,7 @@ namespace MapMaker
                             }
                             //if the input has changed run the gates code
                             gate.Logic(SimDeltaTime);
-                            gate.LastTimeUpdated = SimDeltaTime;
+                            gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
                         }
 
                     }
@@ -467,10 +467,10 @@ namespace MapMaker
                 foreach (var gate in LogicGatesToAlwaysUpdate)
                 {
                     //we dont want to update them multiple times
-                    if (gate.LastTimeUpdated != SimDeltaTime)
+                    if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
                     {
                         gate.Logic(SimDeltaTime);
-                        gate.LastTimeUpdated = SimDeltaTime;
+                        gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
                     }
                 }
                 foreach (var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
