@@ -452,15 +452,13 @@ namespace MapMaker
                                 }
                                 else Line.endColor = (Line.startColor = Color.red);
                             }
-                            //we dont want to waste time if we dont need to.
-                            if (gate.LastTimeUpdated != SimDeltaTime)
-                            {
-                                gate.Logic(SimDeltaTime);
-                                gate.LastTimeUpdated = SimDeltaTime;
-                            }
+                            //if the input has changed run the gates code
+                            gate.Logic(SimDeltaTime);
+                            gate.LastTimeUpdated = SimDeltaTime;
                         }
 
                     }
+
                 }
                 if (FirstUpdateOfTheRound)
                 {
@@ -468,6 +466,12 @@ namespace MapMaker
                 }
                 foreach (var gate in LogicGatesToAlwaysUpdate)
                 {
+                    //we dont want to update them multiple times
+                    if (gate.LastTimeUpdated != SimDeltaTime)
+                    {
+                        gate.Logic(SimDeltaTime);
+                        gate.LastTimeUpdated = SimDeltaTime;
+                    }
                 }
                 foreach (var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
                 {
@@ -477,7 +481,7 @@ namespace MapMaker
                 }
             }
         }
-/*        private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
+        private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
         {
             //triggers dont have gates
             if (output.gate)
@@ -526,7 +530,6 @@ namespace MapMaker
                 }
             }
         }
-*/
         public static Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Fix angle)
         {
             var PointVec2 = (Vec2)point;
