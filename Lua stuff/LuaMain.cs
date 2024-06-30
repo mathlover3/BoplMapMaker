@@ -193,8 +193,8 @@ namespace MapMaker.Lua_stuff
         public static Table Vec2ToTable(Vec2 vec2, Script script)
         {
             Table tbl = new Table(script);
-            tbl["x"] = vec2.x;
-            tbl["y"] = vec2.y;
+            tbl["x"] = (double)vec2.x;
+            tbl["y"] = (double)vec2.y;
             return tbl;
         }
         public static Vec2 TableToVec2(Table table)

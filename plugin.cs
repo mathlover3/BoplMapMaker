@@ -827,18 +827,15 @@ print(""Raycast results: a ="", a, ""b ="", b)
 obj = GetClosestPlayer(0, 0)
 print(""Closest player:"", obj)
 if (obj ~= nil and a ~= nil and a > 0 and a < 100) then
-    if obj.SetSpeed then
-        obj.SetSpeed(a*2)
+    vel = obj.GetVelocity()
+    
+    if (vel[""x""] > 0) then
+        obj.SetSpeed(38)
     else
-        print(""Error: no setspeed"")
-        return 1
+        obj.SetSpeed(19)
     end
-    if obj.GetSpeed then
-        return obj.GetSpeed()
-    else
-        print(""Error: no getspeed"")
-        return 1
-    end
+    return obj.GetSpeed()
+
 end
 return 1", false);
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
