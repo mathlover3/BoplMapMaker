@@ -6,6 +6,8 @@ C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\com.unity.multip
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\Facepunch.Steamworks.Win64.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\Mono.Posix.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\Mono.Security.dll
+C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\MoonSharp.Interpreter.dll
+C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\PlatformApi.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\Purchasing.Common.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\Unity.Analytics.DataPrivacy.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\Unity.InputSystem.dll
@@ -27,7 +29,9 @@ C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\UnityEngine.Purc
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\UnityEngine.SpatialTracking.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\UnityEngine.UI.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\UnityEngine.XR.LegacyInputHelpers.dll
+C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\PlatformApi.pdb
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.csproj.AssemblyReference.cache
+C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.IgnoresAccessChecksTo.cs
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\PluginInfo.cs
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.AssemblyInfoInputs.cache
@@ -36,7 +40,3 @@ C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.csproj.
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.csproj.CopyComplete
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.pdb
-C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net471\MapMaker.IgnoresAccessChecksTo.cs
-C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\PlatformApi.dll
-C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\PlatformApi.pdb
-C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net471\MoonSharp.Interpreter.dll

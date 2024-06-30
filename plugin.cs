@@ -73,6 +73,7 @@ namespace MapMaker
         private static ShootRay ShootRayPrefab = null;
         private static ShakePlatform ShakePlatformPrefab = null;
         private static DropPlayers DropPlayersPrefab = null;
+        private static LuaMain LuaPrefab = null;
         public static SignalSystem signalSystem;
         public static int NextUUID = 0;
         //used to make shakeable platform to know its being called by a blink gun.
@@ -726,7 +727,7 @@ namespace MapMaker
 
                     // Create a new GameObject
                     GameObject OrGateObject = new GameObject("OrGateObject");
-                    // Add the FixTransform and Spawner components to the GameObject
+                    // Add the components to the GameObject
                     OrGateObject.AddComponent<FixTransform>();
                     //put it offscreen
                     OrGateObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
@@ -738,7 +739,7 @@ namespace MapMaker
 
                     // Create a new GameObject
                     GameObject NotGateObject = new GameObject("NotGateObject");
-                    // Add the FixTransform and Spawner components to the GameObject
+                    // Add the components to the GameObject
                     NotGateObject.AddComponent<FixTransform>();
                     //put it offscreen
                     NotGateObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
@@ -768,10 +769,16 @@ namespace MapMaker
                     ShakePlatformPrefab = ShakePlatformGameObject.AddComponent<ShakePlatform>();
 
                     // Create a new GameObject
+                    GameObject LuaGameObject = new GameObject("LuaTestObject");
+                    // Add the components to the GameObject
+                    LuaGameObject.AddComponent<FixTransform>();
+                    LuaPrefab = LuaGameObject.AddComponent<LuaMain>();
+
+                    // Create a new GameObject
                     GameObject SignalSystemObject = new GameObject("SignalSystemObject");
 
 
-                    // Add the FixTransform and Spawner components to the GameObject
+                    // Add the components to the GameObject
                     SignalSystemObject.AddComponent<FixTransform>();
                     signalSystem = SignalSystemObject.AddComponent<SignalSystem>();
                     SignalSystem.LogicInputs = new List<LogicInput>();
@@ -812,17 +819,28 @@ namespace MapMaker
                 //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
                 CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);
                 CreateDropPlayers(platform, 2, (Fix)100, true);
-                GameObject Test = new GameObject("LuaTestObject");
-                var lua = Test.AddComponent<LuaMain>();
-                var input = new LogicInput
-                {
-                    UUid = 2,
-                    gate = lua,
-                    IsOn = false,
-                    Owner = lua.gameObject
-                };
-                //lua.InputSignals.Add(input);
-                //lua.Register();
+                int[] UUids3 = { 3 };
+                int[] UUids4 = { };
+                CreateLuaGate(UUids3, UUids4, new Vec2((Fix)2, (Fix)(2)), (Fix)0, @"    
+a, b = RaycastRoundedRect(0, 0, 90, 300)
+print(""Raycast results: a ="", a, ""b ="", b)
+obj = GetClosestPlayer(0, 0)
+print(""Closest player:"", obj)
+if (obj ~= nil and a ~= nil and a > 0 and a < 100) then
+    if obj.SetSpeed then
+        obj.SetSpeed(a*2)
+    else
+        print(""Error: no setspeed"")
+        return 1
+    end
+    if obj.GetSpeed then
+        return obj.GetSpeed()
+    else
+        print(""Error: no getspeed"")
+        return 1
+    end
+end
+return 1", false);
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
@@ -1290,6 +1308,40 @@ namespace MapMaker
             dropPlayers.OnlyActivateOnRise = OnlyActivateOnRise;
             dropPlayers.Register();
             return dropPlayers;
+        }
+        public static LuaMain CreateLuaGate(int[] InputUUids, int[] OutputUUids, Vec2 pos, Fix rot, string LuaCode, bool RunOnlyOnInputChange)
+        {
+            var Lua = FixTransform.InstantiateFixed<LuaMain>(LuaPrefab, pos, (Fix)ConvertToRadians((double)rot));
+            var LogicInputs = new List<LogicInput>();
+            foreach (var InputSignal in InputUUids)
+            {
+                var input = new LogicInput
+                {
+                    UUid = InputSignal,
+                    gate = Lua,
+                    IsOn = false,
+                    Owner = Lua.gameObject
+                };
+                LogicInputs.Add(input);
+            }
+            var LogicOutputs = new List<LogicOutput>();
+            foreach (var OutputSignal in OutputUUids)
+            {
+                var output = new LogicOutput
+                {
+                    UUid = OutputSignal,
+                    gate = Lua,
+                    IsOn = false,
+                    Owner = Lua.gameObject
+                };
+                LogicOutputs.Add(output);
+            }
+            Lua.InputSignals.AddRange(LogicInputs);
+            Lua.OutputSignals.AddRange(LogicOutputs);
+            Lua.code = LuaCode;
+            Lua.OnlyActivateOnInputChange = RunOnlyOnInputChange;
+            Lua.Register();
+            return Lua;
         }
         //lua stuff
         public static DynValue exec1(CallbackArguments args, string funcName, Func<double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
