@@ -444,15 +444,6 @@ namespace MapMaker
             {
                 output.WasOnLastTick = output.IsOn;
             }
-            foreach (var gate in LogicGatesToAlwaysUpdate)
-            {
-                //we dont want to update them multiple times
-                if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
-                {
-                    gate.Logic(SimDeltaTime);
-                    gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
-                }
-            }
             if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress)
             {
                 //for all of the gates.
@@ -494,6 +485,16 @@ namespace MapMaker
                     var Line = LineRenderers[input];
                     var output = input.inputs[0];
                     SetLinePosForLine(Line, input, output);
+                }
+            }
+            //in case time stop/game hasnt started yet
+            foreach (var gate in LogicGatesToAlwaysUpdate)
+            {
+                //we dont want to update them multiple times
+                if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
+                {
+                    gate.Logic(SimDeltaTime);
+                    gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
                 }
             }
         }

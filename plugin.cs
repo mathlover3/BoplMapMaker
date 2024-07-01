@@ -126,7 +126,6 @@ namespace MapMaker
             MapJsons = JsonList.ToArray();
             //find objects
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
-            UnityEngine.Debug.Log("getting Bow object");
             var objectsFound = 0;
             var ObjectsToFind = 4;
             foreach (GameObject obj in allObjects)
@@ -822,9 +821,11 @@ namespace MapMaker
                 int[] UUids3 = { 3 };
                 int[] UUids4 = { };
                 CreateLuaGate(UUids3, UUids4, new Vec2((Fix)2, (Fix)(2)), (Fix)0, @"    
-a, b = RaycastRoundedRect(0, 0, 90, 3000)
+--a, b = RaycastRoundedRect(0, 0, 90, 3000)
 --print(""Raycast results: a ="", a, ""b ="", b)
-obj = GetClosestPlayer(0, 0)
+if (obj == nil) then
+    obj = GetClosestPlayer(0, 0)
+end
 --print(""Closest player:"", obj)
 if (obj ~= nil and a ~= nil and a >= 0 and a < 100) then
     if (pos ~= nil) then
@@ -840,21 +841,27 @@ if (obj ~= nil and a ~= nil and a >= 0 and a < 100) then
         print(""max speed 19"")
     end
 end
-if (b ~= nil and b.GetClassType() == ""Platform"") then
-    body = b.GetBoplBody()
-    body.SetScale(2)
-    print(""scale is 2"")
-end
-if (obj ~= nil) then
-    print(""obj isnt null"")
-end
-if (a ~= nil) then
-    print(""a isnt null"")
+plats = GetAllPlatforms()
+i = 1
+if (plats ~= nil) then
+    while(plats[i] ~= nil) do
+        plat = plats[i]
+        if (plat ~= nil and plat.IsBoulder() == false) then
+            body = plat.GetBoplBody()
+            if (body ~= nil) then
+                pos2 = body.GetPos()
+                x = pos2[""x""]
+                y = pos2[""y""]
+                plat.SetHome(x, y)
+            end
+        end
+        i = i + 1
+    end
 end
 if (b ~= nil) then
     return b.GetClassType()
 end
-return b", false);
+return b");
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)0, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
@@ -1323,7 +1330,7 @@ return b", false);
             dropPlayers.Register();
             return dropPlayers;
         }
-        public static LuaMain CreateLuaGate(int[] InputUUids, int[] OutputUUids, Vec2 pos, Fix rot, string LuaCode, bool RunOnlyOnInputChange)
+        public static LuaMain CreateLuaGate(int[] InputUUids, int[] OutputUUids, Vec2 pos, Fix rot, string LuaCode)
         {
             var Lua = FixTransform.InstantiateFixed<LuaMain>(LuaPrefab, pos, (Fix)ConvertToRadians((double)rot));
             var LogicInputs = new List<LogicInput>();
@@ -1353,7 +1360,6 @@ return b", false);
             Lua.InputSignals.AddRange(LogicInputs);
             Lua.OutputSignals.AddRange(LogicOutputs);
             Lua.code = LuaCode;
-            Lua.OnlyActivateOnInputChange = RunOnlyOnInputChange;
             Lua.Register();
             return Lua;
         }
@@ -1911,7 +1917,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         public static void ExecAdd(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
         {
-            Debug.Log("ExecAdd");
             var m_ValueStack = __instance.m_ValueStack;
             DynValue r = m_ValueStack.Pop().ToScalar();
             DynValue l = m_ValueStack.Pop().ToScalar();
@@ -1942,7 +1947,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         public static void ExecSub(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
         {
-            Debug.Log("ExecSub");
             var m_ValueStack = __instance.m_ValueStack;
             DynValue r = m_ValueStack.Pop().ToScalar();
             DynValue l = m_ValueStack.Pop().ToScalar();
@@ -1973,7 +1977,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         public static void ExecMul(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
         {
-            Debug.Log("ExecMul");
             var m_ValueStack = __instance.m_ValueStack;
             DynValue r = m_ValueStack.Pop().ToScalar();
             DynValue l = m_ValueStack.Pop().ToScalar();
@@ -2004,7 +2007,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         public static void ExecMod(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
         {
-            Debug.Log("ExecMod");
             var m_ValueStack = __instance.m_ValueStack;
             DynValue r = m_ValueStack.Pop().ToScalar();
             DynValue l = m_ValueStack.Pop().ToScalar();
@@ -2035,7 +2037,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         public static void ExecDiv(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
         {
-            Debug.Log("ExecDiv");
             var m_ValueStack = __instance.m_ValueStack;
             DynValue r = m_ValueStack.Pop().ToScalar();
             DynValue l = m_ValueStack.Pop().ToScalar();
@@ -2066,7 +2067,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         public static void ExecPower(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
         {
-            Debug.Log("ExecPower");
             var m_ValueStack = __instance.m_ValueStack;
             DynValue r = m_ValueStack.Pop().ToScalar();
             DynValue l = m_ValueStack.Pop().ToScalar();
@@ -2097,7 +2097,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         public static void ExecNeg(Instruction i, int instructionPtr, MoonSharp.Interpreter.Execution.VM.Processor __instance, ref int __result)
         {
-            Debug.Log("ExecNeg");
             var m_ValueStack = __instance.m_ValueStack;
             DynValue r = m_ValueStack.Pop().ToScalar();
             double? rn = r.CastToNumber();

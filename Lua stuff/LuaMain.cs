@@ -1,6 +1,7 @@
 ﻿using BoplFixedMath;
 using MoonSharp.Interpreter;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace MapMaker.Lua_stuff
     public class LuaMain : LogicGate
     {
         public static LuaSpawner LuaSpawner;
-        public bool OnlyActivateOnInputChange = false;
+        public string Name = "Lua default name";
         public string code = null;
         private static PlayerPhysics player;
         public Script script;
@@ -37,11 +38,11 @@ namespace MapMaker.Lua_stuff
             script.Globals["SpawnExplosion"] = (object)SpawnExplosionDouble;
             script.Globals["RaycastRoundedRect"] = (object)RaycastRoundedRect;
             script.Globals["GetClosestPlayer"] = (object)GetClosestPlayer;
-            script.Globals["print"] = (Action<string>)print;
+            script.Globals["GetAllPlatforms"] = (object)GetAllPlatforms;
+            script.Options.DebugPrint = s => { Console.WriteLine(s); };
             // Register just MyClass, explicitely.
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
-            UserData.RegisterProxyType<PlatformProxy, ShakablePlatform>(r => new PlatformProxy(r));
-            UserData.RegisterProxyType<BoulderProxy, StickyRoundedRectangle>(r => new BoulderProxy(r));
+            UserData.RegisterProxyType<PlatformProxy, StickyRoundedRectangle>(r => new PlatformProxy(r));
             UserData.RegisterProxyType<BoplBodyProxy, BoplBody>(r => new BoplBodyProxy(r));
             return script;
         }
@@ -50,19 +51,39 @@ namespace MapMaker.Lua_stuff
             UUID = Plugin.NextUUID;
             Plugin.NextUUID++;
             SignalSystem.RegisterLogicGate(this);
-            if (!OnlyActivateOnInputChange)
-            {
-                SignalSystem.RegisterGateThatAlwaysRuns(this);
-            }
+            SignalSystem.RegisterGateThatAlwaysRuns(this);
         }
-        public static DynValue RunScript(string scriptCode, Dictionary<string, object> paramiters, Script script)
+        public DynValue RunScript(string scriptCode, Dictionary<string, object> paramiters, Script script)
         {
             foreach (var Key in paramiters.Keys)
             {
                 script.Globals[Key] = paramiters[Key];
             }
-
-            DynValue res = script.DoString(scriptCode);
+            try
+            {
+                DynValue res = script.DoString(scriptCode);
+                switch (res.Type)
+                {
+                    case DataType.String:
+                        UnityEngine.Debug.Log(res.String);
+                        break;
+                    case DataType.Boolean:
+                        UnityEngine.Debug.Log(res.Boolean);
+                        break;
+                    case DataType.Number:
+                        UnityEngine.Debug.Log(res.Number);
+                        break;
+                    default:
+                        UnityEngine.Debug.Log(res.Type);
+                        break;
+                }
+                return res;
+            }
+            catch (ScriptRuntimeException e)
+            {
+                Console.WriteLine($"ERROR IN LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
+                return DynValue.Nil;
+            }
             /*foreach (var Key in script.Globals.Keys)
             {
                 var value = script.Globals[Key];
@@ -73,26 +94,7 @@ namespace MapMaker.Lua_stuff
                     UnityEngine.Debug.Log(func.Name);
                 }
             }*/
-            switch (res.Type)
-            {
-                case DataType.String:
-                    UnityEngine.Debug.Log(res.String);
-                    break;
-                case DataType.Boolean:
-                    UnityEngine.Debug.Log(res.Boolean);
-                    break;
-                case DataType.Number:
-                    UnityEngine.Debug.Log(res.Number);
-                    break;
-                default:
-                    UnityEngine.Debug.Log(res.Type);
-                    break;
-            }
-            return res;
-        }
-        public static void print(string text)
-        {
-            UnityEngine.Debug.Log(text);
+
         }
         public static void SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {
@@ -145,17 +147,8 @@ namespace MapMaker.Lua_stuff
 
             if (result.pp.fixTrans != null && result.pp.fixTrans.gameObject != null)
             {
-                var roundedRect = result.pp.fixTrans.gameObject.GetComponent<StickyRoundedRectangle>();
-                var shakable = result.pp.fixTrans.gameObject.GetComponent<ShakablePlatform>();
-                //if its a platform not a boulder
-                if (shakable != null)
-                {
-                    platform = UserData.Create(shakable);
-                }
-                else
-                {
-                    platform = UserData.Create(roundedRect);
-                }
+                var sticky = result.pp.fixTrans.gameObject.GetComponent<StickyRoundedRectangle>();
+                platform = UserData.Create(sticky);
             }
             else
             {
@@ -192,6 +185,12 @@ namespace MapMaker.Lua_stuff
                 return UserData.Create(CurrentPlayer);
             }
             return DynValue.Nil;
+        }
+        public static List<StickyRoundedRectangle> GetAllPlatforms()
+        {
+            StickyRoundedRectangle[] allObjects = Resources.FindObjectsOfTypeAll(typeof(StickyRoundedRectangle)) as StickyRoundedRectangle[];
+            List<StickyRoundedRectangle> result = new List<StickyRoundedRectangle>(allObjects);
+            return result;
         }
         public override void Logic(Fix SimDeltaTime)
         {
@@ -274,10 +273,10 @@ namespace MapMaker.Lua_stuff
         public StickyRoundedRectangle target;
         public ShakablePlatform shakable;
         [MoonSharpHidden]
-        public PlatformProxy(ShakablePlatform p)
+        public PlatformProxy(StickyRoundedRectangle p)
         {
-            shakable = p;
-            target = p.gameObject.GetComponent<StickyRoundedRectangle>();
+            target = p;
+            shakable = p.gameObject.GetComponent<ShakablePlatform>();
         }
         public string GetClassType()
         {
@@ -289,15 +288,29 @@ namespace MapMaker.Lua_stuff
         }
         public double GetRot()
         {
-            return (double)PlatformApi.PlatformApi.GetRot(target.gameObject);
+            return (double)(PlatformApi.PlatformApi.GetRot(target.gameObject) * (Fix)PhysTools.RadiansToDegrees);
         }
         public Table GetHome(Script script)
         {
-            return LuaMain.Vec2ToTable(PlatformApi.PlatformApi.GetHome(target.gameObject), script);
+            if (!IsBoulder())
+            {
+                return LuaMain.Vec2ToTable(PlatformApi.PlatformApi.GetHome(target.gameObject), script);
+            }
+            else
+            {
+                throw new ScriptRuntimeException("Can't call GetHome on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
         }
         public double GetHomeRot()
         {
-            return (double)PlatformApi.PlatformApi.GetHomeRot(target.gameObject);
+            if (!IsBoulder())
+            {
+                return (double)(PlatformApi.PlatformApi.GetHomeRot(target.gameObject) * (Fix)PhysTools.RadiansToDegrees);
+            }
+            else
+            {
+                throw new ScriptRuntimeException("Can't call GetHomeRot on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
         }
         public double GetScale()
         {
@@ -309,20 +322,46 @@ namespace MapMaker.Lua_stuff
         }
         public void SetHome(double PosX, double PosY)
         {
-            PlatformApi.PlatformApi.SetHome(target.gameObject, new Vec2((Fix)PosX, (Fix)PosY));
+            if (!IsBoulder())
+            {
+                PlatformApi.PlatformApi.SetHome(target.gameObject, new Vec2((Fix)PosX, (Fix)PosY));
+            }
+            else
+            {
+                throw new ScriptRuntimeException("Can't call SetHome on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
         }
         public void SetHomeRot(double NewRot)
         {
-            PlatformApi.PlatformApi.SetHomeRot(target.gameObject, (Fix)NewRot);
+            if (!IsBoulder())
+            {
+                PlatformApi.PlatformApi.SetHomeRot(target.gameObject, (Fix)NewRot * (Fix)PhysTools.DegreesToRadians);
+            }
+            else
+            {
+                throw new ScriptRuntimeException("Can't call SetHomeRot on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
         }
         public void ShakePlatform(double Duratson, double ShakeAmount)
         {
             shakable.AddShake((Fix)Duratson, (Fix)ShakeAmount);
         }
+        public void DropAllPlayers(double DropForce)
+        {
+            target.DropAllAttachedPlayers(255, (Fix)DropForce);
+        }
         public DynValue GetBoplBody()
         {
             var boplBody = target.GetGroundBody();
-            return UserData.Create(boplBody);
+            if (boplBody)
+            {
+                return UserData.Create(boplBody);
+            }
+            return DynValue.Nil;
+        }
+        public bool IsBoulder()
+        {
+            return target.gameObject.GetComponent<Boulder>() != null;
         }
         public void SetActive(bool active)
         {
@@ -331,19 +370,6 @@ namespace MapMaker.Lua_stuff
         public bool IsActive()
         {
             return target.gameObject.activeInHierarchy;
-        }
-    }
-    public class BoulderProxy
-    {
-        public StickyRoundedRectangle target;
-        [MoonSharpHidden]
-        public BoulderProxy(StickyRoundedRectangle p)
-        {
-            target = p;
-        }
-        public string GetClassType()
-        {
-            return "Boulder";
         }
     }
     public class BoplBodyProxy
@@ -364,7 +390,7 @@ namespace MapMaker.Lua_stuff
         }
         public double GetRot()
         {
-            return (double)target.rotation;
+            return (double)(target.rotation * (Fix)PhysTools.RadiansToDegrees);
         }
         public double GetScale()
         {
@@ -376,14 +402,13 @@ namespace MapMaker.Lua_stuff
         }
         public void SetPos(double x, double y)
         {
-            var x2 = Fix.Clamp((Fix)x, (Fix)(-100), (Fix)100);
-            var y2 = Fix.Clamp((Fix)y, (Fix)(-100), (Fix)100);
-            target.position = new Vec2((Fix)x2, (Fix)y2);
+
+            target.position = new Vec2((Fix)x, (Fix)y);
         }
         public void SetRot(double Rot)
         {
             var rot = Fix.SlowMod((Fix)Rot, (Fix)360);
-            target.rotation = (Fix)Rot;
+            target.rotation = (Fix)Rot * (Fix)PhysTools.DegreesToRadians;
         }
         public void SetScale(double Scale)
         {
