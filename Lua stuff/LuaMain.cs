@@ -62,7 +62,6 @@ namespace MapMaker.Lua_stuff
                 script.Globals[Key] = paramiters[Key];
             }
 
-
             DynValue res = script.DoString(scriptCode);
             /*foreach (var Key in script.Globals.Keys)
             {
@@ -74,7 +73,21 @@ namespace MapMaker.Lua_stuff
                     UnityEngine.Debug.Log(func.Name);
                 }
             }*/
-            UnityEngine.Debug.Log(res.Type);
+            switch (res.Type)
+            {
+                case DataType.String:
+                    UnityEngine.Debug.Log(res.String);
+                    break;
+                case DataType.Boolean:
+                    UnityEngine.Debug.Log(res.Boolean);
+                    break;
+                case DataType.Number:
+                    UnityEngine.Debug.Log(res.Number);
+                    break;
+                default:
+                    UnityEngine.Debug.Log(res.Type);
+                    break;
+            }
             return res;
         }
         public static void print(string text)
@@ -124,7 +137,7 @@ namespace MapMaker.Lua_stuff
         public static DynValue RaycastRoundedRect(double posX, double posY, double angle, double maxDist)
         {
             var pos = new Vec2((Fix)posX, (Fix)posY);
-            var angleRads = (Fix)angle * ((Fix)Fix.PI / (Fix)180);
+            var angleRads = (Fix)angle * (Fix)PhysTools.DegreesToRadians;
             var dir = new Vec2((Fix)angleRads);
             var dist = (Fix)maxDist;
             var result = DetPhysics.Get().RaycastToClosestRoundedRect(pos, dir, dist);
@@ -235,7 +248,6 @@ namespace MapMaker.Lua_stuff
         public double GetGravityMaxFallSpeed() { return (double)target.gravity_maxFallSpeed; }
         public double GetJumpExtraXStrength() { return (double)target.jumpExtraXStrength; }
         public double GetJumpKeptMomentum() { return (double)target.jumpKeptMomentum; }
-        public Table GetVelocity(Script script) { return LuaMain.Vec2ToTable(body.Velocity, script); }
         public Table GetPosition(Script script) { return LuaMain.Vec2ToTable(body.position, script); }
         public void GetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
         public void SetSpeed(double NewValue) {target.Speed = (Fix)NewValue; }

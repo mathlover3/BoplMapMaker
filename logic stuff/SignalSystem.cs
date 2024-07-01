@@ -461,29 +461,24 @@ namespace MapMaker
                     //check if the input has changed
                     foreach(var input in gate.InputSignals)
                     {
-                        var output = input.inputs[0];
-
-                        if ((output.IsOn != output.WasOnLastTick) || FirstUpdateOfTheRound)
+                        var output = input.inputs[0];    
+                        input.IsOn = output.IsOn;
+                        //update the line color
+                        var Line = LineRenderers[input];
+                        //if the line isnt null update the colors.
+                        if (Line)
                         {
-                            
-                            input.IsOn = output.IsOn;
-                            //update the line color
-                            var Line = LineRenderers[input];
-                            //if the line isnt null update the colors.
-                            if (Line)
+                            if (input.IsOn)
                             {
-                                if (input.IsOn)
-                                {
-                                    Line.endColor = (Line.startColor = Color.green);
-                                }
-                                else Line.endColor = (Line.startColor = Color.red);
+                                Line.endColor = (Line.startColor = Color.green);
                             }
-                            //if the input has changed run the gates code
-                            if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
-                            {
-                                gate.Logic(SimDeltaTime);
-                                gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
-                            }
+                            else Line.endColor = (Line.startColor = Color.red);
+                        }
+                        //if the input has changed run the gates code
+                        if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
+                        {
+                            gate.Logic(SimDeltaTime);
+                            gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
                         }
 
                     }

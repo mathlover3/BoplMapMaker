@@ -822,28 +822,42 @@ namespace MapMaker
                 int[] UUids3 = { 3 };
                 int[] UUids4 = { };
                 CreateLuaGate(UUids3, UUids4, new Vec2((Fix)2, (Fix)(2)), (Fix)0, @"    
-a, b = RaycastRoundedRect(0, 0, 270, 300)
-print(""Raycast results: a ="", a, ""b ="", b)
+a, b = RaycastRoundedRect(0, 0, 90, 3000)
+--print(""Raycast results: a ="", a, ""b ="", b)
 obj = GetClosestPlayer(0, 0)
-print(""Closest player:"", obj)
-if (obj ~= nil and a ~= nil and a > 0 and a < 100) then
-    vel = obj.GetVelocity()
+--print(""Closest player:"", obj)
+if (obj ~= nil and a ~= nil and a >= 0 and a < 100) then
+    if (pos ~= nil) then
+        LastPos = pos
+    end
+    pos = obj.GetPosition()
     
-    if (vel[""x""] > 0) then
+    if (LastPos ~= nil and LastPos[""x""] - pos[""x""] > 0) then
         obj.SetMaxSpeed(38)
+        print(""max speed 38"")
     else
         obj.SetMaxSpeed(19)
+        print(""max speed 19"")
     end
-    if (b ~= nil and b.GetClassType() == ""Platform"") then
-        body = b.GetBoplBody()
-        body.SetScale(2)
-        return b.GetClassType()
-    end
+end
+if (b ~= nil and b.GetClassType() == ""Platform"") then
+    body = b.GetBoplBody()
+    body.SetScale(2)
+    print(""scale is 2"")
+end
+if (obj ~= nil) then
+    print(""obj isnt null"")
+end
+if (a ~= nil) then
+    print(""a isnt null"")
+end
+if (b ~= nil) then
+    return b.GetClassType()
 end
 return b", false);
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
-                //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
+                //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)0, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
