@@ -17,7 +17,7 @@ sends a raycast from a point that can only hit RoundedRects (platforms and match
 the number is the distance it travaled before hitting anything. returns a very big negitive number if it doesnt hit anything
 note that Platform/Boulder may be nil if it didnt hit anything.
 to see if its a platform or a boulder class check if its nil and if not then use GetClassType to see witch it is.
-0 deg is right and 90 is down.
+0 deg is right and 90 is up.
 number, Platform/Boulder RaycastRoundedRect(number posX, number posY, number angle, number maxDist)
 
 gets the closest player to that posison. returns nil if all the players are gone (begiening/end of game)
@@ -38,7 +38,6 @@ number Player.GetGravityMaxFallSpeed()
 number Player.GetJumpExtraXStrength()
 number Player.GetJumpKeptMomentum()
 number Player.GetAirAccel()
-Vec2 Player.GetVelocity()
 Vec2 Player.GetPosition()
 none/nil Player.SetSpeed(number NewValue)
 none/nil Player.SetGroundedSpeed(number NewValue)
@@ -56,6 +55,7 @@ none/nil Player.SetActive(bool active)
 bool Player.IsActive()
 returns "Player"
 string Player.GetClassType()
+
 ## Platform
 the following are the funcsons of the Platform type.
 returns "Platform"
