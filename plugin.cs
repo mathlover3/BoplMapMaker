@@ -822,7 +822,7 @@ namespace MapMaker
                 int[] UUids3 = { 3 };
                 int[] UUids4 = { };
                 CreateLuaGate(UUids3, UUids4, new Vec2((Fix)2, (Fix)(2)), (Fix)0, @"    
-a, b = RaycastRoundedRect(0, 0, 90, 300)
+a, b = RaycastRoundedRect(0, 0, 270, 300)
 print(""Raycast results: a ="", a, ""b ="", b)
 obj = GetClosestPlayer(0, 0)
 print(""Closest player:"", obj)
@@ -830,14 +830,17 @@ if (obj ~= nil and a ~= nil and a > 0 and a < 100) then
     vel = obj.GetVelocity()
     
     if (vel[""x""] > 0) then
-        obj.SetSpeed(38)
+        obj.SetMaxSpeed(38)
     else
-        obj.SetSpeed(19)
+        obj.SetMaxSpeed(19)
     end
-    return obj.GetSpeed()
-
+    if (b ~= nil and b.GetClassType() == ""Platform"") then
+        body = b.GetBoplBody()
+        body.SetScale(2)
+        return b.GetClassType()
+    end
 end
-return 1", false);
+return b", false);
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)360, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));

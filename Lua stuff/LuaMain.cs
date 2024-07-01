@@ -40,8 +40,9 @@ namespace MapMaker.Lua_stuff
             script.Globals["print"] = (Action<string>)print;
             // Register just MyClass, explicitely.
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
-            UserData.RegisterProxyType<PlatformProxy, StickyRoundedRectangle>(r => new PlatformProxy(r));
+            UserData.RegisterProxyType<PlatformProxy, ShakablePlatform>(r => new PlatformProxy(r));
             UserData.RegisterProxyType<BoulderProxy, StickyRoundedRectangle>(r => new BoulderProxy(r));
+            UserData.RegisterProxyType<BoplBodyProxy, BoplBody>(r => new BoplBodyProxy(r));
             return script;
         }
         public void Register()
@@ -73,7 +74,7 @@ namespace MapMaker.Lua_stuff
                     UnityEngine.Debug.Log(func.Name);
                 }
             }*/
-            UnityEngine.Debug.Log(res.Number);
+            UnityEngine.Debug.Log(res.Type);
             return res;
         }
         public static void print(string text)
@@ -123,7 +124,8 @@ namespace MapMaker.Lua_stuff
         public static DynValue RaycastRoundedRect(double posX, double posY, double angle, double maxDist)
         {
             var pos = new Vec2((Fix)posX, (Fix)posY);
-            var dir = new Vec2((Fix)angle);
+            var angleRads = (Fix)angle * ((Fix)Fix.PI / (Fix)180);
+            var dir = new Vec2((Fix)angleRads);
             var dist = (Fix)maxDist;
             var result = DetPhysics.Get().RaycastToClosestRoundedRect(pos, dir, dist);
             DynValue platform;
@@ -135,11 +137,11 @@ namespace MapMaker.Lua_stuff
                 //if its a platform not a boulder
                 if (shakable != null)
                 {
-                    platform = UserData.Create(new PlatformProxy(roundedRect));
+                    platform = UserData.Create(shakable);
                 }
                 else
                 {
-                    platform = UserData.Create(new BoulderProxy(roundedRect));
+                    platform = UserData.Create(roundedRect);
                 }
             }
             else
@@ -246,6 +248,10 @@ namespace MapMaker.Lua_stuff
         public void SetJumpExtraXStrength(double NewValue) {target.jumpExtraXStrength = (Fix)NewValue; }
         public void SetJumpKeptMomentum(double NewValue) {target.jumpKeptMomentum = (Fix)NewValue; }
         public void SetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
+        public void SetActive(bool active)
+        {
+            target.gameObject.SetActive(active);
+        }
         public string GetClassType()
         {
             return "Player";
@@ -256,10 +262,10 @@ namespace MapMaker.Lua_stuff
         public StickyRoundedRectangle target;
         public ShakablePlatform shakable;
         [MoonSharpHidden]
-        public PlatformProxy(StickyRoundedRectangle p)
+        public PlatformProxy(ShakablePlatform p)
         {
-            target = p;
-            shakable = p.gameObject.GetComponent<ShakablePlatform>();
+            shakable = p;
+            target = p.gameObject.GetComponent<StickyRoundedRectangle>();
         }
         public string GetClassType()
         {
@@ -269,7 +275,7 @@ namespace MapMaker.Lua_stuff
         {
             return LuaMain.Vec2ToTable(PlatformApi.PlatformApi.GetPos(target.gameObject), script);
         }
-        public double GetRot(Script script)
+        public double GetRot()
         {
             return (double)PlatformApi.PlatformApi.GetRot(target.gameObject);
         }
@@ -277,9 +283,42 @@ namespace MapMaker.Lua_stuff
         {
             return LuaMain.Vec2ToTable(PlatformApi.PlatformApi.GetHome(target.gameObject), script);
         }
-        public double GetHomeRot(Script script)
+        public double GetHomeRot()
         {
             return (double)PlatformApi.PlatformApi.GetHomeRot(target.gameObject);
+        }
+        public double GetScale()
+        {
+            return (double)PlatformApi.PlatformApi.GetScale(target.gameObject);
+        }
+        public void SetScale(double scale)
+        {
+            PlatformApi.PlatformApi.SetScale(target.gameObject, (Fix)scale);
+        }
+        public void SetHome(double PosX, double PosY)
+        {
+            PlatformApi.PlatformApi.SetHome(target.gameObject, new Vec2((Fix)PosX, (Fix)PosY));
+        }
+        public void SetHomeRot(double NewRot)
+        {
+            PlatformApi.PlatformApi.SetHomeRot(target.gameObject, (Fix)NewRot);
+        }
+        public void ShakePlatform(double Duratson, double ShakeAmount)
+        {
+            shakable.AddShake((Fix)Duratson, (Fix)ShakeAmount);
+        }
+        public DynValue GetBoplBody()
+        {
+            var boplBody = target.GetGroundBody();
+            return UserData.Create(boplBody);
+        }
+        public void SetActive(bool active)
+        {
+            target.gameObject.SetActive(active);
+        }
+        public bool IsActive()
+        {
+            return target.gameObject.activeInHierarchy;
         }
     }
     public class BoulderProxy
@@ -295,5 +334,56 @@ namespace MapMaker.Lua_stuff
             return "Boulder";
         }
     }
-
+    public class BoplBodyProxy
+    {
+        public BoplBody target;
+        [MoonSharpHidden]
+        public BoplBodyProxy(BoplBody p)
+        {
+            target = p;
+        }
+        public string GetClassType()
+        {
+            return "BoplBody";
+        }
+        public Table GetPos(Script script)
+        {
+            return LuaMain.Vec2ToTable(target.position, script);
+        }
+        public double GetRot()
+        {
+            return (double)target.rotation;
+        }
+        public double GetScale()
+        {
+            return (double)target.Scale;
+        }
+        public Table GetVelocity(Script script)
+        {
+            return LuaMain.Vec2ToTable(target.velocity, script);
+        }
+        public void SetPos(double x, double y)
+        {
+            var x2 = Fix.Clamp((Fix)x, (Fix)(-100), (Fix)100);
+            var y2 = Fix.Clamp((Fix)y, (Fix)(-100), (Fix)100);
+            target.position = new Vec2((Fix)x2, (Fix)y2);
+        }
+        public void SetRot(double Rot)
+        {
+            var rot = Fix.SlowMod((Fix)Rot, (Fix)360);
+            target.rotation = (Fix)Rot;
+        }
+        public void SetScale(double Scale)
+        {
+            target.Scale = (Fix)Scale;
+        }
+        public void SetVelocity(double VelX, double VelY)
+        {
+            target.velocity = new Vec2((Fix)VelX, (Fix)VelY);
+        }
+        public void AddForce(double ForceX, double ForceY)
+        {
+            target.AddForce(new Vec2((Fix)ForceX, (Fix)ForceY));
+        }
+    }
 }

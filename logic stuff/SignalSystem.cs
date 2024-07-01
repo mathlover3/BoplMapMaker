@@ -428,6 +428,18 @@ namespace MapMaker
 
         public override void UpdateSim(Fix SimDeltaTime)
         {
+            //make sure we are the last thing to be updated (mostly for the lua support)
+            var updatables = Updater.updatables;
+            var index = updatables.IndexOf(this);
+            //if its not the last updatable
+            if (index != updatables.Count - 1)
+            {
+                //remove it and add it to the end
+                updatables.RemoveAt(index);
+                updatables.Add(this);
+                return;
+            }    
+            //now for acsuly running the logic
             foreach(var output in LogicOutputs)
             {
                 output.WasOnLastTick = output.IsOn;
