@@ -849,9 +849,7 @@ if (plats ~= nil) then
         if (plat ~= nil and plat.IsBoulder() == false) then
             body = plat.GetBoplBody()
             if (body ~= nil) then
-                pos2 = body.GetPos()
-                x = pos2[""x""]
-                y = pos2[""y""]
+                x, y = body.GetPos()
                 plat.SetHome(x, y)
             end
         end

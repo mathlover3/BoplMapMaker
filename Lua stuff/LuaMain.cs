@@ -1,4 +1,5 @@
 ﻿using BoplFixedMath;
+using MonoMod.Utils;
 using MoonSharp.Interpreter;
 using System;
 using System.Collections;
@@ -204,27 +205,12 @@ namespace MapMaker.Lua_stuff
             };
             RunScript(code, paramiters, script);
         }
-        public static Table Vec2ToTable(Vec2 vec2, Script script)
+        public static DynValue Vec2ToTuple(Vec2 vec2)
         {
-            Table tbl = new Table(script);
-            tbl["x"] = (double)vec2.x;
-            tbl["y"] = (double)vec2.y;
-            return tbl;
-        }
-        public static Vec2 TableToVec2(Table table)
-        {
-            Vec2 vec = new Vec2();
-            if (table.Get("x") != DynValue.Nil && table.Get("y") != DynValue.Nil) 
-            {
-                if (table.Get("x").Type == DataType.Number && table.Get("y").Type == DataType.Number)
-                {
-                    vec.x = (Fix)table.Get("x").Number;
-                    vec.y = (Fix)table.Get("y").Number;
-                    return vec;
-                }
-                else { throw new Exception("TABLE TO TURN INTO VEC2 HAS A VALUE OF x/y THATS NOT A NUMBER!"); }
-            }
-            else { throw new Exception("TABLE TO TURN INTO VEC2 HAS A VALUE OF x/y THATS NIL!"); }
+            return DynValue.NewTuple(
+                DynValue.NewNumber((double)vec2.x),
+                DynValue.NewNumber((double)vec2.y)
+            );
         }
     }
     public class LuaPlayerPhysicsProxy
@@ -247,7 +233,7 @@ namespace MapMaker.Lua_stuff
         public double GetGravityMaxFallSpeed() { return (double)target.gravity_maxFallSpeed; }
         public double GetJumpExtraXStrength() { return (double)target.jumpExtraXStrength; }
         public double GetJumpKeptMomentum() { return (double)target.jumpKeptMomentum; }
-        public Table GetPosition(Script script) { return LuaMain.Vec2ToTable(body.position, script); }
+        public DynValue GetPosition(Script script) { return LuaMain.Vec2ToTuple(body.position); }
         public void GetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
         public void SetSpeed(double NewValue) {target.Speed = (Fix)NewValue; }
         public void SetGroundedSpeed(double NewValue) {target.groundedSpeed = (Fix)NewValue; }
@@ -282,19 +268,11 @@ namespace MapMaker.Lua_stuff
         {
             return "Platform";
         }
-        public Table GetPos(Script script)
-        {
-            return LuaMain.Vec2ToTable(PlatformApi.PlatformApi.GetPos(target.gameObject), script);
-        }
-        public double GetRot()
-        {
-            return (double)(PlatformApi.PlatformApi.GetRot(target.gameObject) * (Fix)PhysTools.RadiansToDegrees);
-        }
-        public Table GetHome(Script script)
+        public DynValue GetHome()
         {
             if (!IsBoulder())
             {
-                return LuaMain.Vec2ToTable(PlatformApi.PlatformApi.GetHome(target.gameObject), script);
+                return LuaMain.Vec2ToTuple(PlatformApi.PlatformApi.GetHome(target.gameObject));
             }
             else
             {
@@ -384,9 +362,9 @@ namespace MapMaker.Lua_stuff
         {
             return "BoplBody";
         }
-        public Table GetPos(Script script)
+        public DynValue GetPos()
         {
-            return LuaMain.Vec2ToTable(target.position, script);
+            return LuaMain.Vec2ToTuple(target.position);
         }
         public double GetRot()
         {
@@ -396,9 +374,9 @@ namespace MapMaker.Lua_stuff
         {
             return (double)target.Scale;
         }
-        public Table GetVelocity(Script script)
+        public DynValue GetVelocity()
         {
-            return LuaMain.Vec2ToTable(target.velocity, script);
+            return LuaMain.Vec2ToTuple(target.velocity);
         }
         public void SetPos(double x, double y)
         {
