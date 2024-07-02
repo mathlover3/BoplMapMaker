@@ -323,6 +323,14 @@ namespace MapMaker
                         Debug.Log("Found the PlayerList");
                         break;
                     }
+                    //level 5 and likely some outers have it called this for some reson.
+                    if (obj.name == "PlayerList (1)")
+                    {
+                        //store its reference
+                        PlayerList = obj;
+                        Debug.Log("Found the PlayerList");
+                        break;
+                    }
                 }
                 GameSessionHandler handler = PlayerList.GetComponent(typeof(GameSessionHandler)) as GameSessionHandler;
                 handler.teamSpawns = Vecs;
@@ -852,10 +860,18 @@ if (plats ~= nil) then
                 x, y = body.GetPos()
                 plat.SetHome(x, y)
             end
-            plat.SetActive(math.random() > 0.5)
         end
         i = i + 1
     end
+end
+if (math.random() > 0.95) then
+    ShootBlink(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),0.5,4,1,0.3)
+end
+if (math.random() > 0.95) then
+    ShootGrow(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),0.8,0.8,50)
+end
+if (math.random() > 0.95) then
+    ShootShrink(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),-0.8,-0.8,50)
 end
 if (b ~= nil) then
     return b.GetClassType()
@@ -1622,9 +1638,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 if (Quantum != null && Quantum.Victim != null)
                 {
                     var VictimId = Quantum.Victim.GetInstanceID();
-                    Debug.Log($"VictimId: {VictimId}");
                     var DissappearId = __instance.gameObject.GetInstanceID();
-                    Debug.Log($"DissappearId: {DissappearId}");
                     //if this is already being blinked and its not being called from a blink dont shake it as if its shorter then it will go back to normal too soon.
                     if (VictimId == DissappearId && !Plugin.CurrentlyBlinking)
                     {

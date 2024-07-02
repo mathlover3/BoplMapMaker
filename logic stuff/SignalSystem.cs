@@ -487,63 +487,17 @@ namespace MapMaker
                     SetLinePosForLine(Line, input, output);
                 }
             }
-            //in case time stop/game hasnt started yet
-            foreach (var gate in LogicGatesToAlwaysUpdate)
+            //in case time is stoped.
+            if (PlatformApi.PlatformApi.gameInProgress)
             {
-                //we dont want to update them multiple times
-                if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
+                foreach (var gate in LogicGatesToAlwaysUpdate)
                 {
-                    gate.Logic(SimDeltaTime);
-                    gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
-                }
-            }
-        }
-        private static void CallAllLogic(LogicOutput output, Fix SimDeltaTime, bool FirstCall)
-        {
-            //triggers dont have gates
-            if (output.gate)
-            {
-                //if this isnt a first call then we will have already done this 
-                if (FirstCall)
-                {
-                    output.gate.Logic(SimDeltaTime);
-                }
-
-                //if this is a delay and its not the first call then we are stoping the prossesing as this may be a loop
-                if (output.gate.GetComponent<SignalDelay>() != null && !FirstCall)
-                {
-                    return;
-                }
-            }
-            //if the state hasnt changed dont keep going wasting time. unless its the first update in witch case we want everything to update.
-            if (output.IsOn == output.WasOnLastTick && !FirstUpdateOfTheRound)
-            {
-                return;
-            }
-            //for all of the inputs the output outputs to...
-            for (int i = 0; i < output.outputs.Count; i++)
-            {
-                //if set the inputs IsOn to the output that is inputing into it and then run the Logic
-                LogicInput input = output.outputs[i];
-                input.IsOn = output.IsOn;
-                //update the line color
-                var Line = LineRenderers[input];
-                //if the line isnt null update the colors.
-                if (Line)
-                {
-                    if (input.IsOn)
+                    //we dont want to update them multiple times
+                    if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
                     {
-                        Line.endColor = (Line.startColor = Color.green);
+                        gate.Logic(SimDeltaTime);
+                        gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
                     }
-                    else Line.endColor = (Line.startColor = Color.red);
-                }
-                //run the gates logic
-                input.gate.Logic(SimDeltaTime);
-                //for all of this gates outputs keep looping recusivly
-                for (int j = 0; j < input.gate.OutputSignals.Count; j++)
-                {
-                    LogicOutput output2 = input.gate.OutputSignals[j];
-                    CallAllLogic(output2, SimDeltaTime, false);
                 }
             }
         }

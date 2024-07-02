@@ -132,7 +132,7 @@ namespace MapMaker
             shootScaleChange.Shoot(fixTransform.position, rotVec, ref ignore, 255);
         }
         //https://discussions.unity.com/t/copy-a-component-at-runtime/71172/3
-        public T CopyComponent<T>(T original, GameObject destination) where T : Component
+        public static T CopyComponent<T>(T original, GameObject destination) where T : Component
         {
             System.Type type = original.GetType();
             Component copy = destination.AddComponent(type);

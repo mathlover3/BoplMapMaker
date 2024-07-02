@@ -9,26 +9,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace MapMaker.Lua_stuff
 {
     public class LuaMain : LogicGate
     {
         public static LuaSpawner LuaSpawner;
+        public static ShootBlink ShootBlinkObject;
         public string Name = "Lua default name";
         public string code = null;
-        private static PlayerPhysics player;
         public Script script;
+        private static Fix deltaTime = Fix.Zero;
         public void Awake()
         {
-            player = null;
             if (LuaSpawner == null)
             {
                 //if there is none we create one for everyone.
                 LuaSpawner = gameObject.AddComponent<LuaSpawner>();
             }
+            if (ShootBlinkObject == null)
+            {
+                //if there is none we create one for everyone.
+                ShootBlinkObject = gameObject.AddComponent<ShootBlink>();
+            }
         }
-        public static Script SetUpScriptFuncsons()
+        public Script SetUpScriptFuncsons()
         {
             //dont want to let people use librays that would give them acsess outside of the game like os and io now do we? also no time package eather as thats just asking for desinks.
             Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.Metatables | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Dynamic);
@@ -40,6 +46,13 @@ namespace MapMaker.Lua_stuff
             script.Globals["RaycastRoundedRect"] = (object)RaycastRoundedRect;
             script.Globals["GetClosestPlayer"] = (object)GetClosestPlayer;
             script.Globals["GetAllPlatforms"] = (object)GetAllPlatforms;
+            script.Globals["ShootBlink"] = (object)ShootBlink;
+            script.Globals["ShootGrow"] = (object)ShootGrow;
+            script.Globals["ShootShrink"] = (object)ShootShrink;
+            script.Globals["GetDeltaTime"] = (object)GetDeltaTime;
+            script.Globals["GetTimeSenceLevelLoad"] = (object)GetTimeSenceLevelLoad;
+            script.Globals["GetInputValueWithId"] = (object)GetInputValueWithId;
+            script.Globals["SetOutputWithId"] = (object)SetOutputWithId;
             script.Options.DebugPrint = s => { Console.WriteLine(s); };
             // Register just MyClass, explicitely.
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
@@ -163,7 +176,13 @@ namespace MapMaker.Lua_stuff
         }
         public static DynValue GetClosestPlayer(double posX, double posY)
         {
-            var players = GameObject.Find("PlayerList").transform;
+            //PlayerList (1)
+            var playerlist = GameObject.Find("PlayerList");
+            if (playerlist == null)
+            {
+                playerlist = GameObject.Find("PlayerList (1)");
+            }
+            var players = playerlist.transform;
             PlayerPhysics CurrentPlayer = null;
             Fix bestDist = Fix.MaxValue;
             foreach (Transform player in players)
@@ -187,11 +206,91 @@ namespace MapMaker.Lua_stuff
             }
             return DynValue.Nil;
         }
+        public static void ShootBlink(double posX, double posY, double Angle, double minPlayerDuration, double WallDuration, double WallDelay, double WallShake)
+        {
+            ShootBlinkObject.minPlayerDuration = (Fix)minPlayerDuration;
+            ShootBlinkObject.WallDelay = (Fix)WallDelay;
+            ShootBlinkObject.WallDuration = (Fix)WallDuration;
+            ShootBlinkObject.WallShake = (Fix)WallShake;
+            var dir = (Fix)Angle * (Fix)PhysTools.DegreesToRadians;
+            var ignore = false;
+            ShootBlinkObject.Shoot(new Vec2((Fix)posX, (Fix)posY), new Vec2(dir), ref ignore);
+        }
+        public void ShootGrow(double posX, double posY, double Angle, double ScaleMultiplyer, double PlayerMultiplyer, double blackHoleGrowth)
+        {
+            //if we already have one we remove it as it might be a strink one.
+            ShootScaleChange shootScaleChange = GetComponent<ShootScaleChange>();
+            if (shootScaleChange != null)
+            {
+                Destroy(shootScaleChange);
+            }
+            var ShootScaleChangeComp = ShootRay.GrowGameObjectPrefab.GetComponent<ShootScaleChange>();
+            shootScaleChange = ShootRay.CopyComponent<ShootScaleChange>(ShootScaleChangeComp, gameObject);
+            shootScaleChange.Awake();
+            var scaleChanger = ShootScaleChangeComp.ScaleChangerPrefab;
+            scaleChanger.multiplier = (Fix)ScaleMultiplyer;
+            scaleChanger.PlayerMultiplier = (Fix)PlayerMultiplyer;
+            scaleChanger.smallNonPlayersMultiplier = (Fix)ScaleMultiplyer;
+            shootScaleChange.ScaleChangerPrefab = scaleChanger;
+            //rot is in radiens
+            var rot = (Fix)Angle * (Fix)PhysTools.DegreesToRadians;
+            var rotVec = new Vec2(rot);
+            shootScaleChange.blackHoleGrowthInverse01 = Fix.One / (Fix)blackHoleGrowth;
+            bool ignore = false;
+            shootScaleChange.Shoot(new Vec2((Fix)posX, (Fix)posY), rotVec, ref ignore, 255);
+        }
+        public void ShootShrink(double posX, double posY, double Angle, double ScaleMultiplyer, double PlayerMultiplyer, double blackHoleGrowth)
+        {
+            //if we already have one we remove it as it might be a strink one.
+            ShootScaleChange shootScaleChange = GetComponent<ShootScaleChange>();
+            if (shootScaleChange != null)
+            {
+                Destroy(shootScaleChange);
+            }
+            var ShootScaleChangeComp = ShootRay.StrinkGameObjectPrefab.GetComponent<ShootScaleChange>();
+            shootScaleChange = ShootRay.CopyComponent<ShootScaleChange>(ShootScaleChangeComp, gameObject);
+            shootScaleChange.Awake();
+            var scaleChanger = ShootScaleChangeComp.ScaleChangerPrefab;
+            scaleChanger.multiplier = (Fix)ScaleMultiplyer;
+            scaleChanger.PlayerMultiplier = (Fix)PlayerMultiplyer;
+            scaleChanger.smallNonPlayersMultiplier = (Fix)ScaleMultiplyer;
+            shootScaleChange.ScaleChangerPrefab = scaleChanger;
+            //rot is in radiens
+            var rot = (Fix)Angle * (Fix)PhysTools.DegreesToRadians;
+            var rotVec = new Vec2(rot);
+            shootScaleChange.blackHoleGrowthInverse01 = Fix.One / (Fix)blackHoleGrowth;
+            bool ignore = false;
+            shootScaleChange.Shoot(new Vec2((Fix)posX, (Fix)posY), rotVec, ref ignore, 255);
+        }
         public static List<StickyRoundedRectangle> GetAllPlatforms()
         {
             StickyRoundedRectangle[] allObjects = Resources.FindObjectsOfTypeAll(typeof(StickyRoundedRectangle)) as StickyRoundedRectangle[];
             List<StickyRoundedRectangle> result = new List<StickyRoundedRectangle>(allObjects);
             return result;
+        }
+        public static double GetDeltaTime()
+        {
+            return (double)deltaTime;
+        }
+        public static double GetTimeSenceLevelLoad()
+        {
+            return (double)Updater.SimTimeSinceLevelLoaded;
+        }
+        public bool GetInputValueWithId(int id)
+        {
+            if (InputSignals.Count < id)
+            {
+                throw new ScriptRuntimeException($"Logic gate {Name} doesnt have input with id {id} it only has {InputSignals.Count} inputs");
+            }
+            return InputSignals[id - 1].IsOn;
+        }
+        public void SetOutputWithId(int id, bool value)
+        {
+            if (OutputSignals.Count < id)
+            {
+                throw new ScriptRuntimeException($"Logic gate {Name} doesnt have ouput with id {id} it only has {OutputSignals.Count} ouputs");
+            }
+            OutputSignals[id - 1].IsOn = value;
         }
         public override void Logic(Fix SimDeltaTime)
         {
@@ -199,10 +298,8 @@ namespace MapMaker.Lua_stuff
             {
                 script = SetUpScriptFuncsons();
             }
-            Dictionary<string, object> paramiters = new Dictionary<string, object>
-            {
-                { "mynumber", 5 }
-            };
+            Dictionary<string, object> paramiters = new Dictionary<string, object>();
+            deltaTime = SimDeltaTime;
             RunScript(code, paramiters, script);
         }
         public static DynValue Vec2ToTuple(Vec2 vec2)
@@ -245,10 +342,6 @@ namespace MapMaker.Lua_stuff
         public void SetJumpExtraXStrength(double NewValue) {target.jumpExtraXStrength = (Fix)NewValue; }
         public void SetJumpKeptMomentum(double NewValue) {target.jumpKeptMomentum = (Fix)NewValue; }
         public void SetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
-        public void SetActive(bool active)
-        {
-            target.gameObject.SetActive(active);
-        }
         public string GetClassType()
         {
             return "Player";
@@ -341,26 +434,35 @@ namespace MapMaker.Lua_stuff
         {
             return target.gameObject.GetComponent<Boulder>() != null;
         }
-        public void SetActive(bool active)
-        {
-            target.gameObject.SetActive(active);
-        }
-        public bool IsActive()
-        {
-            return target.gameObject.activeInHierarchy;
-        }
     }
     public class BoplBodyProxy
     {
         public BoplBody target;
+        public string type = "Unknown/Modded";
         [MoonSharpHidden]
         public BoplBodyProxy(BoplBody p)
         {
             target = p;
+            if (target.GetComponent<Arrow> != null) { type = "Arrow"; }
+            if (target.GetComponent<RocketEngine> != null) { type = "RocketEngine"; }
+            if (target.GetComponent<Mine> != null) { type = "Mine"; }
+            if (target.GetComponent<SimpleSparkNode> != null) { type = "Telsa"; }
+            if (target.GetComponent<DynamicAbilityPickup> != null) { type = "AbilityPickup"; }
+            if (target.GetComponent<Missile> != null) { type = "Missile"; }
+            if (target.GetComponent<Boulder> != null) { type = "MatchoBoulder"; }
+            if (target.GetComponent<SpikeAttack> != null) { type = "Spike"; }
+            if (target.GetComponent<BounceBall> != null) { type = "Rock"; }
+            if (target.GetComponent<FlammableSmoke> != null) { type = "Smoke"; }
+            if (target.GetComponent<SmokeGrenadeExplode2> != null) { type = "Smoke Grenade"; }
+            if (target.GetComponent<Grenade> != null) { type = "Grenade"; }
         }
         public string GetClassType()
         {
             return "BoplBody";
+        }
+        public string GetObjectType()
+        {
+            return type;
         }
         public DynValue GetPos()
         {
