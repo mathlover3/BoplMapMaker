@@ -31,7 +31,7 @@ Sequence (of Platforms) GetAllPlatforms()
 
 
 ## Vec2
-the type before the funcson are its return type. Vec2 is just a shorthand for a table with a number value for "x" and "y"
+the type before the funcson are its return type. Vec2 is just a shorthand for outputing 2 numbers x, y
 
 ## Player
 the following are funcsons of the Player type (returned by some funcsons) (tecnicly its a userData type but it acts like its its own type so we can think of it like it is)
@@ -75,7 +75,6 @@ home is basicly what posison it would like to be in. its what the springs try to
 Vec2 Platform.GetHome()
 number Platform.GetHomeRot()
 number Platform.GetScale()
-
 none/nil Platform.SetScale(number scale)
 none/nil Platform.SetHome(number posX, number posY)
 none/nil Platform.SetHomeRot(number NewRot)
