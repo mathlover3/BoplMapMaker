@@ -4,6 +4,7 @@ using MoonSharp.Interpreter;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -43,6 +44,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
             script.Globals["SpawnSmokeGrenade"] = (object)SpawnSmokeGrenadeDouble;
             script.Globals["SpawnExplosion"] = (object)SpawnExplosionDouble;
+            script.Globals["SpawnBoulder"] = (object)SpawnBoulderDouble;
             script.Globals["RaycastRoundedRect"] = (object)RaycastRoundedRect;
             script.Globals["GetClosestPlayer"] = (object)GetClosestPlayer;
             script.Globals["GetAllPlatforms"] = (object)GetAllPlatforms;
@@ -110,13 +112,13 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
-        public static void SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity, float R, float G, float B)
+        public static void SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B)
         {
-            SpawnArrow((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity, R, G, B);
+            SpawnArrow((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, R, G, B);
         }
-        public static void SpawnArrow(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity, float R, float G, float B)
+        public static void SpawnArrow(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, float R, float G, float B)
         {
-            LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity, new Color(0,0,0));
+            LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B));
         }
         public static void SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {
@@ -149,6 +151,40 @@ namespace MapMaker.Lua_stuff
         public static void SpawnExplosion(Fix posX, Fix posY, Fix scale)
         {
             LuaSpawner.SpawnNormalExplosion(new Vec2(posX, posY), scale);
+        }
+        public static void SpawnBoulderDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity, string type, float R, float G, float B)
+        {
+            PlatformType platformType;
+            var color = Color.white;
+            switch (type)
+            {
+                case "snow":
+                    platformType = PlatformType.snow;
+                    break;
+                case "grass":
+                    platformType = PlatformType.grass;
+                    break;
+                case "ice":
+                    platformType = PlatformType.ice;
+                    break;
+                case "space":
+                    platformType = PlatformType.space;
+                    break;
+                case "slime":
+                    platformType = PlatformType.slime;
+                    color = new Color(R, G, B);
+                    break;
+                default:
+                    throw new ScriptRuntimeException($"{type} is not a valid platform type.");
+            }
+            SpawnBoulder((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity, platformType, color);
+        }
+        public static void SpawnBoulder(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity, PlatformType type, Color color)
+        {
+            var boulder = PlatformApi.PlatformApi.SpawnBoulder(new Vec2(posX, posY), scale, type, color);
+            var dphysicsRoundedRect = boulder.hitbox;
+            dphysicsRoundedRect.velocity = new Vec2(StartVelX, StartVelY);
+            dphysicsRoundedRect.angularVelocity = StartAngularVelocity;
         }
         public static DynValue RaycastRoundedRect(double posX, double posY, double angle, double maxDist)
         {

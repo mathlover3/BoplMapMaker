@@ -19,6 +19,7 @@ namespace MapMaker.Lua_stuff
         private static DynamicAbilityPickup AbilityPickup;
         private static BoplBody SmokeGrenade;
         private static Explosion MissleExplosion;
+        public static Material WhiteSlimeMat;
         public void Awake()
         {
             UnityEngine.Debug.Log("LuaSpawner Awake");
@@ -100,6 +101,18 @@ namespace MapMaker.Lua_stuff
                 //get the Arrow prefab from the BowTransform
                 arrow = (BoplBody)AccessTools.Field(typeof(BowTransform), "Arrow").GetValue(BowTransform);
             }
+            if (WhiteSlimeMat == null)
+            {
+                Material[] allMaterials = Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[];
+                foreach (Material mat in allMaterials)
+                {
+                    if (mat.name == "whiteSlime")
+                    {
+                        WhiteSlimeMat = mat;
+                        Spawner.WhiteSlimeMat = mat;
+                    }
+                }
+            }
         }
         public enum ObjectSpawnType
         {
@@ -111,14 +124,14 @@ namespace MapMaker.Lua_stuff
             SmokeGrenade,
             Explosion
         }
-        public static void SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Fix StartAngularVelocity, Color color)
+        public static void SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(arrow, pos);
             boplBody.Scale = scale;
             boplBody.StartVelocity = StartVel;
             boplBody.rotation = CalculateAngle(StartVel);
-            boplBody.StartAngularVelocity = StartAngularVelocity;
-            boplBody.GetComponent<SpriteRenderer>().material.color = color;
+            boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
+            boplBody.GetComponent<SpriteRenderer>().color = color;
         }
         //modifyed chatgpt code
         public static Fix CalculateAngle(Vec2 vec2)

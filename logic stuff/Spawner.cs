@@ -1,5 +1,6 @@
 ﻿using BoplFixedMath;
 using HarmonyLib;
+using MapMaker.Lua_stuff;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,7 +21,7 @@ namespace MapMaker
         private static DynamicAbilityPickup AbilityPickup;
         private static BoplBody SmokeGrenade;
         private static Explosion MissleExplosion;
-
+        public static Material WhiteSlimeMat;
         public ObjectSpawnType spawnType = ObjectSpawnType.None;
         public Fix SimTimeBetweenSpawns = Fix.One;
         public Fix angle = Fix.Zero;
@@ -35,7 +36,6 @@ namespace MapMaker
         //if true then it will only activate on rising edge.
         public bool IsTriggerSignal = false;
         private bool HasTrigged = false;
-        //up to 65536 signals! more then enoth for amost anything! even building a computer???
 
         public void Awake()
         {
@@ -119,6 +119,18 @@ namespace MapMaker
                 //get the Arrow prefab from the BowTransform
                 arrow = (BoplBody)AccessTools.Field(typeof(BowTransform), "Arrow").GetValue(BowTransform);
             }
+            if (WhiteSlimeMat == null)
+            {
+                Material[] allMaterials = Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[];
+                foreach (Material mat in allMaterials)
+                {
+                    if (mat.name == "whiteSlime")
+                    {
+                        WhiteSlimeMat = mat;
+                        LuaSpawner.WhiteSlimeMat = mat;
+                    }
+                }
+            }
         }
         public void Register()
         {
@@ -147,7 +159,8 @@ namespace MapMaker
             boplBody.StartVelocity = StartVel;
             boplBody.rotation = CalculateAngle(StartVel);
             boplBody.StartAngularVelocity = StartAngularVelocity;
-            boplBody.GetComponent<SpriteRenderer>().material.color = ArrowOrBoulderColor;
+            boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
+            boplBody.GetComponent<SpriteRenderer>().color = ArrowOrBoulderColor;
         }
         //modifyed chatgpt code
         public static Fix CalculateAngle(Vec2 vec2)
@@ -230,6 +243,10 @@ namespace MapMaker
             switch (spawnType)
             {
                 case ObjectSpawnType.Boulder:
+                    if (BoulderType != PlatformType.slime)
+                    {
+                        ArrowOrBoulderColor = Color.white;
+                    }
                     var boulder = PlatformApi.PlatformApi.SpawnBoulder(pos, scale, BoulderType, ArrowOrBoulderColor);
                     var dphysicsRoundedRect = boulder.hitbox;
                     dphysicsRoundedRect.velocity = velocity;

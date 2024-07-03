@@ -896,19 +896,22 @@ if (math.random() > 0.98) then
     ShootBlink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.5,4,1,0.3)
 end
 if (math.random() > 0.98) then
-    --ShootGrow(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),0.8,0.8,50)
+    --ShootGrow(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.8,0.8,50)
 end
 if (math.random() > 0.98) then
-    --ShootShrink(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),-0.8,-0.8,50)
+    --ShootShrink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),-0.8,-0.8,50)
 end
 if (math.random() > 0.99) then
-    SpawnArrow(math.random(-97.27, 97.6), math.random(-26, 40), math.random(1, 2), math.random(-5, 5), math.random(-5, 5), 0, 1, 1, 1)
+    SpawnArrow(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), math.random(), math.random(), math.random())
 end
 if (math.random() > 0.99) then
-    SpawnGrenade(math.random(-97.27, 97.6), math.random(-26, 40), math.random(0.5, 2), math.random(-5, 5), math.random(-5, 5), 0)
+    SpawnGrenade(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), 0)
 end
 if (math.random() > 0.995) then
-    SpawnExplosion(math.random(-97.27, 97.6), math.random(-26, 40), math.random(0.2, 1.5))
+    SpawnExplosion(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.2, 1.5))
+end
+if (math.random() > 0.99) then
+    SpawnBoulder(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), 0, ""slime"", math.random(), math.random(), math.random())
 end
 if (b ~= nil) then
     return b.GetClassType()

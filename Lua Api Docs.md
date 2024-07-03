@@ -10,7 +10,7 @@ for the following angle is in degrees.
 the type before the funcson are its return type.
 
 Red, Green and Blue are all number between 0 and 1.
-none SpawnArrow(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity, number Red, number Green, number Blue)
+none SpawnArrow(number posX, number posY, number scale, number StartVelX, number StartVelY, number Red, number Green, number Blue)
 
 none SpawnGrenade(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
 
@@ -19,6 +19,11 @@ none SpawnAbilityPickup(number posX, number posY, number scale, number StartVelX
 none SpawnSmokeGrenade(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
 
 none SpawnExplosion(number posX, number posY, number scale)
+
+type can be the following: "grass", "snow", "ice", "space", "slime" if it isnt one of those it will throw a error.
+only if the type is slime does R, G and B mater
+R, G and B are numbers between 0 and 1.
+none SpawnBoulder(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity, string type, number R, number G, number B)
 
 sends a raycast from a point that can only hit RoundedRects (platforms and matchoman boulders) into the world and returning the distance it went and the RoundedRect it hit.
 the number is the distance it travaled before hitting anything. returns a very big negitive number if it doesnt hit anything
