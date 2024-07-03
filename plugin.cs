@@ -680,7 +680,6 @@ namespace MapMaker
             Debug.Log("OnSceneLoaded: " + scene.name);
             if (IsLevelName(scene.name))
             {
-
                 try
                 {
 
@@ -697,6 +696,11 @@ namespace MapMaker
                     // Add the components to the GameObject
                     spawnerGameObject.AddComponent<FixTransform>();
                     SpawnerPrefab = spawnerGameObject.AddComponent<Spawner>();
+                    spawnerGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    spawnerGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    var spriteRender = spawnerGameObject.AddComponent<SpriteRenderer>();
+                    var SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/spawnericon.prefab");
+                    spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
                     GameObject DisappearGameObject = new GameObject("DisappearPlatformsObject");
@@ -706,6 +710,11 @@ namespace MapMaker
                     DisappearPlatformsOnSignalPrefab = DisappearGameObject.AddComponent<DisappearPlatformsOnSignal>();
                     //reset this at the begiening of every round.
                     DisappearPlatformsOnSignal.DisappearPlatformsOnSignals = new();
+                    DisappearGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    DisappearGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    spriteRender = DisappearGameObject.AddComponent<SpriteRenderer>();
+                    SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/disapearingplatform.prefab");
+                    spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
                     // Create a new GameObject
                     GameObject AndGateObject = new GameObject("AndGateObject");
 
@@ -762,24 +771,43 @@ namespace MapMaker
                     ShootRayGameObject.AddComponent<FixTransform>();
                     ShootRayGameObject.AddComponent<ShootBlink>();
                     ShootRayPrefab = ShootRayGameObject.AddComponent<ShootRay>();
+                    spriteRender.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    ShootRayGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    spriteRender = ShootRayGameObject.AddComponent<SpriteRenderer>();
+
 
                     // Create a new GameObject
                     GameObject DropPlayersGameObject = new GameObject("DropPlayersObject");
                     // Add the components to the GameObject
                     DropPlayersGameObject.AddComponent<FixTransform>();
                     DropPlayersPrefab = DropPlayersGameObject.AddComponent<DropPlayers>();
+                    DropPlayersGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    DropPlayersGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    spriteRender = DropPlayersGameObject.AddComponent<SpriteRenderer>();
+                    SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/playerdrop.prefab");
+                    spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
                     GameObject ShakePlatformGameObject = new GameObject("ShakePlatformObject");
                     // Add the components to the GameObject
                     ShakePlatformGameObject.AddComponent<FixTransform>();
                     ShakePlatformPrefab = ShakePlatformGameObject.AddComponent<ShakePlatform>();
+                    ShakePlatformGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    ShakePlatformGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    var ShakePlatformRender = ShakePlatformGameObject.AddComponent<SpriteRenderer>();
+                    var ShakePlatformSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/shaker.prefab");
+                    ShakePlatformRender.sprite = ShakePlatformSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
                     GameObject LuaGameObject = new GameObject("LuaTestObject");
                     // Add the components to the GameObject
                     LuaGameObject.AddComponent<FixTransform>();
                     LuaPrefab = LuaGameObject.AddComponent<LuaMain>();
+                    LuaGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
+                    LuaGameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+                    var LuaRender = LuaGameObject.AddComponent<SpriteRenderer>();
+                    var LuaSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/luagate.prefab");
+                    LuaRender.sprite = LuaSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
                     GameObject SignalSystemObject = new GameObject("SignalSystemObject");
@@ -806,29 +834,29 @@ namespace MapMaker
                 //TESTING START!
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
-                var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
+                //var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
                 List<int> layers = new List<int>
                 {
                     LayerMask.NameToLayer("Player")
                 };
                 //CREATE ALL TRIGGERS BEFORE CREATING SIGNAL DELAYS!!!
-                CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
-                CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
+                //CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
+                //CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
                 int[] UUids = { 4, 0 };
-                CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
-                CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
+                //CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
+                //CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
                 int[] UUids2 = { 1, 5 };
-                CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
-                CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
-                CreateSignalDelay(2, 5, (Fix)0, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
-                CreateSignalDelay(3, 4, (Fix)0, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
-                AddMovingPlatformSignalStuff(platform, 2);
+                //CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
+                //CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
+                //CreateSignalDelay(2, 5, (Fix)0, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
+                //CreateSignalDelay(3, 4, (Fix)0, new Vec2((Fix)2, (Fix)(2)), (Fix)180);
+                //AddMovingPlatformSignalStuff(platform, 2);
                 //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
-                CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);
-                CreateDropPlayers(platform, 2, (Fix)100, true);
-                int[] UUids3 = { 3 };
+                //CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);
+                //CreateDropPlayers(platform, 2, (Fix)100, true);
+                int[] UUids3 = { };
                 int[] UUids4 = { };
-                CreateLuaGate(UUids3, UUids4, new Vec2((Fix)2, (Fix)(2)), (Fix)0, @"    
+                CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"    
 --a, b = RaycastRoundedRect(0, 0, 90, 3000)
 --print(""Raycast results: a ="", a, ""b ="", b)
 if (obj == nil) then
@@ -864,14 +892,23 @@ if (plats ~= nil) then
         i = i + 1
     end
 end
-if (math.random() > 0.95) then
-    ShootBlink(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),0.5,4,1,0.3)
+if (math.random() > 0.98) then
+    ShootBlink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.5,4,1,0.3)
 end
-if (math.random() > 0.95) then
-    ShootGrow(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),0.8,0.8,50)
+if (math.random() > 0.98) then
+    --ShootGrow(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),0.8,0.8,50)
 end
-if (math.random() > 0.95) then
-    ShootShrink(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),-0.8,-0.8,50)
+if (math.random() > 0.98) then
+    --ShootShrink(math.random(-97.27, 97.6),math.random(-26, 40),math.random(0, 360),-0.8,-0.8,50)
+end
+if (math.random() > 0.99) then
+    SpawnArrow(math.random(-97.27, 97.6), math.random(-26, 40), math.random(1, 2), math.random(-5, 5), math.random(-5, 5), 0, 1, 1, 1)
+end
+if (math.random() > 0.99) then
+    SpawnGrenade(math.random(-97.27, 97.6), math.random(-26, 40), math.random(0.5, 2), math.random(-5, 5), math.random(-5, 5), 0)
+end
+if (math.random() > 0.995) then
+    SpawnExplosion(math.random(-97.27, 97.6), math.random(-26, 40), math.random(0.2, 1.5))
 end
 if (b ~= nil) then
     return b.GetClassType()
@@ -880,6 +917,7 @@ return b");
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)0, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
+                //CreateSpawner(new Vec2((Fix)(0), (Fix)20), (Fix)10, Vec2.zero, Fix.Zero, Spawner.ObjectSpawnType.AbilityOrb, PlatformType.space, true, 3, true);
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
@@ -1253,6 +1291,11 @@ return b");
         public static ShootRay CreateShootBlink(int InputUUid, Vec2 pos, Fix rot, Fix VarenceInDegrees, Fix BlinkWallDelay, Fix BlinkMinPlayerDuration, Fix BlinkWallDuration, Fix BlinkWallShake)
         {
             var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
+            //icon
+            var spriteRender = shootRay.GetComponent<SpriteRenderer>();
+            var SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/blinkemitter.prefab");
+            spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
+
             var input = new LogicInput
             {
                 UUid = InputUUid,
@@ -1273,6 +1316,11 @@ return b");
         public static ShootRay CreateShootGrow(int InputUUid, Vec2 pos, Fix rot, Fix VarenceInDegrees, Fix blackHoleGrowth, Fix ScaleMultiplyer, Fix PlayerMultiplyer)
         {
             var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
+            //icon stuff
+            var spriteRender = shootRay.GetComponent<SpriteRenderer>();
+            var SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/growemitter.prefab");
+            spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
+
             var input = new LogicInput
             {
                 UUid = InputUUid,
@@ -1293,6 +1341,10 @@ return b");
         public static ShootRay CreateShootStrink(int InputUUid, Vec2 pos, Fix rot, Fix VarenceInDegrees, Fix blackHoleGrowth, Fix ScaleMultiplyer, Fix PlayerMultiplyer)
         {
             var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
+            //icon stuff
+            var spriteRender = shootRay.GetComponent<SpriteRenderer>();
+            var SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/shrinkemitter.prefab");
+            spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
             var input = new LogicInput
             {
                 UUid = InputUUid,

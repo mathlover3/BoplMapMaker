@@ -9,13 +9,14 @@ the following are global funcsons.
 for the following angle is in degrees.
 the type before the funcson are its return type.
 
-none SpawnArrow(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
+Red, Green and Blue are all number between 0 and 1.
+none SpawnArrow(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity, number Red, number Green, number Blue)
 
-none SpawnGrenade(number posX, number posY, number angle, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
+none SpawnGrenade(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
 
 none SpawnAbilityPickup(number posX, number posY, number scale, number StartVelX, number StartVelY)
 
-none SpawnSmokeGrenade(number posX, number posY, number angle, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
+none SpawnSmokeGrenade(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
 
 none SpawnExplosion(number posX, number posY, number scale)
 
@@ -30,6 +31,7 @@ Player GetClosestPlayer(number posX, number posY)
 returns all platforms (including boulders)
 Sequence (of Platforms) GetAllPlatforms()
 
+for some reson if you shoot a blink under the water it prevents stuff from reflecting off it for a bit??? no clue why.
 for normal blink minPlayerDuration = 0.5, WallDuration = 4, WallDelay = 1, WallShake = 0.3
 none ShootBlink(number posX, number posY, number Angle, number minPlayerDuration, number WallDuration, number WallDelay, number WallShake)
 

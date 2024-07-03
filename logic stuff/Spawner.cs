@@ -25,7 +25,7 @@ namespace MapMaker
         public Fix SimTimeBetweenSpawns = Fix.One;
         public Fix angle = Fix.Zero;
         public Fix scale = Fix.One;
-        public Color color = Color.white;
+        public Color ArrowOrBoulderColor = Color.white;
         public Vec2 velocity = new Vec2(Fix.Zero, Fix.Zero);
         public Fix angularVelocity = Fix.Zero;
         public PlatformType BoulderType = PlatformType.grass;
@@ -147,6 +147,7 @@ namespace MapMaker
             boplBody.StartVelocity = StartVel;
             boplBody.rotation = CalculateAngle(StartVel);
             boplBody.StartAngularVelocity = StartAngularVelocity;
+            boplBody.GetComponent<SpriteRenderer>().material.color = ArrowOrBoulderColor;
         }
         //modifyed chatgpt code
         public static Fix CalculateAngle(Vec2 vec2)
@@ -229,7 +230,7 @@ namespace MapMaker
             switch (spawnType)
             {
                 case ObjectSpawnType.Boulder:
-                    var boulder = PlatformApi.PlatformApi.SpawnBoulder(pos, scale, BoulderType, color);
+                    var boulder = PlatformApi.PlatformApi.SpawnBoulder(pos, scale, BoulderType, ArrowOrBoulderColor);
                     var dphysicsRoundedRect = boulder.hitbox;
                     dphysicsRoundedRect.velocity = velocity;
                     dphysicsRoundedRect.angularVelocity = angularVelocity;

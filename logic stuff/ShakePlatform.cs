@@ -49,6 +49,7 @@ namespace MapMaker
                 
             }
             WasOnLastFrame = IsOn();
+            GetComponent<FixTransform>().position = shakablePlatform.GetComponent<FixTransform>().position;
         }
     }
 }

@@ -111,13 +111,14 @@ namespace MapMaker.Lua_stuff
             SmokeGrenade,
             Explosion
         }
-        public static void SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
+        public static void SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Fix StartAngularVelocity, Color color)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(arrow, pos);
             boplBody.Scale = scale;
             boplBody.StartVelocity = StartVel;
             boplBody.rotation = CalculateAngle(StartVel);
             boplBody.StartAngularVelocity = StartAngularVelocity;
+            boplBody.GetComponent<SpriteRenderer>().material.color = color;
         }
         //modifyed chatgpt code
         public static Fix CalculateAngle(Vec2 vec2)

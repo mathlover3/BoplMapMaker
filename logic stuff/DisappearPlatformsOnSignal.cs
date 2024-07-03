@@ -48,6 +48,7 @@ namespace MapMaker
 
         public override void Logic(Fix SimDeltaTime)
         {
+            GetComponent<FixTransform>().position = platform.GetComponent<FixTransform>().position;
             //platform is null if its been eaten by a black hole
             if (!(gameObject.name == "DisappearPlatformsObject") && platform != null)
             {

@@ -37,7 +37,7 @@ namespace MapMaker.Lua_stuff
         public Script SetUpScriptFuncsons()
         {
             //dont want to let people use librays that would give them acsess outside of the game like os and io now do we? also no time package eather as thats just asking for desinks.
-            Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.Metatables | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Dynamic);
+            Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine);
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
             script.Globals["SpawnGrenade"] = (object)SpawnGrenadeDouble;
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
@@ -110,21 +110,21 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
-        public static void SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
+        public static void SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity, float R, float G, float B)
         {
-            SpawnArrow((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
+            SpawnArrow((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity, R, G, B);
         }
-        public static void SpawnArrow(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
+        public static void SpawnArrow(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity, float R, float G, float B)
         {
-            LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
+            LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity, new Color(0,0,0));
         }
-        public static void SpawnGrenadeDouble(double posX, double posY, double angle, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
+        public static void SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {
-            SpawnGrenade((Fix)posX, (Fix)posY, (Fix)angle, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
+            SpawnGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
         }
-        public static void SpawnGrenade(Fix posX, Fix posY, Fix angle, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
+        public static void SpawnGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
         {
-            LuaSpawner.SpawnGrenade(new Vec2(posX, posY), angle, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
+            LuaSpawner.SpawnGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
         }
         public static void SpawnAbilityPickupDouble(double posX, double posY, double scale, double StartVelX, double StartVelY)
         {
@@ -134,13 +134,13 @@ namespace MapMaker.Lua_stuff
         {
             LuaSpawner.SpawnAbilityPickup(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY));
         }
-        public static void SpawnSmokeGrenadeDouble(double posX, double posY, double angle, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
+        public static void SpawnSmokeGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {
-            SpawnSmokeGrenade((Fix)posX, (Fix)posY, (Fix)angle, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
+            SpawnSmokeGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
         }
-        public static void SpawnSmokeGrenade(Fix posX, Fix posY, Fix angle, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
+        public static void SpawnSmokeGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
         {
-            LuaSpawner.SpawnSmokeGrenade(new Vec2(posX, posY), angle, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
+            LuaSpawner.SpawnSmokeGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
         }
         public static void SpawnExplosionDouble(double posX, double posY, double scale)
         {

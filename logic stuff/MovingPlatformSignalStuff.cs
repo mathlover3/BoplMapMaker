@@ -36,7 +36,6 @@ namespace MapMaker
         }
         public override void Logic(Fix SimDeltaTime)
         {
-            //UnityEngine.Debug.Log("MovingPlatforms Logic");
         }
     }
 }

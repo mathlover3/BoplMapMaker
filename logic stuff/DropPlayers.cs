@@ -1,4 +1,5 @@
 ﻿using BoplFixedMath;
+using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +48,7 @@ namespace MapMaker
 
             }
             WasOnLastFrame = IsOn();
+            GetComponent<FixTransform>().position = stickyRoundedRectangle.GetComponent<FixTransform>().position;
         }
     }
 }
