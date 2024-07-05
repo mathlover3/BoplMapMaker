@@ -290,7 +290,6 @@ namespace MapMaker
                     //if its in trigger signal mode and it hasnt trigged yet
                     if (IsTriggerSignal && !HasTrigged)
                     {
-                        UnityEngine.Debug.Log("SignalIsOn! and its a trigger signal!");
                         SpawnMyItem();
                         HasTrigged = true;
                     }

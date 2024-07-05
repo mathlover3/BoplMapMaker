@@ -283,6 +283,22 @@ namespace MapMaker
                         {
                             MoreJsonParceing.SpawnTriggers((List<object>)Dict["Triggers"]);
                         }
+                        if (Dict.ContainsKey("ShootBlinks"))
+                        {
+                            MoreJsonParceing.SpawnShootBlinks((List<object>)Dict["ShootBlinks"]);
+                        }
+                        if (Dict.ContainsKey("ShootGrows"))
+                        {
+                            MoreJsonParceing.SpawnShootGrows((List<object>)Dict["ShootGrows"]);
+                        }
+                        if (Dict.ContainsKey("ShootStrinks"))
+                        {
+                            MoreJsonParceing.SpawnShootStrinks((List<object>)Dict["ShootStrinks"]);
+                        }
+                        if (Dict.ContainsKey("Spawners"))
+                        {
+                            MoreJsonParceing.SpawnSpawners((List<object>)Dict["Spawners"]);
+                        }
                     }
 
                 }

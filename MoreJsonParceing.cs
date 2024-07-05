@@ -89,6 +89,110 @@ namespace MapMaker
                 Plugin.CreateTrigger(Vec2Pos, Vec2Extents, outputUUID, Visable, DettectAbilityOrbs, DettectArrows, DettectBlackHole, DettectBoulders, DettectEngine, DettectGrenades, DettectMine, DettectMissle, DettectPlatforms, DettectPlayers, DettectSmoke, DettectSmokeGrenade, DettectSpike, DettectTesla);
             }
         }
+        public static void SpawnShootBlinks(List<object> ShootBlinks)
+        {
+            foreach (Dictionary<String, object> ShootBlink in ShootBlinks)
+            {
+                var InputUUID = Convert.ToInt32(ShootBlink["InputUUID"]);
+                var pos = (Dictionary<String, object>)ShootBlink["Pos"];
+                var Vec2Pos = new Vec2((Fix)Convert.ToDouble(pos["x"]), (Fix)Convert.ToDouble(pos["y"]));
+                var rot = (Fix)Convert.ToDouble(ShootBlink["Rotation"]);
+                var Varence = (Fix)Convert.ToDouble(ShootBlink["Varence"]);
+                var PlayerDuration = (Fix)Convert.ToDouble(ShootBlink["PlayerDuration"]);
+                var WallDelay = (Fix)Convert.ToDouble(ShootBlink["WallDelay"]);
+                var WallShake = (Fix)Convert.ToDouble(ShootBlink["WallShake"]);
+                var WallDuration = (Fix)Convert.ToDouble(ShootBlink["WallDuration"]);
+                Plugin.CreateShootBlink(InputUUID, Vec2Pos, rot, Varence, WallDelay, PlayerDuration, WallDuration, WallShake);
+            }
+        }
+        public static void SpawnShootGrows(List<object> ShootGrows)
+        {
+            foreach (Dictionary<String, object> ShootGrow in ShootGrows)
+            {
+                var InputUUID = Convert.ToInt32(ShootGrow["InputUUID"]);
+                var pos = (Dictionary<String, object>)ShootGrow["Pos"];
+                var Vec2Pos = new Vec2((Fix)Convert.ToDouble(pos["x"]), (Fix)Convert.ToDouble(pos["y"]));
+                var rot = (Fix)Convert.ToDouble(ShootGrow["Rotation"]);
+                var Varence = (Fix)Convert.ToDouble(ShootGrow["Varence"]);
+                var blackHoleGrowth = (Fix)Convert.ToDouble(ShootGrow["blackHoleGrowth"]);
+                var ScaleMultiplyer = (Fix)Convert.ToDouble(ShootGrow["ScaleMultiplyer"]);
+                var PlayerMultiplyer = (Fix)Convert.ToDouble(ShootGrow["PlayerMultiplyer"]);
+                Plugin.CreateShootGrow(InputUUID, Vec2Pos, rot, Varence, blackHoleGrowth, ScaleMultiplyer, PlayerMultiplyer);
+            }
+        }
+        public static void SpawnShootStrinks(List<object> ShootStrinks)
+        {
+            foreach (Dictionary<String, object> ShootStrink in ShootStrinks)
+            {
+                var InputUUID = Convert.ToInt32(ShootStrink["InputUUID"]);
+                var pos = (Dictionary<String, object>)ShootStrink["Pos"];
+                var Vec2Pos = new Vec2((Fix)Convert.ToDouble(pos["x"]), (Fix)Convert.ToDouble(pos["y"]));
+                var rot = (Fix)Convert.ToDouble(ShootStrink["Rotation"]);
+                var Varence = (Fix)Convert.ToDouble(ShootStrink["Varence"]);
+                var blackHoleGrowth = (Fix)Convert.ToDouble(ShootStrink["blackHoleGrowth"]);
+                var ScaleMultiplyer = (Fix)Convert.ToDouble(ShootStrink["ScaleMultiplyer"]);
+                var PlayerMultiplyer = (Fix)Convert.ToDouble(ShootStrink["PlayerMultiplyer"]);
+                Plugin.CreateShootStrink(InputUUID, Vec2Pos, rot, Varence, blackHoleGrowth, ScaleMultiplyer, PlayerMultiplyer);
+            }
+        }
+        public static void SpawnSpawners(List<object> Spawners)
+        {
+            foreach (Dictionary<String, object> Spawner2 in Spawners)
+            {
+                var InputUUID = Convert.ToInt32(Spawner2["InputUUID"]);
+                var pos = (Dictionary<String, object>)Spawner2["Pos"];
+                var Vec2Pos = new Vec2((Fix)Convert.ToDouble(pos["x"]), (Fix)Convert.ToDouble(pos["y"]));
+                var SpawningVelocity = (Dictionary<String, object>)Spawner2["SpawningVelocity"];
+                var Vec2SpawningVelocity = new Vec2((Fix)Convert.ToDouble(SpawningVelocity["x"]), (Fix)Convert.ToDouble(SpawningVelocity["y"]));
+                var TimeBetweenSpawns = (Fix)Convert.ToDouble(Spawner2["TimeBetweenSpawns"]);
+                var angularVelocity = (Fix)Convert.ToDouble(Spawner2["angularVelocity"]);
+                var UseSignal = Convert.ToBoolean(Spawner2["UseSignal"]);
+                var IsTriggerSignal = Convert.ToBoolean(Spawner2["IsTriggerSignal"]);
+                var ColorList = ListOfObjectsToListOfFix((List<object>)Spawner2["Color"]);
+                var Color = new UnityEngine.Color((float)ColorList[0], (float)ColorList[1], (float)ColorList[2], (float)ColorList[3]);
+                var SpawnTypeString = Convert.ToString(Spawner2["SpawnType"]);
+                var SpawnType = Spawner.ObjectSpawnType.None;
+                switch (SpawnTypeString)
+                {
+                    case "Boulder":
+                        SpawnType = Spawner.ObjectSpawnType.Boulder;
+                        break;
+                    case "Arrow":
+                        SpawnType = Spawner.ObjectSpawnType.Arrow;
+                        break;
+                    case "Grenade":
+                        SpawnType = Spawner.ObjectSpawnType.Grenade;
+                        break;
+                    case "AbilityOrb":
+                        SpawnType = Spawner.ObjectSpawnType.AbilityOrb;
+                        break;
+                    case "SmokeGrenade":
+                        SpawnType = Spawner.ObjectSpawnType.SmokeGrenade;
+                        break;
+                    case "Explosion":
+                        SpawnType = Spawner.ObjectSpawnType.Explosion;
+                        break;
+                }
+                var BoulderTypeString = Convert.ToString(Spawner2["BoulderType"]);
+                var BoulderType = PlatformType.grass;
+                switch (BoulderTypeString)
+                {
+                    case "snow":
+                        BoulderType = PlatformType.snow;
+                        break;
+                    case "ice":
+                        BoulderType = PlatformType.ice;
+                        break;
+                    case "space":
+                        BoulderType = PlatformType.space;
+                        break;
+                    case "slime":
+                        BoulderType = PlatformType.slime;
+                        break;
+                }
+                Plugin.CreateSpawner(Vec2Pos, TimeBetweenSpawns, Vec2SpawningVelocity, angularVelocity, Color, SpawnType, BoulderType, UseSignal, InputUUID, IsTriggerSignal);
+            }
+        }
         public static Fix FloorToThousandnths(double value)
         {
             return Fix.Floor(((Fix)value) * (Fix)1000) / (Fix)1000;
