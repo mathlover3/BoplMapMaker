@@ -15,6 +15,7 @@ public class Graph
     private Dictionary<int, bool> visited = new();
     private List<LogicGate> gates = new();
     private List<GraphNode> triggers = new();
+    private List<GraphNode> AllNodes = new();
     public Graph(int V)
     {
         this.V = V;
@@ -65,6 +66,7 @@ public class Graph
             Gate = destGate,
         };
         adj[sou].Add(node);
+        AllNodes.Add(node);
         var node2 = new GraphNode
         {
             id = sou,
@@ -76,6 +78,7 @@ public class Graph
         {
             triggers.Add(node2);
         }
+        AllNodes.Add(node2);
     }
 
     // Returns true if the graph contains a
@@ -159,6 +162,15 @@ public class Graph
         {
             ForwordProbagate(trigger);
         }
+        //in case they are disconnected from the triggers.
+        foreach(var node in AllNodes)
+        {
+            //visit the ones that havent been visited yet
+            if (!(visited.ContainsKey(node.id) && visited[node.id]))
+            {
+                ForwordProbagate(node);
+            }
+        }    
         return gates;
     }
 }

@@ -2303,7 +2303,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static bool Awake_MapMaker_Plug(CollisionInformation collision, Missile __instance)
         {
 #pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
-            if (collision.layer == LayerMask.NameToLayer("RigidBodyAffector") || collision.layer == LayerMask.NameToLayer("Rope"))
+            if (collision.layer == LayerMask.NameToLayer("RigidBodyAffector") || collision.layer == LayerMask.NameToLayer("Rope") || collision.layer == (LayerMask)3)
             {
                 return false;
             }
@@ -2315,6 +2315,21 @@ BindingFlags.NonPublic | BindingFlags.Static);
             }
             Updater.DestroyFix(__instance.gameObject);
             return false;
+        }
+    }
+    [HarmonyPatch(typeof(RopeHook))]
+    public class RopeHookPatches
+    {
+        [HarmonyPatch("OnCollide")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CollisionInformation collision, RopeHook __instance)
+        {
+            //if its a trigger dont do anything.
+            if (collision.layer == (LayerMask)3)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
