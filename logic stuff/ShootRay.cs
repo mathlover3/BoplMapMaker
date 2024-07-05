@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace MapMaker
 {
@@ -34,6 +35,11 @@ namespace MapMaker
         {
             Debug.Log($"gameObject is {gameObject}");
             gameObject.hideFlags = HideFlags.HideAndDontSave;
+            Debug.Log($"{gameObject.name} Awake in {SceneManager.GetActiveScene().name}");
+        }
+        void OnDestroy()
+        {
+            Debug.Log($"{gameObject.name} Destroyed in {SceneManager.GetActiveScene().name}");
         }
         public void Register()
         {

@@ -3,6 +3,7 @@ using MapMaker.Lua_stuff;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -551,6 +552,37 @@ namespace MapMaker
             PointVec2 += PivotVec2;
             return (Vector3)PointVec2;
         }
+        private List<string> references = new List<string>();
+        public void FindAllReferences(UnityEngine.Object objectToFind)
+        {
+            references.Clear();
+            if (objectToFind == null)
+            {
+                return;
+            }
 
+            UnityEngine.Object[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
+            foreach (UnityEngine.Object obj in allObjects)
+            {
+
+                GameObject gameObject = (GameObject)obj;
+                Component[] components = gameObject.GetComponents<Component>();
+                foreach (Component component in components)
+                {
+                    FieldInfo[] fields = component.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                    foreach (FieldInfo field in fields)
+                    {
+                        if (field.FieldType == typeof(UnityEngine.Object) || field.FieldType.IsSubclassOf(typeof(UnityEngine.Object)))
+                        {
+                            UnityEngine.Object value = (UnityEngine.Object)field.GetValue(component);
+                            if (value == objectToFind)
+                            {
+                                references.Add($"{gameObject.name} ({component.GetType().Name})");
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

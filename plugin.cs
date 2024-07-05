@@ -772,6 +772,13 @@ namespace MapMaker
             Debug.Log("OnSceneLoaded: " + scene.name);
             if (IsLevelName(scene.name))
             {
+                //remove all shootrays that are still around as they dont like unloading when the scene unloads for some reson.
+                ShootRay[] allRays = Resources.FindObjectsOfTypeAll(typeof(ShootRay)) as ShootRay[];
+                foreach (var Ray in allRays)
+                {
+                    Destroy(Ray.gameObject);
+                    Destroy(Ray);
+                }
                 try
                 {
 
@@ -1232,14 +1239,17 @@ return b");*/
             var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, Pos);
             spawner.spawnType = spawnType;
             spawner.UseSignal = UseSignal;
-            var input = new LogicInput
+            if (UseSignal)
             {
-                UUid = Signal,
-                gate = spawner,
-                IsOn = false,
-                Owner = spawner.gameObject
-            };
-            spawner.InputSignals.Add(input);
+                var input = new LogicInput
+                {
+                    UUid = Signal,
+                    gate = spawner,
+                    IsOn = false,
+                    Owner = spawner.gameObject
+                };
+                spawner.InputSignals.Add(input);
+            }
             spawner.IsTriggerSignal = IsTriggerSignal;
             spawner.BoulderType = BoulderType;
             spawner.SimTimeBetweenSpawns = SimTimeBetweenSpawns;

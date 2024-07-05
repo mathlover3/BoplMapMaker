@@ -137,6 +137,7 @@ namespace MapMaker
             UUID = Plugin.NextUUID;
             Plugin.NextUUID++;
             SignalSystem.RegisterLogicGate(this);
+            SignalSystem.RegisterGateThatAlwaysRuns(this);
         }
         public bool IsOn()
         {
@@ -284,8 +285,9 @@ namespace MapMaker
                         RelitiveSimTime = RelitiveSimTime - SimTimeBetweenSpawns;
                         SpawnMyItem();
                     }
+                    return;
                 }
-                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && IsOn() && UseSignal)
+                if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress && UseSignal && IsOn())
                 {
                     //if its in trigger signal mode and it hasnt trigged yet
                     if (IsTriggerSignal && !HasTrigged)
