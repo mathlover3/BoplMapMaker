@@ -279,6 +279,10 @@ namespace MapMaker
                         {
                             MoreJsonParceing.SpawnDelayGates((List<object>)Dict["DelayGates"]);
                         }
+                        if (Dict.ContainsKey("Triggers"))
+                        {
+                            MoreJsonParceing.SpawnTriggers((List<object>)Dict["Triggers"]);
+                        }
                     }
 
                 }
@@ -384,7 +388,7 @@ namespace MapMaker
                     double x = Convert.ToDouble(transform["x"]);
                     double y = Convert.ToDouble(transform["y"]);
                     //defult to 0 rotatson incase the json is missing it
-                    double rotatson = 0;
+                    Fix rotatson = Fix.Zero;
                     if (platform.ContainsKey("rotation"))
                     {
                         rotatson = ConvertToRadians(Convert.ToDouble(platform["rotation"]));
@@ -672,7 +676,7 @@ namespace MapMaker
                         PlatformApi.PlatformApi.SetPos(Platform, (Vec2)pos);
                         //rotate object
                         StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
-                        StickyRect.GetGroundBody().rotation = FloorToThousandnths(rotatson);
+                        StickyRect.GetGroundBody().rotation = FloorToThousandnths((double)rotatson);
                         if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                         {
                             //antilock platform
@@ -907,12 +911,8 @@ namespace MapMaker
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
                 //var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
-                List<int> layers = new List<int>
-                {
-                    LayerMask.NameToLayer("Player")
-                };
-                CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0, true);
-                CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1, true);
+                //CreateTrigger(new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0, true);
+                //CreateTrigger(new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1, true);
                 int[] UUids = { 4, 0 };
                 //CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
                 //CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
@@ -1061,9 +1061,9 @@ return b");*/
             return regex.IsMatch(input);
         }
         //https://stormconsultancy.co.uk/blog/storm-news/convert-an-angle-in-degrees-to-radians-in-c/
-        public static double ConvertToRadians(double angle)
+        public static Fix ConvertToRadians(double angle)
         {
-            return (Math.PI / 180) * angle;
+            return (Fix)PhysTools.DegreesToRadians * (Fix)angle;
         }
         //https://stackoverflow.com/questions/19167669/keep-only-numeric-value-from-a-string
         // simply replace the offending substrings with an empty string
@@ -1233,10 +1233,10 @@ return b");*/
             spawner.Register();
             return spawner;
         }
-        public static Trigger CreateTrigger(List<int> LayersToDetect, Vec2 Pos, Vec2 Extents, ushort Signal, bool visable)
+        public static Trigger CreateTrigger(Vec2 Pos, Vec2 Extents, int Signal, bool visable, bool DettectAbilityOrbs, bool DettectArrows, bool DettectBlackHole, bool DettectBoulders, bool DettectEngine, bool DettectGrenades, bool DettectMine, bool DettectMissle, bool DettectPlatforms, bool DettectPlayers, bool DettectSmoke, bool DettectSmokeGrenade, bool DettectSpike, bool DettectTesla)
         {
+            
             var trigger = FixTransform.InstantiateFixed<Trigger>(TriggerPrefab, new Vec2(Fix.Zero, (Fix)30));
-            trigger.layersToDetect = LayersToDetect;
             var output = new LogicOutput
             {
                 UUid = Signal,
@@ -1248,6 +1248,20 @@ return b");*/
             trigger.SetPos(Pos);
             trigger.SetExtents(Extents);
             trigger.Visable = visable;
+            trigger.DettectAbilityOrbs = DettectAbilityOrbs;
+            trigger.DettectArrows = DettectArrows;
+            trigger.DettectBlackHole = DettectBlackHole;
+            trigger.DettectBoulders = DettectBoulders;
+            trigger.DettectEngine = DettectEngine;
+            trigger.DettectGrenades = DettectGrenades;
+            trigger.DettectMine = DettectMine;
+            trigger.DettectMissle = DettectMissle;
+            trigger.DettectPlatforms = DettectPlatforms;
+            trigger.DettectPlayers = DettectPlayers;
+            trigger.DettectSmoke = DettectSmoke;
+            trigger.DettectSmokeGrenade = DettectSmokeGrenade;
+            trigger.DettectSpike = DettectSpike;
+            trigger.DettectTesla = DettectTesla;
             trigger.Register();
             return trigger;
         }
@@ -2325,10 +2339,12 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static bool Awake_MapMaker_Plug(CollisionInformation collision, RopeHook __instance)
         {
             //if its a trigger dont do anything.
+#pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
             if (collision.layer == (LayerMask)3)
             {
                 return false;
             }
+#pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
             return true;
         }
     }
