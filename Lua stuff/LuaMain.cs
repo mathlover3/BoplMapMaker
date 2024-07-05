@@ -48,6 +48,8 @@ namespace MapMaker.Lua_stuff
             script.Globals["RaycastRoundedRect"] = (object)RaycastRoundedRect;
             script.Globals["GetClosestPlayer"] = (object)GetClosestPlayer;
             script.Globals["GetAllPlatforms"] = (object)GetAllPlatforms;
+            script.Globals["GetAllPlayers"] = (object)GetAllPlayers;
+            script.Globals["GetAllBoplBodys"] = (object)GetAllBoplBodys;
             script.Globals["ShootBlink"] = (object)ShootBlink;
             script.Globals["ShootGrow"] = (object)ShootGrow;
             script.Globals["ShootShrink"] = (object)ShootShrink;
@@ -242,6 +244,45 @@ namespace MapMaker.Lua_stuff
             }
             return DynValue.Nil;
         }
+        public static DynValue GetAllPlayers(Script script)
+        {
+            //PlayerList (1)
+            var playerlist = GameObject.Find("PlayerList");
+            if (playerlist == null)
+            {
+                playerlist = GameObject.Find("PlayerList (1)");
+            }
+            var players = playerlist.transform;
+            List<PlayerPhysics> Players = new();
+            foreach (Transform player in players)
+            {
+                if (player.gameObject.name == "Player(Clone)")
+                {
+                    Players.Add(player.gameObject.GetComponent<PlayerPhysics>());
+                }
+            }
+            //DynValue.FromObject
+            return DynValue.NewTuple(
+                DynValue.NewNumber(Players.Count),
+                DynValue.FromObject(script, Players)
+            );
+        }
+        public static DynValue GetAllBoplBodys(Script script)
+        {
+            BoplBody[] allObjects = Resources.FindObjectsOfTypeAll(typeof(BoplBody)) as BoplBody[];
+            List<BoplBody> result = new();
+            foreach (var body in allObjects)
+            {
+                if (body.gameObject.scene.name != null && body.HasBeenInitialized && !body.physicsCollider.IsDestroyed)
+                {
+                    result.Add(body);
+                }
+            }
+            return DynValue.NewTuple(
+                DynValue.NewNumber(result.Count),
+                DynValue.FromObject(script, result)
+            );
+        }
         public static void ShootBlink(double posX, double posY, double Angle, double minPlayerDuration, double WallDuration, double WallDelay, double WallShake)
         {
             ShootBlinkObject.minPlayerDuration = (Fix)minPlayerDuration;
@@ -298,11 +339,14 @@ namespace MapMaker.Lua_stuff
             bool ignore = false;
             shootScaleChange.Shoot(new Vec2((Fix)posX, (Fix)posY), rotVec, ref ignore, 255);
         }
-        public static List<StickyRoundedRectangle> GetAllPlatforms()
+        public static DynValue GetAllPlatforms(Script script)
         {
             StickyRoundedRectangle[] allObjects = Resources.FindObjectsOfTypeAll(typeof(StickyRoundedRectangle)) as StickyRoundedRectangle[];
             List<StickyRoundedRectangle> result = new List<StickyRoundedRectangle>(allObjects);
-            return result;
+            return DynValue.NewTuple(
+                DynValue.NewNumber(result.Count),
+                DynValue.FromObject(script, result)
+            );
         }
         public static double GetDeltaTime()
         {
@@ -314,7 +358,7 @@ namespace MapMaker.Lua_stuff
         }
         public bool GetInputValueWithId(int id)
         {
-            if (InputSignals.Count < id)
+            if (InputSignals.Count < id || id < 1)
             {
                 throw new ScriptRuntimeException($"Logic gate {Name} doesnt have input with id {id} it only has {InputSignals.Count} inputs");
             }
@@ -322,7 +366,7 @@ namespace MapMaker.Lua_stuff
         }
         public void SetOutputWithId(int id, bool value)
         {
-            if (OutputSignals.Count < id)
+            if (OutputSignals.Count < id || id < 1)
             {
                 throw new ScriptRuntimeException($"Logic gate {Name} doesnt have ouput with id {id} it only has {OutputSignals.Count} ouputs");
             }
@@ -368,6 +412,7 @@ namespace MapMaker.Lua_stuff
         public double GetJumpKeptMomentum() { return (double)target.jumpKeptMomentum; }
         public DynValue GetPosition(Script script) { return LuaMain.Vec2ToTuple(body.position); }
         public void GetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
+        public double GetMass() { return (double)(Fix.One / target.inverseMass01); }
         public void SetSpeed(double NewValue) {target.Speed = (Fix)NewValue; }
         public void SetGroundedSpeed(double NewValue) {target.groundedSpeed = (Fix)NewValue; }
         public void SetMaxSpeed(double NewValue) {target.maxSpeed = (Fix)NewValue; }
@@ -378,6 +423,12 @@ namespace MapMaker.Lua_stuff
         public void SetJumpExtraXStrength(double NewValue) {target.jumpExtraXStrength = (Fix)NewValue; }
         public void SetJumpKeptMomentum(double NewValue) {target.jumpKeptMomentum = (Fix)NewValue; }
         public void SetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
+        public void SetMass(double NewValue) { target.inverseMass01 = Fix.One / (Fix)NewValue; }
+        public void AddForce(double ForceX, double ForceY)
+        {
+            target.AddForce(new Vec2((Fix)ForceX, (Fix)ForceY));
+        }
+        
         public string GetClassType()
         {
             return "Player";
@@ -479,18 +530,20 @@ namespace MapMaker.Lua_stuff
         public BoplBodyProxy(BoplBody p)
         {
             target = p;
-            if (target.GetComponent<Arrow> != null) { type = "Arrow"; }
-            if (target.GetComponent<RocketEngine> != null) { type = "RocketEngine"; }
-            if (target.GetComponent<Mine> != null) { type = "Mine"; }
-            if (target.GetComponent<SimpleSparkNode> != null) { type = "Telsa"; }
-            if (target.GetComponent<DynamicAbilityPickup> != null) { type = "AbilityPickup"; }
-            if (target.GetComponent<Missile> != null) { type = "Missile"; }
-            if (target.GetComponent<Boulder> != null) { type = "MatchoBoulder"; }
-            if (target.GetComponent<SpikeAttack> != null) { type = "Spike"; }
-            if (target.GetComponent<BounceBall> != null) { type = "Rock"; }
-            if (target.GetComponent<FlammableSmoke> != null) { type = "Smoke"; }
-            if (target.GetComponent<SmokeGrenadeExplode2> != null) { type = "Smoke Grenade"; }
-            if (target.GetComponent<Grenade> != null) { type = "Grenade"; }
+            if (target.GetComponent<Grenade>() != null) { type = "Grenade"; }
+            if (target.GetComponent<Arrow>() != null) { type = "Arrow"; }
+            if (target.GetComponent<RocketEngine>() != null) { type = "RocketEngine"; }
+            if (target.GetComponent<Mine>() != null) { type = "Mine"; }
+            if (target.GetComponent<SimpleSparkNode>() != null) { type = "Telsa"; }
+            if (target.GetComponent<DynamicAbilityPickup>() != null) { type = "AbilityPickup"; }
+            if (target.GetComponent<Missile>() != null) { type = "Missile"; }
+            if (target.GetComponent<Boulder>() != null) { type = "MatchoBoulder"; }
+            if (target.GetComponent<SpikeAttack>() != null) { type = "Spike"; }
+            if (target.GetComponent<BounceBall>() != null) { type = "Rock"; }
+            if (target.GetComponent<FlammableSmoke>() != null) { type = "Smoke"; }
+            if (target.GetComponent<SmokeGrenadeExplode2>() != null) { type = "Smoke Grenade"; }
+            if (target.GetComponent<ShakablePlatform>() != null) { type = "Platform"; }
+
         }
         public string GetClassType()
         {
@@ -499,6 +552,14 @@ namespace MapMaker.Lua_stuff
         public string GetObjectType()
         {
             return type;
+        }
+        public bool HasBeenInitialized()
+        {
+            return target.HasBeenInitialized;
+        }
+        public bool IsBeingDestroyed()
+        {
+            return target.physicsCollider.IsDestroyed;
         }
         public DynValue GetPos()
         {
@@ -510,11 +571,39 @@ namespace MapMaker.Lua_stuff
         }
         public double GetScale()
         {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetScale on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetScale on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
             return (double)target.Scale;
         }
         public DynValue GetVelocity()
         {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetVelocity on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetVelocity on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
             return LuaMain.Vec2ToTuple(target.velocity);
+        }
+        public double GetMass() 
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetMass on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetMass on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            return (double)(Fix.One / target.InverseMass);
         }
         public void SetPos(double x, double y)
         {
@@ -528,14 +617,50 @@ namespace MapMaker.Lua_stuff
         }
         public void SetScale(double Scale)
         {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetScale on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetScale on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
             target.Scale = (Fix)Scale;
         }
         public void SetVelocity(double VelX, double VelY)
         {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetVelocity on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetVelocity on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
             target.velocity = new Vec2((Fix)VelX, (Fix)VelY);
+        }
+        public void SetMass(double Mass) 
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetMass on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetMass on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.InverseMass = Fix.One / (Fix)Mass; 
         }
         public void AddForce(double ForceX, double ForceY)
         {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called AddForce on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called AddForce on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
             target.AddForce(new Vec2((Fix)ForceX, (Fix)ForceY));
         }
     }

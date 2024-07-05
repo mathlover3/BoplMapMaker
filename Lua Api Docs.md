@@ -33,8 +33,15 @@ number, Platform RaycastRoundedRect(number posX, number posY, number angle, numb
 
 gets the closest player to that posison. returns nil if all the players are gone (begiening/end of game)
 Player GetClosestPlayer(number posX, number posY)
-returns all platforms (including boulders)
-Sequence (of Platforms) GetAllPlatforms()
+
+returns then number of platforms then all platforms (including boulders)
+number, Sequence (of Platforms) GetAllPlatforms()
+
+returns then number of players then all players. note that there may be no entrys if theres no players.
+number, Sequence (of Players) GetAllPlayers()
+
+returns then number of BoplBodys then all BoplBodys. will not return BoplBodys that havent been initialized yet or is being destroyed on that frame.
+number, Sequence (of BoplBodys) GetAllBoplBodys()
 
 for some reson if you shoot a blink under the water it prevents stuff from reflecting off it for a bit??? no clue why.
 for normal blink minPlayerDuration = 0.5, WallDuration = 4, WallDelay = 1, WallShake = 0.3
@@ -55,7 +62,7 @@ number GetTimeSenceLevelLoad()
 gets the value of the logic gate input with that id. uses 1 based indexing. returns a error if the id is > then the number of inputs
 bool GetInputValueWithId(number id)
 
-sets the value of the logic gates output with that id. returns a error if the id is > then the number of outputs
+sets the value of the logic gates output with that id. returns a error if the id is > then the number of outputs. the output will stay the value you set untill you set it agien.
 none SetOutputWithId(number id, bool value)
 
 ## Vec2
@@ -73,6 +80,7 @@ number Player.GetGravityMaxFallSpeed()
 number Player.GetJumpExtraXStrength()
 number Player.GetJumpKeptMomentum()
 number Player.GetAirAccel()
+number Player.GetMass()
 Vec2 Player.GetPosition()
 none Player.SetSpeed(number NewValue)
 none Player.SetGroundedSpeed(number NewValue)
@@ -84,6 +92,8 @@ none Player.SetGravityMaxFallSpeed(number NewValue)
 none Player.SetJumpExtraXStrength(number NewValue)
 none Player.SetJumpKeptMomentum(number NewValue)
 none Player.SetAirAccel(number NewValue)
+none Player.SetMass(number NewValue)
+none Player.AddForce(number ForceX, number ForceY)
 returns "Player"
 string Player.GetClassType()
 
@@ -111,14 +121,21 @@ bool Platform.IsBoulder()
 this is the funcsons the BoplBody has.
 returns "BoplBody"
 string BoplBody.GetClassType()
+bool HasBeenInitialized()
+bool IsBeingDestroyed()
 Vec2 BoplBody.GetPos()
 number BoplBody.GetRot()
+
+GetScale, GetMass, GetVelocity, AddForce, SetScale, SetVelocity and SetMass will error out if it hasnt been initialized or if its being destroyed (this only is the case for 1 frame and then the BoplBody becomes nil.). check HasBeenInitialized and IsBeingDestroyed before calling them.
 number BoplBody.GetScale()
+number BoplBody.GetMass()
+Vec2 BoplBody.GetVelocity()
 none BoplBody.SetPos(number PosX, number PosY)
 none BoplBody.SetRot(number Rot)
 none BoplBody.SetScale(number Scale)
 none BoplBody.SetVelocity(number VelX, number VelY)
-none BoplBody.AddForce(number ForceX, number ForceY)\
+none BoplBody.SetMass(number Mass)
+none BoplBody.AddForce(number ForceX, number ForceY)
 
-can return "Arrow", "RocketEngine", "Mine", "Telsa", "AbilityPickup", "Missile", "MatchoBoulder", "Spike", "Rock", "Smoke", "Smoke Grenade", "Grenade", "Unknown/Modded"
+can return "Arrow", "RocketEngine", "Mine", "Telsa", "AbilityPickup", "Missile", "MatchoBoulder", "Spike", "Rock", "Smoke", "Smoke Grenade", "Grenade", "Platform", "Unknown/Modded"
 string BoplBody.GetObjectType()

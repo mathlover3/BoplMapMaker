@@ -19,6 +19,8 @@ namespace MapMaker
         public FixTransform fixTrans = null;
         public List<int> layersToDetect = new List<int>();
         public int UUID;
+        public bool Visable = true;
+        public Color color = Color.blue;
         private bool Colliding = false;
         public void Awake()
         {
@@ -31,7 +33,7 @@ namespace MapMaker
                 {
                     LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
                     lineRenderer.material = new Material(Shader.Find("Hidden/Internal-Colored"));
-                    lineRenderer.endColor = (lineRenderer.startColor = Color.black);
+                    lineRenderer.endColor = (lineRenderer.startColor = color);
                     lineRenderer.endWidth = (lineRenderer.startWidth = 0.2f);
                 }
                 dPhysicsBox = FixTransform.InstantiateFixed<DPhysicsBox>(DPhysicsBoxPrefab, new Vec2(Fix.Zero, Fix.Zero), Fix.Zero);
@@ -105,29 +107,32 @@ namespace MapMaker
                 }
                 Colliding = false;
                 //UnityEngine.Debug.Log("IsOn: " + IsOn);
-                try
+                if (Visable)
                 {
-                    //debug stuff
-                    LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
-                    FixTransform component = base.GetComponent<FixTransform>();
-                    Vector2 vector = (Vector2)dPhysicsBox.CalcExtents();
-                    Vector3 b = base.transform.right * vector.x;
-                    Vector3 b2 = base.transform.up * vector.y;
-                    Vector3 a = (component == null) ? base.transform.position : (base.transform.position + base.transform.up * (float)component.offset.y + base.transform.right * (float)component.offset.x);
-                    Vector3 vector2 = a + b + b2;
-                    Vector3 vector3 = a + b - b2;
-                    Vector3 vector4 = a - b + b2;
-                    Vector3 vector5 = a - b - b2;
-                    lineRenderer.positionCount = 5;
-                    lineRenderer.SetPosition(0, vector2);
-                    lineRenderer.SetPosition(1, vector3);
-                    lineRenderer.SetPosition(2, vector5);
-                    lineRenderer.SetPosition(3, vector4);
-                    lineRenderer.SetPosition(4, vector2);
-                }
-                catch (Exception ex)
-                {
-                    UnityEngine.Debug.LogError($"Error Drawing Debug Lines: {ex}");
+                    try
+                    {
+                        //debug stuff
+                        LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
+                        FixTransform component = base.GetComponent<FixTransform>();
+                        Vector2 vector = (Vector2)dPhysicsBox.CalcExtents();
+                        Vector3 b = base.transform.right * vector.x;
+                        Vector3 b2 = base.transform.up * vector.y;
+                        Vector3 a = (component == null) ? base.transform.position : (base.transform.position + base.transform.up * (float)component.offset.y + base.transform.right * (float)component.offset.x);
+                        Vector3 vector2 = a + b + b2;
+                        Vector3 vector3 = a + b - b2;
+                        Vector3 vector4 = a - b + b2;
+                        Vector3 vector5 = a - b - b2;
+                        lineRenderer.positionCount = 5;
+                        lineRenderer.SetPosition(0, vector2);
+                        lineRenderer.SetPosition(1, vector3);
+                        lineRenderer.SetPosition(2, vector5);
+                        lineRenderer.SetPosition(3, vector4);
+                        lineRenderer.SetPosition(4, vector2);
+                    }
+                    catch (Exception ex)
+                    {
+                        UnityEngine.Debug.LogError($"Error Drawing Debug Lines: {ex}");
+                    }
                 }
             }
         }

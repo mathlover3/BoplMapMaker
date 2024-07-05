@@ -262,7 +262,23 @@ namespace MapMaker
                     Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
                     if (int.Parse((string)Dict["mapId"]) == CurrentMapId)
                     {
-                        SpawnPlatformsFromMap(mapJson, i);
+                        SpawnPlatformsFromMap(Dict, i);
+                        if (Dict.ContainsKey("AndGates"))
+                        {
+                            MoreJsonParceing.SpawnAndGates((List<object>)Dict["AndGates"]);
+                        }
+                        if (Dict.ContainsKey("OrGates"))
+                        {
+                            MoreJsonParceing.SpawnOrGates((List<object>)Dict["OrGates"]);
+                        }
+                        if (Dict.ContainsKey("NotGates"))
+                        {
+                            MoreJsonParceing.SpawnNotGates((List<object>)Dict["NotGates"]);
+                        }
+                        if (Dict.ContainsKey("DelayGates"))
+                        {
+                            MoreJsonParceing.SpawnDelayGates((List<object>)Dict["DelayGates"]);
+                        }
                     }
 
                 }
@@ -274,7 +290,7 @@ namespace MapMaker
             }
         }
 
-        public static void SpawnPlatformsFromMap(string mapJson, int index)
+        public static void SpawnPlatformsFromMap(Dictionary<string, object> Dict, int index)
         {
             //get the platform prefab out of the Platform ability gameobject (david) DO NOT REMOVE!
             //chatgpt code to get the Platform ability object
@@ -292,8 +308,6 @@ namespace MapMaker
             }
             var platformTransform = PlatformAbility.GetComponent(typeof(PlatformTransform)) as PlatformTransform;
             platformPrefab = platformTransform.platformPrefab;
-            //turn the json into a dicsanary. (david+chatgpt) dont remove it as it works.
-            Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
             //spawn point stuff
 
             if (Dict.ContainsKey("teamSpawns"))
@@ -594,8 +608,40 @@ namespace MapMaker
                         Vector4[] color2 = { color };
                         Vec2[] centerPoint2 = { centerPoint };
                         //spawn platform
-                        PlatformApi.PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
+                        var PlatformObject = PlatformApi.PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
+                        //signal time!
 
+                        if (platform.ContainsKey("MovingPlatformSignalStuff"))
+                        {
+                            var movingPlatformSignalStuff = (Dictionary<string, object>)platform["MovingPlatformSignalStuff"];
+                            var UUID = Convert.ToInt32(movingPlatformSignalStuff["InputUUID"]);
+                            AddMovingPlatformSignalStuff(PlatformObject, UUID);
+                        }
+                        if (platform.ContainsKey("DisappearPlatformOnSignal"))
+                        {
+                            var disappearPlatformOnSignal = (Dictionary<string, object>)platform["DisappearPlatformOnSignal"];
+                            var UUID = Convert.ToInt32(disappearPlatformOnSignal["InputUUID"]);
+                            var SecondsToReapper = Convert.ToDouble(disappearPlatformOnSignal["SecondsToReapper"]);
+                            var Delay = Convert.ToDouble(disappearPlatformOnSignal["Delay"]);
+                            CreateDisappearPlatformsOnSignal(PlatformObject, UUID, (Fix)SecondsToReapper, (Fix)Delay);
+                        }
+                        if (platform.ContainsKey("ShakePlatform"))
+                        {
+                            var shakePlatform = (Dictionary<string, object>)platform["ShakePlatform"];
+                            var UUID = Convert.ToInt32(shakePlatform["InputUUID"]);
+                            var Duration = Convert.ToDouble(shakePlatform["Duration"]);
+                            var OnlyActivateOnRise = Convert.ToBoolean(shakePlatform["OnlyActivateOnRise"]);
+                            var ShakeAmount = Convert.ToDouble(shakePlatform["ShakeAmount"]);
+                            CreateShakePlatform(PlatformObject, UUID, (Fix)Duration, OnlyActivateOnRise, (Fix)ShakeAmount);
+                        }
+                        if (platform.ContainsKey("DropPlayers"))
+                        {
+                            var DropPlayers = (Dictionary<string, object>)platform["DropPlayers"];
+                            var UUID = Convert.ToInt32(DropPlayers["InputUUID"]);
+                            var OnlyActivateOnRise = Convert.ToBoolean(DropPlayers["OnlyActivateOnRise"]);
+                            var DropForce = Convert.ToDouble(DropPlayers["DropForce"]);
+                            CreateDropPlayers(PlatformObject, UUID, (Fix)DropForce, OnlyActivateOnRise);
+                        }
                         Debug.Log("Platform spawned successfully");
                     }
 
@@ -648,6 +694,37 @@ namespace MapMaker
                             VectorFieldPlatformComp.orbitSpeed = FloorToThousandnths(orbitSpeed);
                             VectorFieldPlatformComp.ovalness01 = FloorToThousandnths(ovalness01);
                         }
+                        if (platform.ContainsKey("MovingPlatformSignalStuff"))
+                        {
+                            var movingPlatformSignalStuff = (Dictionary<string, object>)platform["MovingPlatformSignalStuff"];
+                            var UUID = Convert.ToInt32(movingPlatformSignalStuff["InputUUID"]);
+                            AddMovingPlatformSignalStuff(Platform, UUID);
+                        }
+                        if (platform.ContainsKey("DisappearPlatformOnSignal"))
+                        {
+                            var disappearPlatformOnSignal = (Dictionary<string, object>)platform["DisappearPlatformOnSignal"];
+                            var UUID = Convert.ToInt32(disappearPlatformOnSignal["InputUUID"]);
+                            var SecondsToReapper = Convert.ToDouble(disappearPlatformOnSignal["SecondsToReapper"]);
+                            var Delay = Convert.ToDouble(disappearPlatformOnSignal["Delay"]);
+                            CreateDisappearPlatformsOnSignal(Platform, UUID, (Fix)SecondsToReapper, (Fix)Delay);
+                        }
+                        if (platform.ContainsKey("ShakePlatform"))
+                        {
+                            var shakePlatform = (Dictionary<string, object>)platform["ShakePlatform"];
+                            var UUID = Convert.ToInt32(shakePlatform["InputUUID"]);
+                            var Duration = Convert.ToDouble(shakePlatform["Duration"]);
+                            var OnlyActivateOnRise = Convert.ToBoolean(shakePlatform["OnlyActivateOnRise"]);
+                            var ShakeAmount = Convert.ToDouble(shakePlatform["ShakeAmount"]);
+                            CreateShakePlatform(Platform, UUID, (Fix)Duration, OnlyActivateOnRise, (Fix)ShakeAmount);
+                        }
+                        if (platform.ContainsKey("DropPlayers"))
+                        {
+                            var DropPlayers = (Dictionary<string, object>)platform["DropPlayers"];
+                            var UUID = Convert.ToInt32(DropPlayers["InputUUID"]);
+                            var OnlyActivateOnRise = Convert.ToBoolean(DropPlayers["OnlyActivateOnRise"]);
+                            var DropForce = Convert.ToDouble(DropPlayers["DropForce"]);
+                            CreateDropPlayers(Platform, UUID, (Fix)DropForce, OnlyActivateOnRise);
+                        }
                     }
 
                 }
@@ -655,11 +732,6 @@ namespace MapMaker
                 {
                     Debug.LogError($"Failed to spawn platform. Error: {ex}");
                 }
-            }
-            if (Dict.ContainsKey("boulders"))
-            {
-                List<object> boulders = (List<object>)Dict["boulders"];
-                MapMaker.MoreJsonParceing.SpawnBoulders(boulders);
             }
 
 
@@ -839,9 +911,8 @@ namespace MapMaker
                 {
                     LayerMask.NameToLayer("Player")
                 };
-                //CREATE ALL TRIGGERS BEFORE CREATING SIGNAL DELAYS!!!
-                //CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0);
-                //CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1);
+                CreateTrigger(layers, new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0, true);
+                CreateTrigger(layers, new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1, true);
                 int[] UUids = { 4, 0 };
                 //CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
                 //CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
@@ -856,28 +927,29 @@ namespace MapMaker
                 //CreateDropPlayers(platform, 2, (Fix)100, true);
                 int[] UUids3 = { };
                 int[] UUids4 = { };
-                CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"    
+                /*CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"
 --a, b = RaycastRoundedRect(0, 0, 90, 3000)
 --print(""Raycast results: a ="", a, ""b ="", b)
-if (obj == nil) then
-    obj = GetClosestPlayer(0, 0)
+if (player == nil) then
+    player = GetClosestPlayer(0, 0)
 end
---print(""Closest player:"", obj)
-if (obj ~= nil and a ~= nil and a >= 0 and a < 100) then
-    if (pos ~= nil) then
-        LastPos = pos
+Players = GetAllPlayers()
+if (player ~= nil) then
+    if (Px ~= nil) then
+        LastPx = Px
+        LastPy = Py
     end
-    pos = obj.GetPosition()
+    Px, Py = player.GetPosition()
     
-    if (LastPos ~= nil and LastPos[""x""] - pos[""x""] > 0) then
-        obj.SetMaxSpeed(38)
-        print(""max speed 38"")
+    if (LastPx ~= nil and Px - LastPx > 0) then
+        --player.SetMaxSpeed(38)
+        --print(""max speed 38"")
     else
-        obj.SetMaxSpeed(19)
-        print(""max speed 19"")
+        --player.SetMaxSpeed(19)
+        --print(""max speed 19"")
     end
 end
-plats = GetAllPlatforms()
+c, plats = GetAllPlatforms()
 i = 1
 if (plats ~= nil) then
     while(plats[i] ~= nil) do
@@ -885,45 +957,65 @@ if (plats ~= nil) then
         if (plat ~= nil and plat.IsBoulder() == false) then
             body = plat.GetBoplBody()
             if (body ~= nil) then
-                x, y = body.GetPos()
-                plat.SetHome(x, y)
+                --x, y = body.GetPos()
+                --plat.SetHome(x, y)
+                --rot = body.GetRot()
+                --plat.SetHomeRot(rot)
             end
         end
         i = i + 1
     end
 end
-if (math.random() > 0.98) then
-    ShootBlink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.5,4,1,0.3)
+BodyCount, Bodys = GetAllBoplBodys()
+i = 1
+while(Bodys[i] ~= nil) do
+    Body = Bodys[i]
+    if (true) then
+        --Body.SetMass(i)
+        Body.AddForce(50, 10)
+    end
+    i = i + 1
 end
-if (math.random() > 0.98) then
-    --ShootGrow(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.8,0.8,50)
-end
-if (math.random() > 0.98) then
-    --ShootShrink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),-0.8,-0.8,50)
-end
-if (math.random() > 0.99) then
-    SpawnArrow(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), math.random(), math.random(), math.random())
-end
-if (math.random() > 0.99) then
-    SpawnGrenade(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), 0)
+--SetOutputWithId(1, i >= 10)
+PlayerCount, Players = GetAllPlayers()
+i = 1
+while(Players[i] ~= nil) do
+    Player = Players[i]
+    Player.AddForce(0.01, 0)
+    i = i + 1
 end
 if (math.random() > 0.995) then
-    SpawnExplosion(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.2, 1.5))
+    ShootBlink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.5,4,1,0.3)
 end
-if (math.random() > 0.99) then
-    SpawnBoulder(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), 0, ""slime"", math.random(), math.random(), math.random())
+if (math.random() > 0.995) then
+    ShootGrow(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.8,0.8,50)
+end
+if (math.random() > 0.995) then
+    ShootShrink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),-0.8,-0.8,50)
+end
+if (math.random() > 0.995) then
+    SpawnArrow(math.random(-97.27, 97.6), 40, math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), math.random(), math.random(), math.random())
+end
+if (math.random() > 0.995) then
+    SpawnGrenade(math.random(-97.27, 97.6), 40, math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), 0)
+end
+if (math.random() > 0.995) then
+    --SpawnExplosion(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.2, 1.5))
+end
+if (math.random() > 0.995) then
+    SpawnBoulder(math.random(-97.27, 97.6), 40, math.random(0.5, 1), math.random(-25, 25), math.random(-25, 25), 10, ""slime"", math.random(), math.random(), math.random())
 end
 if (b ~= nil) then
     return b.GetClassType()
 end
-return b");
+return b");*/
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)0, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
-                //CreateSpawner(new Vec2((Fix)(0), (Fix)20), (Fix)10, Vec2.zero, Fix.Zero, Spawner.ObjectSpawnType.AbilityOrb, PlatformType.space, true, 3, true);
+                //CreateSpawner(new Vec2((Fix)(0), (Fix)20), (Fix)1, Vec2.zero, Fix.Zero, new UnityEngine.Color(0, 1, 0, 0.5f), Spawner.ObjectSpawnType.Boulder, PlatformType.slime, true, 8, false);
                 //MAKE SURE TO CALL THIS WHEN DONE CREATING SIGNAL STUFF!
-                signalSystem.SetUpDicts();
-                Debug.Log("signal stuff is done!");
+                //signalSystem.SetUpDicts();
+                //Debug.Log("signal stuff is done!");
                 //TESTING END!
 
                 CurrentMapId = GetMapIdFromSceneName(scene.name);
@@ -939,6 +1031,7 @@ return b");
                     if (DoWeHaveMapWithMapId == MapIdCheckerThing.NoMapFoundWithId)
                     {
                         Debug.Log("no custom map found for this map");
+                        signalSystem.SetUpDicts();
                         return;
                     }
                 }
@@ -958,7 +1051,8 @@ return b");
                     Updater.DestroyFix(tplatform.gameObject);
                 }
                 LoadMapsFromFolder();
-
+                signalSystem.SetUpDicts();
+                Debug.Log("signal stuff is done!");
             }
         }
         public static bool IsLevelName(String input)
@@ -1117,7 +1211,7 @@ return b");
             }
             return Floats;
         }
-        public static Spawner CreateSpawner(Vec2 Pos, Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity, Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
+        public static Spawner CreateSpawner(Vec2 Pos, Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity, UnityEngine.Color color, Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
         {
             var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, Pos);
             spawner.spawnType = spawnType;
@@ -1135,10 +1229,11 @@ return b");
             spawner.SimTimeBetweenSpawns = SimTimeBetweenSpawns;
             spawner.velocity = SpawningVelocity;
             spawner.angularVelocity = angularVelocity;
+            spawner.ArrowOrBoulderColor = color;
             spawner.Register();
             return spawner;
         }
-        public static Trigger CreateTrigger(List<int> LayersToDetect, Vec2 Pos, Vec2 Extents, ushort Signal)
+        public static Trigger CreateTrigger(List<int> LayersToDetect, Vec2 Pos, Vec2 Extents, ushort Signal, bool visable)
         {
             var trigger = FixTransform.InstantiateFixed<Trigger>(TriggerPrefab, new Vec2(Fix.Zero, (Fix)30));
             trigger.layersToDetect = LayersToDetect;
@@ -1152,6 +1247,7 @@ return b");
             trigger.LogicOutput = output;
             trigger.SetPos(Pos);
             trigger.SetExtents(Extents);
+            trigger.Visable = visable;
             trigger.Register();
             return trigger;
         }
@@ -1629,28 +1725,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
 #pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
         }
     }
-    [HarmonyPatch(typeof(Missile))]
-    public class MissilePatches
-    {
-        [HarmonyPatch("OnCollide")]
-        [HarmonyPrefix]
-        private static bool Awake_MapMaker_Plug(CollisionInformation collision, Missile __instance)
-        {
-#pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
-            if (collision.layer == LayerMask.NameToLayer("RigidBodyAffector") || collision.layer == LayerMask.NameToLayer("Rope") || collision.layer == (LayerMask)3)
-            {
-                return false;
-            }
-#pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
-            FixTransform.InstantiateFixed<Explosion>(__instance.onHitExplosionPrefab, __instance.body.position).GetComponent<IPhysicsCollider>().Scale = __instance.fixTrans.Scale;
-            if (!string.IsNullOrEmpty(__instance.soundEffectOnCol))
-            {
-                AudioManager.Get().Play(__instance.soundEffectOnCol);
-            }
-            Updater.DestroyFix(__instance.gameObject);
-            return false;
-        }
-    }
+
     [HarmonyPatch(typeof(SmokeGrenadeExplode2))]
     public class SmokeGrenadeExplode2Patches
     {
@@ -2172,5 +2247,74 @@ BindingFlags.NonPublic | BindingFlags.Static);
         }
     }
 
-
+    [HarmonyPatch(typeof(HookshotInstant))]
+    public class HookshotInstantPatches
+    {
+        [HarmonyPatch("UseAbility")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(HookshotInstant __instance)
+        {
+            __instance.playerInfo = __instance.instantAbility.playerInfo;
+            if (__instance.ropeBody != null && __instance.playerInfo.ropeBody != null && __instance.ropeBody.enabled && __instance.playerInfo.ropeBody.enabled && __instance.playerInfo.ropeBody.number == __instance.firedRopeNumber && (int)__instance.ropeBody.ownerId == __instance.playerInfo.playerId)
+            {
+                if (__instance.tickWhenUsedLast + 60 < Updater.SimulationTicks)
+                {
+                    AudioManager.Get().Play("reelInFire");
+                }
+                __instance.tickWhenUsedLast = Updater.SimulationTicks;
+                int num = __instance.playerInfo.topAttachment ? (__instance.ropeBody.segmentCount - 1) : 0;
+                __instance.framesSinceReelIn++;
+                if (__instance.framesSinceReelIn >= __instance.framesBetweenReelIns)
+                {
+                    __instance.ropeBody.segmentSeparation = Fix.Max(__instance.ropeBody.segmentSeparation - __instance.ReelInSpeed / (Fix)((long)__instance.ropeBody.segmentCount), __instance.reeledInSegmentSeparation);
+                    bool flag = true;
+                    if (__instance.ropeBody.segmentSeparation < __instance.separationBeforeReelinDeletion)
+                    {
+                        flag = __instance.ropeBody.ReelInSegment(__instance.playerInfo.topAttachment);
+                    }
+                    if (!flag)
+                    {
+                        Vec2 u = Vec2.NormalizedSafe(__instance.ropeBody.segment[num] - __instance.playerInfo.slimeController.body.position) * (Fix)0.1;
+                        if (!__instance.playerInfo.isGrounded && __instance.ropeBody.hookHasArrived)
+                        {
+                            __instance.playerInfo.slimeController.body.position = __instance.ropeBody.segment[num] + u;
+                        }
+                        __instance.ropeBody.enabled = false;
+                        __instance.ropeBody.disabledThisFrame = true;
+                        __instance.ropeBody = null;
+                        AudioManager.Get().Play("hookshotLetGo");
+                    }
+                    __instance.framesSinceReelIn = 0;
+                    return false;
+                }
+            }
+            else
+            {
+                __instance.FireHook();
+            }
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(Missile))]
+    public class MisslePatches
+    {
+        [HarmonyPatch("OnCollide")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CollisionInformation collision, Missile __instance)
+        {
+#pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
+            if (collision.layer == LayerMask.NameToLayer("RigidBodyAffector") || collision.layer == LayerMask.NameToLayer("Rope"))
+            {
+                return false;
+            }
+#pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
+            FixTransform.InstantiateFixed<Explosion>(__instance.onHitExplosionPrefab, __instance.body.position).GetComponent<IPhysicsCollider>().Scale = __instance.fixTrans.Scale;
+            if (!string.IsNullOrEmpty(__instance.soundEffectOnCol))
+            {
+                AudioManager.Get().Play(__instance.soundEffectOnCol);
+            }
+            Updater.DestroyFix(__instance.gameObject);
+            return false;
+        }
+    }
 }

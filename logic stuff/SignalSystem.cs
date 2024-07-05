@@ -384,26 +384,34 @@ namespace MapMaker
                     lineRenderer.SetPosition(0, pos);
                 }
                 //multiple inputs
-                if (InputOwner.GetComponent<AndGate>() != null || InputOwner.GetComponent<OrGate>() != null)
+                if (InputOwner.GetComponent<AndGate>() != null || InputOwner.GetComponent<OrGate>() != null || InputOwner.GetComponent<LuaMain>() != null)
                 {
                     var center1 = (UnityEngine.Vector3)InputOwner.GetComponent<FixTransform>().position;
                     var NumberOfLines = input.gate.InputSignals.Count;
                     //it needs to be a 1 based index.
                     var LineIndex = input.gate.InputSignals.IndexOf(input) + 1;
                     //offset it as these gates can have multiple inputs
-
+                    Vector3 center;
                     var MaxOffset = 0.6;
                     var bottom = center1.y - MaxOffset;
                     var centerY = center1.y;
                     //thanks to my dad for the math for this.
                     var Y = (LineIndex - 1) * ((2 * (centerY - bottom)) / (NumberOfLines - 1)) + bottom;
                     //safe to use normal float math instead of Fixes because it doesnt effect gameplay at all.
-                    var center = new Vector3(center1.x - 1.7f, (float)Y);
+                    center = new Vector3(center1.x - 1.7f, (float)Y);
                     var rot1 = InputOwner.GetComponent<FixTransform>().rotationInner;
                     var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
                     var scale = InputOwner.transform.localScale.x;
                     var pos = RotatePointAroundPivot(center, center1, rot);
                     lineRenderer.SetPosition(0, pos);
+                    if (NumberOfLines == 1)
+                    {
+                        center = new Vector3(center1.x - 1.7f, center1.y);
+                        var rot2 = InputOwner.GetComponent<FixTransform>().rotationInner;
+                        var rot3 = rot2 * (Fix)PhysTools.RadiansToDegrees;
+                        var pos2 = RotatePointAroundPivot(center, center1, rot3);
+                        lineRenderer.SetPosition(0, pos2);
+                    }
                 }
                 //output checking
                 if (OutputOwner.GetComponent<Trigger>() != null || OutputOwner.GetComponent<Spawner>() != null || OutputOwner.GetComponent<DisappearPlatformsOnSignal>() != null || OutputOwner.GetComponent<MovingPlatformSignalStuff>() != null)
@@ -419,6 +427,36 @@ namespace MapMaker
                     var pos1 = center + new Vector3(2f, 0);
                     var pos = RotatePointAroundPivot(pos1, center, rot);
                     lineRenderer.SetPosition(1, pos);
+                }
+                //multiple outputs
+                if (OutputOwner.GetComponent<LuaMain>() != null)
+                {
+                    var center1 = (UnityEngine.Vector3)OutputOwner.GetComponent<FixTransform>().position;
+                    var NumberOfLines = output.gate.OutputSignals.Count;
+                    //it needs to be a 1 based index.
+                    var LineIndex = output.gate.OutputSignals.IndexOf(output) + 1;
+                    //offset it as these gates can have multiple inputs
+                    Vector3 center;
+                    var MaxOffset = 0.6;
+                    var bottom = center1.y - MaxOffset;
+                    var centerY = center1.y;
+                    //thanks to my dad for the math for this.
+                    var Y = (LineIndex - 1) * ((2 * (centerY - bottom)) / (NumberOfLines - 1)) + bottom;
+                    //safe to use normal float math instead of Fixes because it doesnt effect gameplay at all.
+                    center = new Vector3(center1.x + 1.7f, (float)Y);
+                    var rot1 = OutputOwner.GetComponent<FixTransform>().rotationInner;
+                    var rot = rot1 * (Fix)PhysTools.RadiansToDegrees;
+                    var scale = OutputOwner.transform.localScale.x;
+                    var pos = RotatePointAroundPivot(center, center1, rot);
+                    lineRenderer.SetPosition(1, pos);
+                    if (NumberOfLines == 1)
+                    {
+                        center = new Vector3(center1.x + 1.7f, center1.y);
+                        var rot2 = OutputOwner.GetComponent<FixTransform>().rotationInner;
+                        var rot3 = rot2 * (Fix)PhysTools.RadiansToDegrees;
+                        var pos2 = RotatePointAroundPivot(center, center1, rot3);
+                        lineRenderer.SetPosition(1, pos2);
+                    }
                 }
             }
         }
@@ -513,5 +551,6 @@ namespace MapMaker
             PointVec2 += PivotVec2;
             return (Vector3)PointVec2;
         }
+
     }
 }
