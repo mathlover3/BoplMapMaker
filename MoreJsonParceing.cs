@@ -193,6 +193,28 @@ namespace MapMaker
                 Plugin.CreateSpawner(Vec2Pos, TimeBetweenSpawns, Vec2SpawningVelocity, angularVelocity, Color, SpawnType, BoulderType, UseSignal, InputUUID, IsTriggerSignal);
             }
         }
+        public static string FileName = "";
+        public static void SpawnLuaGates(List<object> gates, int index)
+        {
+            foreach (Dictionary<String, object> gate in gates)
+            {
+                var inputs = ListOfObjectsToListOfInt((List<object>)gate["InputUUIDs"]);
+                var inputArray = inputs.ToArray();
+                var outputs = ListOfObjectsToListOfInt((List<object>)gate["InputUUIDs"]);
+                var outputArray = outputs.ToArray();
+                var pos = (Dictionary<String, object>)gate["Pos"];
+                var Vec2Pos = new Vec2((Fix)Convert.ToDouble(pos["x"]), (Fix)Convert.ToDouble(pos["y"]));
+                var rot = (Fix)Convert.ToDouble(gate["Rotation"]);
+                FileName = Convert.ToString(gate["LuaCodeFileName"]);
+                var file = Plugin.GetFileFromZipArchiveBytes(Plugin.zipArchives[index], DoesFileHaveSameName)[0];
+                var Code = System.Text.Encoding.Default.GetString(file);
+                Plugin.CreateLuaGate(inputArray, outputArray, Vec2Pos, rot, Code);
+            }
+        }
+        public static bool DoesFileHaveSameName(string filepath)
+        {
+            return filepath.EndsWith(FileName);
+        }
         public static Fix FloorToThousandnths(double value)
         {
             return Fix.Floor(((Fix)value) * (Fix)1000) / (Fix)1000;

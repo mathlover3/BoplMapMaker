@@ -299,12 +299,16 @@ namespace MapMaker
                         {
                             MoreJsonParceing.SpawnSpawners((List<object>)Dict["Spawners"]);
                         }
+                        if (Dict.ContainsKey("LuaGates"))
+                        {
+                            MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
+                        }
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Failed to load map from json: {mapJson} Error: {ex.Message}");
+                    Debug.LogError($"Failed to load map from json: {mapJson} Error: {ex}");
                 }
                 i++;
             }
