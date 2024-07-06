@@ -83,16 +83,16 @@ namespace MapMaker.Lua_stuff
                 switch (res.Type)
                 {
                     case DataType.String:
-                        UnityEngine.Debug.Log(res.String);
+                        //UnityEngine.Debug.Log(res.String);
                         break;
                     case DataType.Boolean:
-                        UnityEngine.Debug.Log(res.Boolean);
+                        //UnityEngine.Debug.Log(res.Boolean);
                         break;
                     case DataType.Number:
-                        UnityEngine.Debug.Log(res.Number);
+                        //UnityEngine.Debug.Log(res.Number);
                         break;
                     default:
-                        UnityEngine.Debug.Log(res.Type);
+                        //UnityEngine.Debug.Log(res.Type);
                         break;
                 }
                 return res;

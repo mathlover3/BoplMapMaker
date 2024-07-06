@@ -29,9 +29,12 @@ using MapMaker.Lua_stuff;
 using MoonSharp.Interpreter;
 using Mono.Cecil.Cil;
 using UnityEngine.Events;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using Entwined;
 
 namespace MapMaker
 {
+    [BepInDependency("com.entwinedteam.entwined")]
     [BepInPlugin("com.MLT.MapLoader", "MapLoader", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
@@ -41,9 +44,11 @@ namespace MapMaker
         public static List<ResizablePlatform> Platforms;
         public static int t;
         public static string mapsFolderPath; // Create blank folder path var
-        public static int CurrentMapId;
+        public static int CurrentMapUUID;
+        public static int CurrentMapIndex;
         public static Fix OneByOneBlockMass = Fix.One;
         public static string[] MapJsons;
+        public static string[] MetaDataJsons;
         // Define a static logger instance
         public static ManualLogSource logger;
         public static bool UseCustomTexture = false;
@@ -76,6 +81,16 @@ namespace MapMaker
         private static LuaMain LuaPrefab = null;
         public static SignalSystem signalSystem;
         public static int NextUUID = 0;
+
+        public static readonly int GrassMapId = 0;
+        public static readonly int SnowMapId = 21;
+        public static readonly int SpaceMapId = 33;
+
+        //networking stuff
+        //public static EntwinedPacketChannel<int> MapUUIDChannel;
+        //public static bool HasRecevedMapUUID = false;
+        //public static StartRequestPacket StartRequestPacket;
+
         //used to make shakeable platform to know its being called by a blink gun.
         public static bool CurrentlyBlinking;
         public enum MapIdCheckerThing
@@ -107,6 +122,8 @@ namespace MapMaker
             //thanks almafa64 on discord for the path stuff.
             MyAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/assetbundle");
             string[] assetNames = MyAssetBundle.GetAllAssetNames();
+            //MapUUIDChannel = new EntwinedPacketChannel<int>(this, new IntEntwiner());
+            //MapUUIDChannel.OnMessage += OnGetUUID; 
             foreach (string name in assetNames)
             {
                 Debug.Log("asset name is: " + name);
@@ -118,16 +135,23 @@ namespace MapMaker
             ZipArchive[] zipArchives = GetZipArchives();
             //Create a List for the json for a bit
             List<string> JsonList = new List<string>();
+            List<string> MetaDataList = new();
+            Debug.Log("line 139");
             foreach (ZipArchive zipArchive in zipArchives)
             {
                 //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
+                MetaDataList.Add(GetFileFromZipArchive(zipArchive, IsMetaDataFile)[0]);
             }
+            Debug.Log("line 146");
             MapJsons = JsonList.ToArray();
+            MetaDataJsons = MetaDataList.ToArray();
+            Debug.Log("line 149");
             //find objects
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
             var objectsFound = 0;
             var ObjectsToFind = 4;
+            Debug.Log("line 154");
             foreach (GameObject obj in allObjects)
             {
                 if (obj.name == "invisibleHitbox")
@@ -200,23 +224,27 @@ namespace MapMaker
             //will only be reached if its not a boplmap
             return false;
         }
+        public static bool IsMetaDataFile(string path)
+        {
+            return path.EndsWith("MetaData.json");
+        }
         //see if there is a custom map we should load (returns enum) (david) (this was annoying to make but at least i learned about predicits!)
         public static MapIdCheckerThing CheckIfWeHaveCustomMapWithMapId()
         {
             int[] MapIds = { };
-            foreach (string mapJson in MapJsons)
+            foreach (string MetaDataJson in MetaDataJsons)
             {
                 try
                 {
-                    Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
+                    Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(MetaDataJson) as Dictionary<string, object>;
                     //add it to a array to be checked
-                    int mapid = int.Parse((string)Dict["mapId"]);
-                    Debug.Log("Map has Mapid of " + mapid);
+                    int mapid = Convert.ToInt32(Dict["MapUUID"]);
+                    Debug.Log("Map has MapUUID of " + mapid);
                     MapIds = MapIds.Append(mapid).ToArray();
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Failed to get MapId from Json: {mapJson} with exseptson: {ex}");
+                    Debug.LogError($"Failed to get MapId from Json: {MetaDataJson} with exseptson: {ex}");
                 }
             }
             //define a predicit (basicly a funcsion that checks if a value meets a critera. in this case being = to CurrentMapId)
@@ -242,7 +270,7 @@ namespace MapMaker
         //check if value = CurrentMapId. used for CheckIfWeHaveCustomMapWithMapId
         public static bool ValueEqualsCurrentMapId(int ValueToCheck)
         {
-            if (ValueToCheck == CurrentMapId)
+            if (ValueToCheck == CurrentMapUUID)
             {
                 return true;
             }
@@ -254,64 +282,62 @@ namespace MapMaker
         //CALL ONLY ON LEVEL LOAD!
         public static void LoadMapsFromFolder()
         {
-            var i = 0;
-            foreach (string mapJson in MapJsons)
+            var i = CurrentMapIndex;
+            var mapJson = MapJsons[CurrentMapIndex];
+            try
             {
-                try
+                Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(MetaDataJsons[i]) as Dictionary<string, object>;
+                if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID)
                 {
                     Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
-                    if (int.Parse((string)Dict["mapId"]) == CurrentMapId)
+                    SpawnPlatformsFromMap(Dict, i);
+                    if (Dict.ContainsKey("AndGates"))
                     {
-                        SpawnPlatformsFromMap(Dict, i);
-                        if (Dict.ContainsKey("AndGates"))
-                        {
-                            MoreJsonParceing.SpawnAndGates((List<object>)Dict["AndGates"]);
-                        }
-                        if (Dict.ContainsKey("OrGates"))
-                        {
-                            MoreJsonParceing.SpawnOrGates((List<object>)Dict["OrGates"]);
-                        }
-                        if (Dict.ContainsKey("NotGates"))
-                        {
-                            MoreJsonParceing.SpawnNotGates((List<object>)Dict["NotGates"]);
-                        }
-                        if (Dict.ContainsKey("DelayGates"))
-                        {
-                            MoreJsonParceing.SpawnDelayGates((List<object>)Dict["DelayGates"]);
-                        }
-                        if (Dict.ContainsKey("Triggers"))
-                        {
-                            MoreJsonParceing.SpawnTriggers((List<object>)Dict["Triggers"]);
-                        }
-                        if (Dict.ContainsKey("ShootBlinks"))
-                        {
-                            MoreJsonParceing.SpawnShootBlinks((List<object>)Dict["ShootBlinks"]);
-                        }
-                        if (Dict.ContainsKey("ShootGrows"))
-                        {
-                            MoreJsonParceing.SpawnShootGrows((List<object>)Dict["ShootGrows"]);
-                        }
-                        if (Dict.ContainsKey("ShootStrinks"))
-                        {
-                            MoreJsonParceing.SpawnShootStrinks((List<object>)Dict["ShootStrinks"]);
-                        }
-                        if (Dict.ContainsKey("Spawners"))
-                        {
-                            MoreJsonParceing.SpawnSpawners((List<object>)Dict["Spawners"]);
-                        }
-                        if (Dict.ContainsKey("LuaGates"))
-                        {
-                            MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
-                        }
+                        MoreJsonParceing.SpawnAndGates((List<object>)Dict["AndGates"]);
                     }
-
+                    if (Dict.ContainsKey("OrGates"))
+                    {
+                        MoreJsonParceing.SpawnOrGates((List<object>)Dict["OrGates"]);
+                    }
+                    if (Dict.ContainsKey("NotGates"))
+                    {
+                        MoreJsonParceing.SpawnNotGates((List<object>)Dict["NotGates"]);
+                    }
+                    if (Dict.ContainsKey("DelayGates"))
+                    {
+                        MoreJsonParceing.SpawnDelayGates((List<object>)Dict["DelayGates"]);
+                    }
+                    if (Dict.ContainsKey("Triggers"))
+                    {
+                        MoreJsonParceing.SpawnTriggers((List<object>)Dict["Triggers"]);
+                    }
+                    if (Dict.ContainsKey("ShootBlinks"))
+                    {
+                        MoreJsonParceing.SpawnShootBlinks((List<object>)Dict["ShootBlinks"]);
+                    }
+                    if (Dict.ContainsKey("ShootGrows"))
+                    {
+                        MoreJsonParceing.SpawnShootGrows((List<object>)Dict["ShootGrows"]);
+                    }
+                    if (Dict.ContainsKey("ShootStrinks"))
+                    {
+                        MoreJsonParceing.SpawnShootStrinks((List<object>)Dict["ShootStrinks"]);
+                    }
+                    if (Dict.ContainsKey("Spawners"))
+                    {
+                        MoreJsonParceing.SpawnSpawners((List<object>)Dict["Spawners"]);
+                    }
+                    if (Dict.ContainsKey("LuaGates"))
+                    {
+                        MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"Failed to load map from json: {mapJson} Error: {ex}");
-                }
-                i++;
             }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to load map from json: {mapJson} Error: {ex}");
+            }
+            i++;
         }
 
         public static void SpawnPlatformsFromMap(Dictionary<string, object> Dict, int index)
@@ -1044,13 +1070,11 @@ return b");*/
                 //signalSystem.SetUpDicts();
                 //Debug.Log("signal stuff is done!");
                 //TESTING END!
-
-                CurrentMapId = GetMapIdFromSceneName(scene.name);
-                var DoWeHaveMapWithMapId = CheckIfWeHaveCustomMapWithMapId();
+                /*var DoWeHaveMapWithMapId = CheckIfWeHaveCustomMapWithMapId();
                 //error if there are multiple maps with the same id
                 if (DoWeHaveMapWithMapId == MapIdCheckerThing.MultipleMapsFoundWithId)
                 {
-                    Debug.LogError($"ERROR! MULTIPLE MAPS WITH MAP ID: {CurrentMapId} FOUND! UHAFYIGGAFYAIO");
+                    Debug.LogError($"ERROR! MULTIPLE MAPS WITH MAP UUID: {CurrentMapUUID} FOUND! UHAFYIGGAFYAIO");
                     return;
                 }
                 else
@@ -1061,7 +1085,7 @@ return b");*/
                         signalSystem.SetUpDicts();
                         return;
                     }
-                }
+                }*/
                 //find the platforms and remove them (shadow + david)
                 levelt = GameObject.Find("Level").transform;
                 var index = 0;
@@ -1237,6 +1261,10 @@ return b");*/
                 Floats.Add((float)Convert.ToDouble(ObjectList[i]));
             }
             return Floats;
+        }
+        private static void OnGetUUID(int payload, PacketSourceInfo sourceInfo)
+        {
+            Debug.Log($"{sourceInfo.SenderSteamName}: {payload}");
         }
         public static Spawner CreateSpawner(Vec2 Pos, Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity, UnityEngine.Color color, Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
         {
@@ -2376,6 +2404,267 @@ BindingFlags.NonPublic | BindingFlags.Static);
             }
 #pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
             return true;
+        }
+    }
+    [HarmonyPatch(typeof(GameSession))]
+    public class GameSessionPatches
+    {
+        [HarmonyPatch("RandomBagLevel")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(GameSession __instance)
+        {
+            Debug.Log("RandomBagLevel");
+            //its max exsclusive min inclusinve
+            Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+            Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+            var type = Convert.ToString(MetaData["MapType"]);
+            switch (type)
+            {
+                case "space":
+                    GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                    break;
+                case "snow":
+                    GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                    break;
+                default:
+                    GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                    break;
+            }
+            var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+            Plugin.CurrentMapUUID = UUID;
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(CharacterSelectHandler))]
+    public class CharacterSelectHandlerPatches
+    {
+        [HarmonyPatch("TryStartGame_inner")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CharacterSelectHandler __instance)
+        {
+            if (CharacterSelectHandler.startButtonAvailable && CharacterSelectHandler.allReadyForMoreThanOneFrame)
+            {
+                AudioManager audioManager = AudioManager.Get();
+                if (audioManager != null)
+                {
+                    audioManager.Play("startGame");
+                }
+                CharacterSelectHandler.startButtonAvailable = false;
+                List<Player> list = PlayerHandler.Get().PlayerList();
+                list.Clear();
+                int num = 1;
+                NamedSpriteList abilityIcons = SteamManager.instance.abilityIcons;
+                for (int i = 0; i < __instance.characterSelectBoxes.Length; i++)
+                {
+                    if (__instance.characterSelectBoxes[i].menuState == CharSelectMenu.ready)
+                    {
+                        PlayerInit playerInit = __instance.characterSelectBoxes[i].playerInit;
+                        Player player = new Player(num, playerInit.team);
+                        player.Color = __instance.playerColors[playerInit.color].playerMaterial;
+                        player.UsesKeyboardAndMouse = playerInit.usesKeyboardMouse;
+                        player.CanUseAbilities = true;
+                        player.inputDevice = playerInit.inputDevice;
+                        player.Abilities = new List<GameObject>(3);
+                        player.AbilityIcons = new List<Sprite>(3);
+                        player.Abilities.Add(abilityIcons.sprites[playerInit.ability0].associatedGameObject);
+                        player.AbilityIcons.Add(abilityIcons.sprites[playerInit.ability0].sprite);
+                        Settings settings = Settings.Get();
+                        if (settings != null && settings.NumberOfAbilities > 1)
+                        {
+                            player.Abilities.Add(abilityIcons.sprites[playerInit.ability1].associatedGameObject);
+                            player.AbilityIcons.Add(abilityIcons.sprites[playerInit.ability1].sprite);
+                        }
+                        Settings settings2 = Settings.Get();
+                        if (settings2 != null && settings2.NumberOfAbilities > 2)
+                        {
+                            player.Abilities.Add(abilityIcons.sprites[playerInit.ability2].associatedGameObject);
+                            player.AbilityIcons.Add(abilityIcons.sprites[playerInit.ability2].sprite);
+                        }
+                        player.CustomKeyBinding = playerInit.keybindOverride;
+                        num++;
+                        list.Add(player);
+                    }
+                }
+                GameSession.Init();
+                //SceneManager.LoadScene("Level1");
+                if (!WinnerTriangleCanvas.HasBeenSpawned)
+                {
+                    SceneManager.LoadScene("winnerTriangle", LoadSceneMode.Additive);
+                }
+            }
+            Debug.Log("TryStartGame_inner");
+            //its max exsclusive min inclusinve
+            Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+            Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+            var type = Convert.ToString(MetaData["MapType"]);
+            switch (type)
+            {
+                case "space":
+                    GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                    break;
+                case "snow":
+                    GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                    break;
+                default:
+                    GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                    break;
+            }
+            var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+            Plugin.CurrentMapUUID = UUID;
+            SceneManager.LoadScene((int)(6 + GameSession.CurrentLevel()), LoadSceneMode.Single);
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(CharacterSelectHandler_online))]
+    public class CharacterSelectHandler_onlinePatches
+    {
+        [HarmonyPatch("ForceStartGame")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CharacterSelectHandler_online __instance, ref PlayerColors pcs)
+        {
+            MonoBehaviour.print("FORCE START GAME");
+            //its max exsclusive min inclusinve
+            Plugin.CurrentMapIndex = Updater.RandomInt(0, Plugin.MapJsons.Length - 1);
+            Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+            var type = Convert.ToString(MetaData["MapType"]);
+            switch (type)
+            {
+                case "space":
+                    GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                    break;
+                case "snow":
+                    GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                    break;
+                default:
+                    GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                    break;
+            }
+            var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+            Plugin.CurrentMapUUID = UUID;
+            if (pcs == null)
+            {
+                pcs = CharacterSelectHandler_online.selfRef.playerColors;
+            }
+            StartRequestPacket startParameters = SteamManager.startParameters;
+            Updater.ReInit();
+            List<Player> list = new List<Player>();
+            Updater.InitSeed(startParameters.seed);
+            if (startParameters.nrOfPlayers > 0)
+            {
+                list.Add(CharacterSelectHandler_online.InitPlayer(1, startParameters.p1_color, startParameters.p1_team, startParameters.p1_ability1, startParameters.p1_ability2, startParameters.p1_ability3, (int)startParameters.nrOfAbilites, pcs));
+            }
+            if (startParameters.nrOfPlayers > 1)
+            {
+                list.Add(CharacterSelectHandler_online.InitPlayer(2, startParameters.p2_color, startParameters.p2_team, startParameters.p2_ability1, startParameters.p2_ability2, startParameters.p2_ability3, (int)startParameters.nrOfAbilites, pcs));
+            }
+            if (startParameters.nrOfPlayers > 2)
+            {
+                list.Add(CharacterSelectHandler_online.InitPlayer(3, startParameters.p3_color, startParameters.p3_team, startParameters.p3_ability1, startParameters.p3_ability2, startParameters.p3_ability3, (int)startParameters.nrOfAbilites, pcs));
+            }
+            if (startParameters.nrOfPlayers > 3)
+            {
+                list.Add(CharacterSelectHandler_online.InitPlayer(4, startParameters.p4_color, startParameters.p4_team, startParameters.p4_ability1, startParameters.p4_ability2, startParameters.p4_ability3, (int)startParameters.nrOfAbilites, pcs));
+            }
+            Player player = null;
+            if (GameLobby.isPlayingAReplay)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (list[i].Id == 1)
+                    {
+                        player = list[i];
+                        break;
+                    }
+                }
+            }
+            else if (startParameters.p1_id == SteamClient.SteamId)
+            {
+                for (int j = 0; j < list.Count; j++)
+                {
+                    if (list[j].Id == 1)
+                    {
+                        player = list[j];
+                        break;
+                    }
+                }
+            }
+            else if (startParameters.p2_id == SteamClient.SteamId)
+            {
+                for (int k = 0; k < list.Count; k++)
+                {
+                    if (list[k].Id == 2)
+                    {
+                        player = list[k];
+                        break;
+                    }
+                }
+            }
+            else if (startParameters.p3_id == SteamClient.SteamId)
+            {
+                for (int l = 0; l < list.Count; l++)
+                {
+                    if (list[l].Id == 3)
+                    {
+                        player = list[l];
+                        break;
+                    }
+                }
+            }
+            else if (startParameters.p4_id == SteamClient.SteamId)
+            {
+                for (int m = 0; m < list.Count; m++)
+                {
+                    if (list[m].Id == 4)
+                    {
+                        player = list[m];
+                        break;
+                    }
+                }
+            }
+            for (int n = 0; n < list.Count; n++)
+            {
+                switch (list[n].Id)
+                {
+                    case 1:
+                        list[n].steamId = startParameters.p1_id;
+                        break;
+                    case 2:
+                        list[n].steamId = startParameters.p2_id;
+                        break;
+                    case 3:
+                        list[n].steamId = startParameters.p3_id;
+                        break;
+                    case 4:
+                        list[n].steamId = startParameters.p4_id;
+                        break;
+                }
+            }
+            player.IsLocalPlayer = true;
+            player.inputDevice = CharacterSelectHandler_online.localPlayerInit.inputDevice;
+            player.UsesKeyboardAndMouse = CharacterSelectHandler_online.localPlayerInit.usesKeyboardMouse;
+            player.CustomKeyBinding = CharacterSelectHandler_online.localPlayerInit.keybindOverride;
+            CharacterSelectHandler_online.startButtonAvailable = false;
+            PlayerHandler.Get().SetPlayerList(list);
+            SteamManager.instance.StartHostedGame();
+            AudioManager audioManager = AudioManager.Get();
+            if (audioManager != null)
+            {
+                audioManager.Play("startGame");
+            }
+            GameSession.Init();
+            if (GameLobby.isPlayingAReplay)
+            {
+                SceneManager.LoadScene((int)(startParameters.currentLevel + 6));
+            }
+            else
+            {
+                SceneManager.LoadScene((int)(startParameters.currentLevel + 6));
+            }
+            if (!WinnerTriangleCanvas.HasBeenSpawned)
+            {
+                SceneManager.LoadScene("winnerTriangle", LoadSceneMode.Additive);
+            }
+            return false;
         }
     }
 }
