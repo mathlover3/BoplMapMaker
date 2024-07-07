@@ -2525,8 +2525,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static bool Awake_MapMaker_Plug(CharacterSelectHandler_online __instance, ref PlayerColors pcs)
         {
             MonoBehaviour.print("FORCE START GAME");
-            int[] a = { 1, 2 };
-            NetworkingStuff.MapUUIDsChannel.SendMessage(a);
             //its max exsclusive min inclusinve
             if (Plugin.MapJsons.Length != 0)
             {
@@ -2672,6 +2670,30 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 SceneManager.LoadScene("winnerTriangle", LoadSceneMode.Additive);
             }
             return false;
+        }
+    }
+    [HarmonyPatch(typeof(SteamManager))]
+    public class SteamManagerPatches
+    {
+        [HarmonyPatch("OnLobbyMemberJoinedCallback")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug(Lobby lobby, Friend friend, SteamManager __instance)
+        {
+            if (__instance.currentLobby.Id != lobby.Id)
+            {
+                return;
+            }
+            //if we own the lobby send the new player the list of our map uuids in order so we can know if we both have the same maps.
+            if (SteamManager.LocalPlayerIsLobbyOwner)
+            {
+                List<int> UUIDs = new List<int>();
+                foreach(string json in Plugin.MetaDataJsons)
+                {
+                    Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(json) as Dictionary<string, object>;
+                    UUIDs.Add(Convert.ToInt32(Meta["MapUUID"]));
+                }
+                NetworkingStuff.MapUUIDsChannel.SendMessage(UUIDs.ToArray());
+            }
         }
     }
 }
