@@ -1262,10 +1262,6 @@ return b");*/
             }
             return Floats;
         }
-        private static void OnGetUUID(int payload, PacketSourceInfo sourceInfo)
-        {
-            Debug.Log($"{sourceInfo.SenderSteamName}: {payload}");
-        }
         public static Spawner CreateSpawner(Vec2 Pos, Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity, UnityEngine.Color color, Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
         {
             var spawner = FixTransform.InstantiateFixed<Spawner>(SpawnerPrefab, Pos);
@@ -2487,31 +2483,32 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 }
                 GameSession.Init();
                 //SceneManager.LoadScene("Level1");
+                Debug.Log("TryStartGame_inner");
+                //its max exsclusive min inclusinve
+                Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+                Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+                var type = Convert.ToString(MetaData["MapType"]);
+                switch (type)
+                {
+                    case "space":
+                        GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                        break;
+                    case "snow":
+                        GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                        break;
+                    default:
+                        GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                        break;
+                }
+                var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+                Plugin.CurrentMapUUID = UUID;
+                SceneManager.LoadScene((int)(6 + GameSession.CurrentLevel()), LoadSceneMode.Single);
                 if (!WinnerTriangleCanvas.HasBeenSpawned)
                 {
                     SceneManager.LoadScene("winnerTriangle", LoadSceneMode.Additive);
                 }
+                Debug.Log(WinnerTriangleCanvas.instance);
             }
-            Debug.Log("TryStartGame_inner");
-            //its max exsclusive min inclusinve
-            Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
-            Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
-            var type = Convert.ToString(MetaData["MapType"]);
-            switch (type)
-            {
-                case "space":
-                    GameSession.currentLevel = (byte)Plugin.SpaceMapId;
-                    break;
-                case "snow":
-                    GameSession.currentLevel = (byte)Plugin.SnowMapId;
-                    break;
-                default:
-                    GameSession.currentLevel = (byte)Plugin.GrassMapId;
-                    break;
-            }
-            var UUID = Convert.ToInt32(MetaData["MapUUID"]);
-            Plugin.CurrentMapUUID = UUID;
-            SceneManager.LoadScene((int)(6 + GameSession.CurrentLevel()), LoadSceneMode.Single);
             return false;
         }
     }
