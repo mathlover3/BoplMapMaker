@@ -38,6 +38,7 @@ namespace MapMaker
     [BepInPlugin("com.MLT.MapLoader", "MapLoader", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
+        public static Plugin instance;
         public static GameObject PlatformAbility;
         public static Transform levelt;
         public static StickyRoundedRectangle platformPrefab;
@@ -86,11 +87,6 @@ namespace MapMaker
         public static readonly int SnowMapId = 21;
         public static readonly int SpaceMapId = 33;
 
-        //networking stuff
-        //public static EntwinedPacketChannel<int> MapUUIDChannel;
-        //public static bool HasRecevedMapUUID = false;
-        //public static StartRequestPacket StartRequestPacket;
-
         //used to make shakeable platform to know its being called by a blink gun.
         public static bool CurrentlyBlinking;
         public enum MapIdCheckerThing
@@ -101,7 +97,8 @@ namespace MapMaker
         }
         private void Awake()
         {
-
+            instance = this;
+            NetworkingStuff.Awake();
             Logger.LogInfo("MapLoader Has been loaded");
             Harmony harmony = new Harmony("com.MLT.MapLoader");
 
@@ -131,27 +128,24 @@ namespace MapMaker
         }
         public void Start()
         {
+
             //fill the MapJsons array up
             ZipArchive[] zipArchives = GetZipArchives();
             //Create a List for the json for a bit
             List<string> JsonList = new List<string>();
             List<string> MetaDataList = new();
-            Debug.Log("line 139");
             foreach (ZipArchive zipArchive in zipArchives)
             {
                 //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
                 MetaDataList.Add(GetFileFromZipArchive(zipArchive, IsMetaDataFile)[0]);
             }
-            Debug.Log("line 146");
             MapJsons = JsonList.ToArray();
             MetaDataJsons = MetaDataList.ToArray();
-            Debug.Log("line 149");
             //find objects
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
             var objectsFound = 0;
             var ObjectsToFind = 4;
-            Debug.Log("line 154");
             foreach (GameObject obj in allObjects)
             {
                 if (obj.name == "invisibleHitbox")
@@ -282,62 +276,64 @@ namespace MapMaker
         //CALL ONLY ON LEVEL LOAD!
         public static void LoadMapsFromFolder()
         {
-            var i = CurrentMapIndex;
-            var mapJson = MapJsons[CurrentMapIndex];
-            try
+            if (MapJsons.Length != 0)
             {
-                Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(MetaDataJsons[i]) as Dictionary<string, object>;
-                if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID)
+                var i = CurrentMapIndex;
+                var mapJson = MapJsons[CurrentMapIndex];
+                try
                 {
-                    Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
-                    SpawnPlatformsFromMap(Dict, i);
-                    if (Dict.ContainsKey("AndGates"))
+                    Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(MetaDataJsons[i]) as Dictionary<string, object>;
+                    if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID)
                     {
-                        MoreJsonParceing.SpawnAndGates((List<object>)Dict["AndGates"]);
-                    }
-                    if (Dict.ContainsKey("OrGates"))
-                    {
-                        MoreJsonParceing.SpawnOrGates((List<object>)Dict["OrGates"]);
-                    }
-                    if (Dict.ContainsKey("NotGates"))
-                    {
-                        MoreJsonParceing.SpawnNotGates((List<object>)Dict["NotGates"]);
-                    }
-                    if (Dict.ContainsKey("DelayGates"))
-                    {
-                        MoreJsonParceing.SpawnDelayGates((List<object>)Dict["DelayGates"]);
-                    }
-                    if (Dict.ContainsKey("Triggers"))
-                    {
-                        MoreJsonParceing.SpawnTriggers((List<object>)Dict["Triggers"]);
-                    }
-                    if (Dict.ContainsKey("ShootBlinks"))
-                    {
-                        MoreJsonParceing.SpawnShootBlinks((List<object>)Dict["ShootBlinks"]);
-                    }
-                    if (Dict.ContainsKey("ShootGrows"))
-                    {
-                        MoreJsonParceing.SpawnShootGrows((List<object>)Dict["ShootGrows"]);
-                    }
-                    if (Dict.ContainsKey("ShootStrinks"))
-                    {
-                        MoreJsonParceing.SpawnShootStrinks((List<object>)Dict["ShootStrinks"]);
-                    }
-                    if (Dict.ContainsKey("Spawners"))
-                    {
-                        MoreJsonParceing.SpawnSpawners((List<object>)Dict["Spawners"]);
-                    }
-                    if (Dict.ContainsKey("LuaGates"))
-                    {
-                        MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
+                        Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
+                        SpawnPlatformsFromMap(Dict, i);
+                        if (Dict.ContainsKey("AndGates"))
+                        {
+                            MoreJsonParceing.SpawnAndGates((List<object>)Dict["AndGates"]);
+                        }
+                        if (Dict.ContainsKey("OrGates"))
+                        {
+                            MoreJsonParceing.SpawnOrGates((List<object>)Dict["OrGates"]);
+                        }
+                        if (Dict.ContainsKey("NotGates"))
+                        {
+                            MoreJsonParceing.SpawnNotGates((List<object>)Dict["NotGates"]);
+                        }
+                        if (Dict.ContainsKey("DelayGates"))
+                        {
+                            MoreJsonParceing.SpawnDelayGates((List<object>)Dict["DelayGates"]);
+                        }
+                        if (Dict.ContainsKey("Triggers"))
+                        {
+                            MoreJsonParceing.SpawnTriggers((List<object>)Dict["Triggers"]);
+                        }
+                        if (Dict.ContainsKey("ShootBlinks"))
+                        {
+                            MoreJsonParceing.SpawnShootBlinks((List<object>)Dict["ShootBlinks"]);
+                        }
+                        if (Dict.ContainsKey("ShootGrows"))
+                        {
+                            MoreJsonParceing.SpawnShootGrows((List<object>)Dict["ShootGrows"]);
+                        }
+                        if (Dict.ContainsKey("ShootStrinks"))
+                        {
+                            MoreJsonParceing.SpawnShootStrinks((List<object>)Dict["ShootStrinks"]);
+                        }
+                        if (Dict.ContainsKey("Spawners"))
+                        {
+                            MoreJsonParceing.SpawnSpawners((List<object>)Dict["Spawners"]);
+                        }
+                        if (Dict.ContainsKey("LuaGates"))
+                        {
+                            MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Failed to load map from json: {mapJson} Error: {ex}");
+                }
             }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Failed to load map from json: {mapJson} Error: {ex}");
-            }
-            i++;
         }
 
         public static void SpawnPlatformsFromMap(Dictionary<string, object> Dict, int index)
@@ -800,7 +796,7 @@ namespace MapMaker
         {
             platformApi.OnSceneLoaded(scene, mode);
             Debug.Log("OnSceneLoaded: " + scene.name);
-            if (IsLevelName(scene.name))
+            if (IsLevelName(scene.name) && MapJsons.Length != 0)
             {
                 //remove all shootrays that are still around as they dont like unloading when the scene unloads for some reson.
                 ShootRay[] allRays = Resources.FindObjectsOfTypeAll(typeof(ShootRay)) as ShootRay[];
@@ -2411,24 +2407,28 @@ BindingFlags.NonPublic | BindingFlags.Static);
         {
             Debug.Log("RandomBagLevel");
             //its max exsclusive min inclusinve
-            Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
-            Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
-            var type = Convert.ToString(MetaData["MapType"]);
-            switch (type)
+            if (Plugin.MapJsons.Length != 0)
             {
-                case "space":
-                    GameSession.currentLevel = (byte)Plugin.SpaceMapId;
-                    break;
-                case "snow":
-                    GameSession.currentLevel = (byte)Plugin.SnowMapId;
-                    break;
-                default:
-                    GameSession.currentLevel = (byte)Plugin.GrassMapId;
-                    break;
+                Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+                Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+                var type = Convert.ToString(MetaData["MapType"]);
+                switch (type)
+                {
+                    case "space":
+                        GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                        break;
+                    case "snow":
+                        GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                        break;
+                    default:
+                        GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                        break;
+                }
+                var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+                Plugin.CurrentMapUUID = UUID;
+                return false;
             }
-            var UUID = Convert.ToInt32(MetaData["MapUUID"]);
-            Plugin.CurrentMapUUID = UUID;
-            return false;
+            return true;
         }
     }
     [HarmonyPatch(typeof(CharacterSelectHandler))]
@@ -2484,25 +2484,30 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 GameSession.Init();
                 //SceneManager.LoadScene("Level1");
                 Debug.Log("TryStartGame_inner");
-                //its max exsclusive min inclusinve
-                Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
-                Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
-                var type = Convert.ToString(MetaData["MapType"]);
-                switch (type)
+                if (Plugin.MapJsons.Length != 0)
                 {
-                    case "space":
-                        GameSession.currentLevel = (byte)Plugin.SpaceMapId;
-                        break;
-                    case "snow":
-                        GameSession.currentLevel = (byte)Plugin.SnowMapId;
-                        break;
-                    default:
-                        GameSession.currentLevel = (byte)Plugin.GrassMapId;
-                        break;
+                    //its max exsclusive min inclusinve
+                    Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+                    Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+                    var type = Convert.ToString(MetaData["MapType"]);
+                    switch (type)
+                    {
+                        case "space":
+                            GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                            break;
+                        case "snow":
+                            GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                            break;
+                        default:
+                            GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                            break;
+                    }
+                    var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+                    Plugin.CurrentMapUUID = UUID;
+                    SceneManager.LoadScene((int)(6 + GameSession.CurrentLevel()), LoadSceneMode.Single);
                 }
-                var UUID = Convert.ToInt32(MetaData["MapUUID"]);
-                Plugin.CurrentMapUUID = UUID;
-                SceneManager.LoadScene((int)(6 + GameSession.CurrentLevel()), LoadSceneMode.Single);
+                else SceneManager.LoadScene("Level1");
+
                 if (!WinnerTriangleCanvas.HasBeenSpawned)
                 {
                     SceneManager.LoadScene("winnerTriangle", LoadSceneMode.Additive);
@@ -2520,24 +2525,29 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static bool Awake_MapMaker_Plug(CharacterSelectHandler_online __instance, ref PlayerColors pcs)
         {
             MonoBehaviour.print("FORCE START GAME");
+            int[] a = { 1, 2 };
+            NetworkingStuff.MapUUIDsChannel.SendMessage(a);
             //its max exsclusive min inclusinve
-            Plugin.CurrentMapIndex = Updater.RandomInt(0, Plugin.MapJsons.Length - 1);
-            Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
-            var type = Convert.ToString(MetaData["MapType"]);
-            switch (type)
+            if (Plugin.MapJsons.Length != 0)
             {
-                case "space":
-                    GameSession.currentLevel = (byte)Plugin.SpaceMapId;
-                    break;
-                case "snow":
-                    GameSession.currentLevel = (byte)Plugin.SnowMapId;
-                    break;
-                default:
-                    GameSession.currentLevel = (byte)Plugin.GrassMapId;
-                    break;
+                Plugin.CurrentMapIndex = Updater.RandomInt(0, Plugin.MapJsons.Length - 1);
+                Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+                var type = Convert.ToString(MetaData["MapType"]);
+                switch (type)
+                {
+                    case "space":
+                        GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                        break;
+                    case "snow":
+                        GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                        break;
+                    default:
+                        GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                        break;
+                }
+                var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+                Plugin.CurrentMapUUID = UUID;
             }
-            var UUID = Convert.ToInt32(MetaData["MapUUID"]);
-            Plugin.CurrentMapUUID = UUID;
             if (pcs == null)
             {
                 pcs = CharacterSelectHandler_online.selfRef.playerColors;
