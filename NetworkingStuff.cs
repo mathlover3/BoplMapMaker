@@ -75,6 +75,9 @@ namespace MapMaker
                 if (UUIDs.ToArray() != payload)
                 {
                     UnityEngine.Debug.LogError("ERROR WE HAVE DIFRENT MAP IDS/MAPS IN DIFRENT ORDERS!");
+                    Plugin.zipArchives = new ZipArchive[0];
+                    Plugin.MapJsons = new string[0];
+                    Plugin.MetaDataJsons = new string[0];
                     DoWeHaveDifrentMapIdsChannel.SendMessage(true);
                 }
                 MapUUIDsReceved = UUIDs;
@@ -99,9 +102,10 @@ namespace MapMaker
             }
         }
 
-        //chatgpt code
+        
         public static byte[] ZipArchiveToByteArray(ZipArchivePacket archive)
         {
+            //chatgpt code
             using (var memoryStream = new MemoryStream())
             {
                 // Create a new ZipArchive in the MemoryStream
@@ -117,6 +121,7 @@ namespace MapMaker
                         }
                     }
                 }
+                //my code
                 var bytes = memoryStream.ToArray().ToList();
                 bytes.AddRange(BitConverter.GetBytes(Plugin.zipArchives.Length));
                 bytes.AddRange(BitConverter.GetBytes(ZipId));
@@ -128,7 +133,6 @@ namespace MapMaker
                 return bytes.ToArray();
             }
         }
-        //chatgpt code
         public static ZipArchivePacket ByteArrayToZipArchive(byte[] byteArray)
         {
             List<byte> bytes = byteArray.ToList();

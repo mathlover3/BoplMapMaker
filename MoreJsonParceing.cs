@@ -200,7 +200,7 @@ namespace MapMaker
             {
                 var inputs = ListOfObjectsToListOfInt((List<object>)gate["InputUUIDs"]);
                 var inputArray = inputs.ToArray();
-                var outputs = ListOfObjectsToListOfInt((List<object>)gate["InputUUIDs"]);
+                var outputs = ListOfObjectsToListOfInt((List<object>)gate["OutputUUIDs"]);
                 var outputArray = outputs.ToArray();
                 var pos = (Dictionary<String, object>)gate["Pos"];
                 var Vec2Pos = new Vec2((Fix)Convert.ToDouble(pos["x"]), (Fix)Convert.ToDouble(pos["y"]));

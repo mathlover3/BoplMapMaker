@@ -56,6 +56,8 @@ namespace MapMaker
         public static string CustomTextureName;
         //all the zipArchives in the same order as the MapJsons
         public static ZipArchive[] zipArchives = { };
+        //my zip archives. not overiten when joining someone else.
+        public static ZipArchive[] MyZipArchives = { };
         public static Sprite sprite;
         public static Material PlatformMat;
         public static GameObject SlimeCamObject;
@@ -796,7 +798,7 @@ namespace MapMaker
         {
             platformApi.OnSceneLoaded(scene, mode);
             Debug.Log("OnSceneLoaded: " + scene.name);
-            if (IsLevelName(scene.name) && MapJsons.Length != 0)
+            if (IsLevelName(scene.name))
             {
                 //remove all shootrays that are still around as they dont like unloading when the scene unloads for some reson.
                 ShootRay[] allRays = Resources.FindObjectsOfTypeAll(typeof(ShootRay)) as ShootRay[];
@@ -805,6 +807,9 @@ namespace MapMaker
                     Destroy(Ray.gameObject);
                     Destroy(Ray);
                 }
+            }
+            if (IsLevelName(scene.name) && MapJsons.Length != 0)
+            {
                 try
                 {
 
@@ -1129,22 +1134,6 @@ return b");*/
             // Open the zip file for reading
             FileStream zipStream = new FileStream(zipFilePath, FileMode.Open);
             ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
-
-            // Iterate through each entry in the zip file
-            /*foreach (ZipArchiveEntry entry in archive.Entries)
-            {
-                // If entry is a directory, skip it
-                if (entry.FullName.EndsWith("/"))
-                    continue;
-
-                // Read the contents of the entry
-                using (StreamReader reader = new StreamReader(entry.Open()))
-                {
-                    string contents = reader.ReadToEnd();
-                    Console.WriteLine($"Contents of {entry.FullName}:");
-                    Console.WriteLine(contents);
-                }
-            }*/
             return archive;
 
         }
@@ -1222,9 +1211,10 @@ return b");*/
             foreach (string zipFile in MapZipFiles)
             {
                 zipArchives = zipArchives.Append(UnzipFile(zipFile)).ToArray();
-
+                
             }
             Debug.Log($"zipArchivesLength is {zipArchives.Length}");
+            MyZipArchives = zipArchives;
             return zipArchives;
 
         }
@@ -2516,6 +2506,12 @@ BindingFlags.NonPublic | BindingFlags.Static);
             }
             return false;
         }
+        [HarmonyPatch("Awake")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug2(CharacterSelectHandler __instance)
+        {
+            GameSessionHandler.LeaveGame(false, false);
+        }
     }
     [HarmonyPatch(typeof(CharacterSelectHandler_online))]
     public class CharacterSelectHandler_onlinePatches
@@ -2528,6 +2524,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
             //its max exsclusive min inclusinve
             if (Plugin.MapJsons.Length != 0)
             {
+                Debug.Log($"we have {Plugin.MapJsons.Length} maps");
                 Plugin.CurrentMapIndex = Updater.RandomInt(0, Plugin.MapJsons.Length - 1);
                 Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
                 var type = Convert.ToString(MetaData["MapType"]);
@@ -2694,6 +2691,30 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 }
                 NetworkingStuff.MapUUIDsChannel.SendMessage(UUIDs.ToArray());
             }
+        }
+    }
+    [HarmonyPatch(typeof(GameSessionHandler))]
+    public class GameSessionHandlerPatches
+    {
+        [HarmonyPatch("LeaveGame")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug(GameSessionHandler __instance)
+        {
+
+            //fill the MapJsons array up
+            ZipArchive[] zipArchives = Plugin.MyZipArchives;
+            Plugin.zipArchives = Plugin.MyZipArchives;
+            //Create a List for the json for a bit
+            List<string> JsonList = new List<string>();
+            List<string> MetaDataList = new();
+            foreach (ZipArchive zipArchive in zipArchives)
+            {
+                //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
+                JsonList.Add(Plugin.GetFileFromZipArchive(zipArchive, Plugin.IsBoplMap)[0]);
+                MetaDataList.Add(Plugin.GetFileFromZipArchive(zipArchive, Plugin.IsMetaDataFile)[0]);
+            }
+            Plugin.MapJsons = JsonList.ToArray();
+            Plugin.MetaDataJsons = MetaDataList.ToArray();
         }
     }
 }
