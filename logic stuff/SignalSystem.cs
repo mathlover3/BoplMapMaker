@@ -270,9 +270,9 @@ namespace MapMaker
 
             foreach (var output in allOutputs)
             {
-                UnityEngine.Debug.Log($"allOutputs has length of {allOutputs.Count}");
+                //UnityEngine.Debug.Log($"allOutputs has length of {allOutputs.Count}");
                 var inputs = GetLogicInputs(output.UUid);
-                UnityEngine.Debug.Log($"LogicInputs for UUid {output.UUid} has length {inputs.Count}");
+                //UnityEngine.Debug.Log($"LogicInputs for UUid {output.UUid} has length {inputs.Count}");
                 foreach (var input in inputs)
                 {
                     if (input.inputs == null)
@@ -280,7 +280,7 @@ namespace MapMaker
                         UnityEngine.Debug.Log($"input.inputs IS NULL!");
                     }
                     input.inputs.Add(output);
-                    UnityEngine.Debug.Log($"added output to inputs");
+                    //UnityEngine.Debug.Log($"added output to inputs");
                     //they have the same UUid so lets just get them both out of the way in one fail swoop.
                     output.outputs.Add(input);
                     GameObject LineRendererGameObject = new GameObject("LineRenderer");
@@ -306,7 +306,7 @@ namespace MapMaker
                         
                     }
 
-                    UnityEngine.Debug.Log($"added input to outputs");
+                    //UnityEngine.Debug.Log($"added input to outputs");
 
                 }
             }

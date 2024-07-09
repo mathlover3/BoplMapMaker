@@ -20,6 +20,7 @@ namespace MapMaker
         public static List<int> MapUUIDsReceved = new();
         public static EntwinedPacketChannel<bool> DoWeHaveDifrentMapIdsChannel;
         public static EntwinedPacketChannel<ZipArchivePacket> ZipChannel;
+        public static EntwinedPacketChannel<BetterStartRequestPacket> StartChannel;
         public static bool HasResetListsYet = false;
         public static int NumberOfZipsReceved = 0;
         public static int ZipId = 0;
@@ -34,6 +35,9 @@ namespace MapMaker
             var entwinerZip = new GenericEntwiner<ZipArchivePacket>(ZipArchiveToByteArray, ByteArrayToZipArchive);
             ZipChannel = new EntwinedPacketChannel<ZipArchivePacket>(Plugin.instance, entwinerZip);
             ZipChannel.OnMessage += OnZipArchive;
+            var entwinerStart = new GenericEntwiner<BetterStartRequestPacket>(BetterStartRequestPacketToByteArray, ByteArrayToBetterStartRequestPacket);
+            StartChannel = new EntwinedPacketChannel<BetterStartRequestPacket>(Plugin.instance, entwinerStart);
+            StartChannel.OnMessage += OnStartPacket;
         }
         public static byte[] IntArrayToBytes(int[] array)
         {
@@ -139,11 +143,23 @@ namespace MapMaker
             bytes.RemoveRange(bytes.Count - 8, 8);
             byte[] data = bytes.ToArray();
             var memoryStream = new MemoryStream(data);
+            //https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/how-to-convert-a-byte-array-to-an-int
+            // If the system architecture is little-endian (that is, little end first),
+            // reverse the byte array.
+            byte[] bytes2 = { byteArray[byteArray.Length - 8], byteArray[byteArray.Length - 7], byteArray[byteArray.Length - 6], byteArray[byteArray.Length - 5] };
+            byte[] bytes3 = { byteArray[byteArray.Length - 4], byteArray[byteArray.Length - 3], byteArray[byteArray.Length - 2], byteArray[byteArray.Length - 1] };
+            //idk why but the microsoft exsample is backwords?
+            if (!BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes2);
+                Array.Reverse(bytes3);
+            }
             var zipPacket = new ZipArchivePacket
             {
                 zip = new ZipArchive(memoryStream, ZipArchiveMode.Read),
-                length = BitConverter.ToInt32(byteArray, byteArray.Length - 8),
-                id = BitConverter.ToInt32(byteArray, byteArray.Length - 4)
+
+                length = BitConverter.ToInt32(bytes2, 0),
+                id = BitConverter.ToInt32(bytes3, 0)
             };
             return zipPacket;
         }
@@ -172,11 +188,75 @@ namespace MapMaker
                 }
             }
         }
+
+        public static byte[] BetterStartRequestPacketToByteArray(BetterStartRequestPacket BetterStartRequest)
+        {
+            StartRequestPacket startRequest = BetterStartRequest.startRequest;
+            byte[] buff = new byte[105];
+            NetworkTools.EncodeStartRequest(ref buff, startRequest);
+            List<byte> packet = buff.ToList();
+            Plugin.CurrentMapIndex = BetterStartRequest.MapIndex;
+            packet.AddRange(BitConverter.GetBytes(BetterStartRequest.MapIndex));
+            return packet.ToArray();
+        }
+        public static BetterStartRequestPacket ByteArrayToBetterStartRequestPacket(byte[] bytes)
+        {
+            List<byte> bytes2 = bytes.ToList();
+            bytes2.RemoveRange(bytes2.Count - 4, 4);
+            var uintConversionArray = new byte[4];
+            var ulongConversionArray = new byte[8];
+            var ushortConversionArray = new byte[8];
+            StartRequestPacket startRequest = NetworkTools.ReadStartRequest(bytes2.ToArray(), ref uintConversionArray, ref ulongConversionArray, ref ushortConversionArray);
+            byte[] bytes3 = { bytes[bytes.Length - 4], bytes[bytes.Length - 3], bytes[bytes.Length - 2], bytes[bytes.Length - 1] };
+            if (!BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes3);
+            }
+            var MapIndex = BitConverter.ToInt32(bytes3, 0);
+            UnityEngine.Debug.Log($"MapIndex is {MapIndex}");
+            var betterStartRequestPacket = new BetterStartRequestPacket
+            {
+                startRequest = startRequest,
+                MapIndex = MapIndex
+            };
+            return betterStartRequestPacket;
+        }
+        public static void OnStartPacket(BetterStartRequestPacket payload, PacketSourceInfo sourceInfo)
+        {
+            if (SteamManager.instance.currentLobby.IsOwnedBy(sourceInfo.Identity.SteamId))
+            {
+                SteamManager.startParameters = payload.startRequest;
+                Plugin.CurrentMapIndex = payload.MapIndex;
+                if (SteamManager.instance.currentLobby.IsOwnedBy(sourceInfo.Identity.SteamId))
+                {
+                    SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);
+                    UnityEngine.Debug.Log(string.Concat(new object[]
+                    {
+                "FORCESTARTGAME: connectedPlayerCount = ",
+                SteamManager.instance.connectedPlayers.Count,
+                " packet from ",
+                sourceInfo.Identity.SteamId
+                    }));
+                    if (GameSession.inMenus)
+                    {
+                        CharacterSelectHandler_online.ForceStartGame(null);
+                        return;
+                    }
+                    SteamManager.ForceLoadNextLevel();
+                    return;
+                }
+            }
+        }
     }
     public struct ZipArchivePacket
     {
         public ZipArchive zip;
         public int length;
         public int id;
+    }
+    public struct BetterStartRequestPacket
+    {
+        public StartRequestPacket startRequest;
+        public int MapIndex;
     }
 }

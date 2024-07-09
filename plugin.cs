@@ -85,6 +85,9 @@ namespace MapMaker
         public static SignalSystem signalSystem;
         public static int NextUUID = 0;
 
+        //used to fix a unity bug
+        public static PlayerAverageCamera averageCamera;
+        public static ShakableCamera shakableCamera;
         public static readonly int GrassMapId = 0;
         public static readonly int SnowMapId = 21;
         public static readonly int SpaceMapId = 33;
@@ -2525,9 +2528,10 @@ BindingFlags.NonPublic | BindingFlags.Static);
             if (Plugin.MapJsons.Length != 0)
             {
                 Debug.Log($"we have {Plugin.MapJsons.Length} maps");
-                Plugin.CurrentMapIndex = Updater.RandomInt(0, Plugin.MapJsons.Length - 1);
+                Debug.Log($"map index is {Plugin.CurrentMapIndex}");
                 Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
                 var type = Convert.ToString(MetaData["MapType"]);
+                Debug.Log("getting map type");
                 switch (type)
                 {
                     case "space":
@@ -2542,11 +2546,14 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 }
                 var UUID = Convert.ToInt32(MetaData["MapUUID"]);
                 Plugin.CurrentMapUUID = UUID;
+                
             }
+            Debug.Log("line 2549");
             if (pcs == null)
             {
                 pcs = CharacterSelectHandler_online.selfRef.playerColors;
             }
+            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
             StartRequestPacket startParameters = SteamManager.startParameters;
             Updater.ReInit();
             List<Player> list = new List<Player>();
@@ -2692,6 +2699,131 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 NetworkingStuff.MapUUIDsChannel.SendMessage(UUIDs.ToArray());
             }
         }
+        [HarmonyPatch("OnLevelWasLoaded")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(int level, SteamManager __instance)
+        {
+            __instance.networkClient = Host.host;
+            return false;
+        }
+        [HarmonyPatch("HostGame")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug2(PlayerInit hostPlayer, SteamManager __instance)
+        {
+            Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+            __instance.currentLobby.SetData("LFM", "0");
+            __instance.currentLobby.SetFriendsOnly();
+            __instance.currentLobby.SetJoinable(false);
+            SteamManager.startParameters = default(StartRequestPacket);
+            ushort num = __instance.nextStartGameSeq;
+            __instance.nextStartGameSeq = (ushort)(num + 1);
+            SteamManager.startParameters.seqNum = num;
+            SteamManager.startParameters.nrOfPlayers = (byte)(__instance.connectedPlayers.Count + 1);
+            SteamManager.startParameters.nrOfAbilites = (byte)Settings.Get().NumberOfAbilities;
+            SteamManager.startParameters.currentLevel = GameSession.CurrentLevel();
+            SteamManager.startParameters.seed = (uint)Environment.TickCount;
+            SteamManager.startParameters.p1_id = SteamClient.SteamId;
+            SteamManager.startParameters.p1_team = (byte)hostPlayer.team;
+            SteamManager.startParameters.p1_color = (byte)hostPlayer.color;
+            SteamManager.startParameters.p1_ability1 = (byte)hostPlayer.ability0;
+            SteamManager.startParameters.p1_ability2 = (byte)hostPlayer.ability1;
+            SteamManager.startParameters.p1_ability3 = (byte)hostPlayer.ability2;
+            if (__instance.connectedPlayers.Count > 0)
+            {
+                SteamManager.startParameters.p2_id = __instance.connectedPlayers[0].id;
+                SteamManager.startParameters.p2_team = __instance.connectedPlayers[0].lobby_team;
+                SteamManager.startParameters.p2_color = (byte)__instance.connectedPlayers[0].lobby_color;
+                SteamManager.startParameters.p2_ability1 = __instance.connectedPlayers[0].lobby_ability1;
+                SteamManager.startParameters.p2_ability2 = __instance.connectedPlayers[0].lobby_ability2;
+                SteamManager.startParameters.p2_ability3 = __instance.connectedPlayers[0].lobby_ability3;
+            }
+            if (__instance.connectedPlayers.Count > 1)
+            {
+                SteamManager.startParameters.p3_id = __instance.connectedPlayers[1].id;
+                SteamManager.startParameters.p3_team = __instance.connectedPlayers[1].lobby_team;
+                SteamManager.startParameters.p3_color = (byte)__instance.connectedPlayers[1].lobby_color;
+                SteamManager.startParameters.p3_ability1 = __instance.connectedPlayers[1].lobby_ability1;
+                SteamManager.startParameters.p3_ability2 = __instance.connectedPlayers[1].lobby_ability2;
+                SteamManager.startParameters.p3_ability3 = __instance.connectedPlayers[1].lobby_ability3;
+            }
+            if (__instance.connectedPlayers.Count > 2)
+            {
+                SteamManager.startParameters.p4_id = __instance.connectedPlayers[2].id;
+                SteamManager.startParameters.p4_team = __instance.connectedPlayers[2].lobby_team;
+                SteamManager.startParameters.p4_color = (byte)__instance.connectedPlayers[2].lobby_color;
+                SteamManager.startParameters.p4_ability1 = __instance.connectedPlayers[2].lobby_ability1;
+                SteamManager.startParameters.p4_ability2 = __instance.connectedPlayers[2].lobby_ability2;
+                SteamManager.startParameters.p4_ability3 = __instance.connectedPlayers[2].lobby_ability3;
+            }
+            byte b = (byte)(SteamManager.instance.dlc.HasDLC() ? 1 : 0);
+            for (int i = 0; i < __instance.connectedPlayers.Count; i++)
+            {
+                if (__instance.connectedPlayers[i].ownsFullGame)
+                {
+                    b = (byte)((int)b | 1 << i + 1);
+                }
+            }
+            SteamManager.startParameters.isDemoMask = b;
+            SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);
+            var betterStartRequestPacket = new BetterStartRequestPacket
+            {
+                startRequest = SteamManager.startParameters,
+                MapIndex = Plugin.CurrentMapIndex
+            };
+            NetworkingStuff.StartChannel.SendMessage(betterStartRequestPacket);
+            return false;
+        }
+        [HarmonyPatch("HostNextLevel")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug2(Player hostPlayer, NamedSpriteList abilityIcons, SteamManager __instance)
+        {
+            Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+            GameSession.CurrentLevel();
+            SteamManager.startParameters.frameBufferSize = (byte)Host.CurrentDelayBufferSize;
+            SteamManager.startParameters.seed = (uint)Environment.TickCount;
+            SteamManager.startParameters.nrOfPlayers = (byte)(__instance.connectedPlayers.Count + 1);
+            Debug.Log($"nrOfPlayers is {SteamManager.startParameters.nrOfPlayers}");
+            SteamManager.startParameters.currentLevel = GameSession.CurrentLevel();
+            SteamManager.startParameters.p1_ability1 = (byte)abilityIcons.IndexOf(hostPlayer.Abilities[0].name);
+            if (Settings.Get().NumberOfAbilities > 1)
+            {
+                SteamManager.startParameters.p1_ability2 = (byte)abilityIcons.IndexOf(hostPlayer.Abilities[1].name);
+            }
+            if (Settings.Get().NumberOfAbilities > 2)
+            {
+                SteamManager.startParameters.p1_ability3 = (byte)abilityIcons.IndexOf(hostPlayer.Abilities[2].name);
+            }
+            if (__instance.connectedPlayers.Count > 0)
+            {
+                SteamManager.startParameters.p2_ability1 = __instance.connectedPlayers[0].lobby_ability1;
+                SteamManager.startParameters.p2_ability2 = __instance.connectedPlayers[0].lobby_ability2;
+                SteamManager.startParameters.p2_ability3 = __instance.connectedPlayers[0].lobby_ability3;
+            }
+            if (__instance.connectedPlayers.Count > 1)
+            {
+                SteamManager.startParameters.p3_ability1 = __instance.connectedPlayers[1].lobby_ability1;
+                SteamManager.startParameters.p3_ability2 = __instance.connectedPlayers[1].lobby_ability2;
+                SteamManager.startParameters.p3_ability3 = __instance.connectedPlayers[1].lobby_ability3;
+            }
+            if (__instance.connectedPlayers.Count > 2)
+            {
+                SteamManager.startParameters.p4_ability1 = __instance.connectedPlayers[2].lobby_ability1;
+                SteamManager.startParameters.p4_ability2 = __instance.connectedPlayers[2].lobby_ability2;
+                SteamManager.startParameters.p4_ability3 = __instance.connectedPlayers[2].lobby_ability3;
+            }
+            SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);
+            for (int i = 0; i < __instance.connectedPlayers.Count; i++)
+            {
+                __instance.connectedPlayers[i].Connection.SendMessage(__instance.startRequestBuffer, SendType.Reliable);
+            }
+            var betterStartRequestPacket = new BetterStartRequestPacket
+            {
+                startRequest = SteamManager.startParameters,
+                MapIndex = Plugin.CurrentMapIndex
+            };
+            NetworkingStuff.StartChannel.SendMessage(betterStartRequestPacket);
+            return false;
+        }
     }
     [HarmonyPatch(typeof(GameSessionHandler))]
     public class GameSessionHandlerPatches
@@ -2700,7 +2832,8 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         private static void Awake_MapMaker_Plug(GameSessionHandler __instance)
         {
-
+            Debug.Log($"number of players is {SteamManager.startParameters.nrOfPlayers}");
+            throw new NotImplementedException();
             //fill the MapJsons array up
             ZipArchive[] zipArchives = Plugin.MyZipArchives;
             Plugin.zipArchives = Plugin.MyZipArchives;
@@ -2715,6 +2848,143 @@ BindingFlags.NonPublic | BindingFlags.Static);
             }
             Plugin.MapJsons = JsonList.ToArray();
             Plugin.MetaDataJsons = MetaDataList.ToArray();
+        }
+        [HarmonyPatch("AnimateOutLevel")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug2(GameSessionHandler __instance)
+        {
+            //idk why but unity crashes when it calls FindObjectOfType sometimes when online so this should hopefuly fix that.
+            Plugin.averageCamera.enabled = false;
+            for (int i = 0; i < __instance.grounds.Length; i++)
+            {
+                if (!(__instance.grounds[i] == null) && !__instance.grounds[i].IsDestroyed)
+                {
+                    AnimateVelocity component = __instance.grounds[i].ThisGameObject().GetComponent<AnimateVelocity>();
+                    if (component != null)
+                    {
+                        component.enabled = false;
+                    }
+                }
+            }
+            for (int j = 0; j < __instance.startPositions.Length; j++)
+            {
+                if (!(__instance.grounds[j] == null) && !__instance.grounds[j].IsDestroyed)
+                {
+                    __instance.targetPositions[j] = __instance.grounds[j].GetComponent<FixTransform>().position;
+                }
+            }
+            for (int k = 0; k < __instance._playedArrivalSound.Length; k++)
+            {
+                __instance._playedArrivalSound[k] = false;
+            }
+            __instance._t = __instance.startProgressOfAnimateInGrounds;
+            __instance.levelAnimationRoutine.WhileLoop(new Func<Fix, bool>(__instance.AnimateOutLoop));
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAverageCamera))]
+    public class PlayerAverageCameraPatches
+    {
+        [HarmonyPatch("Start")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug(PlayerAverageCamera __instance)
+        {
+            Plugin.averageCamera = __instance;
+        }
+    }
+    [HarmonyPatch(typeof(Host))]
+    public class HostPatches
+    {
+        [HarmonyPatch("Start")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug(Host __instance)
+        {
+            Host.host = __instance;
+            Debug.Log($"host is {__instance.gameObject.name}");
+        }
+        [HarmonyPatch("Init")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug2(Host __instance)
+        {
+            try
+            {
+                Debug.Log(__instance.gameObject.name);
+            }
+            catch
+            {
+                Debug.LogError("Host isnt on a gameobject????");
+            }
+            //throw new NotImplementedException();
+        }
+    }
+    [HarmonyPatch(typeof(ShakableCamera))]
+    public class ShakableCameraPatches
+    {
+        [HarmonyPatch("Start")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug(ShakableCamera __instance)
+        {
+            Plugin.shakableCamera = __instance;
+        }
+    }
+    [HarmonyPatch(typeof(Beam))]
+    public class BeamPatches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(Beam __instance)
+        {
+            Updater.RegisterUpdatable(__instance);
+            __instance.animator = __instance.GetComponent<SpriteAnimator>();
+            __instance.spriteRen = __instance.GetComponent<SpriteRenderer>();
+            __instance.body = __instance.GetComponent<PlayerBody>();
+            __instance.ability = __instance.GetComponent<Ability>();
+            __instance.physics = __instance.GetComponent<PlayerPhysics>();
+            __instance.shakeCam = Plugin.shakableCamera;
+            __instance.hurtbox = __instance.GetComponent<DPhysicsBox>();
+            __instance.origFixTransOffset = __instance.GetComponent<FixTransform>().offset;
+            __instance.origExtents = __instance.hurtbox.CalcExtents();
+            __instance.physics.OnAttachedToGround += __instance.OnGrounded;
+            __instance.physics.OnNoLongerGrounded += __instance.OnUngrounded;
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(ControlPlatform))]
+    public class ControlPlatformPatches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(ControlPlatform __instance)
+        {
+            Updater.RegisterUpdatable(__instance);
+            __instance.animator = __instance.GetComponent<SpriteAnimator>();
+            __instance.spriteRen = __instance.GetComponent<SpriteRenderer>();
+            __instance.body = __instance.GetComponent<PlayerBody>();
+            __instance.ability = __instance.GetComponent<Ability>();
+            __instance.physics = __instance.GetComponent<PlayerPhysics>();
+            __instance.shakeCam = Plugin.shakableCamera;
+            __instance.hurtbox = __instance.GetComponent<DPhysicsBox>();
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(CastSpell))]
+    public class CastSpellPatches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CastSpell __instance)
+        {
+            Updater.RegisterUpdatable(__instance);
+            __instance.playerCol = __instance.GetComponent<PlayerCollision>();
+            __instance.animator = __instance.GetComponent<SpriteAnimator>();
+            __instance.spriteRen = __instance.GetComponent<SpriteRenderer>();
+            __instance.body = __instance.GetComponent<PlayerBody>();
+            __instance.ability = __instance.GetComponent<Ability>();
+            __instance.physics = __instance.GetComponent<PlayerPhysics>();
+            __instance.bigCollider = __instance.GetComponent<DPhysicsCircle>();
+            __instance.shakeCam = Plugin.shakableCamera;
+            __instance.fixTrans = __instance.GetComponent<FixTransform>();
+            return false;
         }
     }
 }
