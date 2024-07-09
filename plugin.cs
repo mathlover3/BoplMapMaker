@@ -88,6 +88,9 @@ namespace MapMaker
         //used to fix a unity bug
         public static PlayerAverageCamera averageCamera;
         public static ShakableCamera shakableCamera;
+        //make it a weak refrence?
+        public static List<PlayerInput> playerInputs = new();
+        //map ids
         public static readonly int GrassMapId = 0;
         public static readonly int SnowMapId = 21;
         public static readonly int SpaceMapId = 33;
@@ -2833,7 +2836,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static void Awake_MapMaker_Plug(GameSessionHandler __instance)
         {
             Debug.Log($"number of players is {SteamManager.startParameters.nrOfPlayers}");
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
             //fill the MapJsons array up
             ZipArchive[] zipArchives = Plugin.MyZipArchives;
             Plugin.zipArchives = Plugin.MyZipArchives;
@@ -2984,6 +2987,116 @@ BindingFlags.NonPublic | BindingFlags.Static);
             __instance.bigCollider = __instance.GetComponent<DPhysicsCircle>();
             __instance.shakeCam = Plugin.shakableCamera;
             __instance.fixTrans = __instance.GetComponent<FixTransform>();
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(InputUpdater))]
+    public class InputUpdaterPatches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPostfix]
+        private static void Awake_MapMaker_Plug(InputUpdater __instance)
+        {
+            Plugin.playerInputs.Add(__instance.gameObject.GetComponent<PlayerInput>());
+        }
+    }
+    [HarmonyPatch(typeof(CursorUpdater))]
+    public class CursorUpdaterPatches
+    {
+        [HarmonyPatch("initialize")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(CursorUpdater __instance)
+        {
+            if (__instance.alwaysHideCursorInstead)
+            {
+                Cursor.SetCursor(null, Vector2.one / 2f, CursorMode.Auto);
+                Cursor.visible = false;
+                return false;
+            }
+            if (!Cursor.visible)
+            {
+                Cursor.visible = true;
+            }
+            //clean up the input list
+            List<PlayerInput> inputs = new();
+            foreach (var input in Plugin.playerInputs)
+            {
+                if (input != null)
+                {
+                    inputs.Add(input);
+                }
+            }
+            Plugin.playerInputs = inputs;
+            PlayerInput[] array = inputs.ToArray();
+            if (array.Length == 0)
+            {
+                __instance.SetCursor(__instance.defaultCursorColor);
+                return false;
+            }
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i].currentControlScheme.Equals("KeyboardAndMouse"))
+                {
+                    int claimerId = array[i].GetComponent<InputUpdater>().GetClaimerId();
+                    Player player = PlayerHandler.Get().GetPlayer(claimerId);
+                    if (player != null)
+                    {
+                        UnityEngine.Color color = player.Color.GetColor("_ShadowColor");
+                        __instance.SetCursor(color);
+                    }
+                    return false;
+                }
+            }
+            return false;
+        }
+    }
+    [HarmonyPatch(typeof(MenuAbilitySelector))]
+    public class MenuAbilitySelectorPatches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPrefix]
+        private static bool Awake_MapMaker_Plug(MenuAbilitySelector __instance)
+        {
+            __instance.mgas = __instance.GetComponent<MidGameAbilitySelect>();
+            List<Player> list = new List<Player>();
+            list.Add(new Player(1, 1));
+            PlayerHandler.Get().SetPlayerList(list);
+            List<GameObject> list2 = new List<GameObject>();
+            list2.Add(__instance.mgas.AbilityIcons.sprites[0].associatedGameObject);
+            list2.Add(__instance.mgas.AbilityIcons.sprites[1].associatedGameObject);
+            list2.Add(__instance.mgas.AbilityIcons.sprites[2].associatedGameObject);
+            list[0].Abilities = list2;
+            List<Sprite> list3 = new List<Sprite>();
+            list3.Add(__instance.mgas.AbilityIcons.sprites[0].sprite);
+            list3.Add(__instance.mgas.AbilityIcons.sprites[1].sprite);
+            list3.Add(__instance.mgas.AbilityIcons.sprites[2].sprite);
+            list[0].AbilityIcons = list3;
+            __instance.mgas.SetPlayer(1);
+            __instance.playerId = 1;
+            //clean up the input list
+            List<PlayerInput> inputs = new();
+            foreach (var input in Plugin.playerInputs)
+            {
+                if (input != null)
+                {
+                    inputs.Add(input);
+                }
+            }
+            Plugin.playerInputs = inputs;
+            //get the InputUpdaters 
+            List<InputUpdater> updaters = new();
+            foreach (var input in inputs)
+            {
+                updaters.Add(input.gameObject.GetComponent<InputUpdater>());
+            }
+            InputUpdater[] array = updaters.ToArray();
+            //InputUpdater[] array = UnityEngine.Object.FindObjectsOfType<InputUpdater>();
+            int num = 0;
+            while (num < array.Length && num < list.Count)
+            {
+                array[num].Init(list[num].Id);
+                num++;
+            }
             return false;
         }
     }
