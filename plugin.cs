@@ -2551,7 +2551,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 Plugin.CurrentMapUUID = UUID;
                 
             }
-            Debug.Log("line 2549");
             if (pcs == null)
             {
                 pcs = CharacterSelectHandler_online.selfRef.playerColors;
@@ -2815,10 +2814,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
                 SteamManager.startParameters.p4_ability3 = __instance.connectedPlayers[2].lobby_ability3;
             }
             SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);
-            for (int i = 0; i < __instance.connectedPlayers.Count; i++)
-            {
-                __instance.connectedPlayers[i].Connection.SendMessage(__instance.startRequestBuffer, SendType.Reliable);
-            }
             var betterStartRequestPacket = new BetterStartRequestPacket
             {
                 startRequest = SteamManager.startParameters,
