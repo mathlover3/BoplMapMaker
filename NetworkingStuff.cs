@@ -195,7 +195,6 @@ namespace MapMaker
             byte[] buff = new byte[105];
             NetworkTools.EncodeStartRequest(ref buff, startRequest);
             List<byte> packet = buff.ToList();
-            Plugin.CurrentMapIndex = BetterStartRequest.MapIndex;
             packet.AddRange(BitConverter.GetBytes(BetterStartRequest.MapIndex));
             return packet.ToArray();
         }
@@ -227,6 +226,29 @@ namespace MapMaker
             {
                 SteamManager.startParameters = payload.startRequest;
                 Plugin.CurrentMapIndex = payload.MapIndex;
+                //its max exsclusive min inclusinve
+                if (Plugin.MapJsons.Length != 0)
+                {
+                    UnityEngine.Debug.Log($"we have {Plugin.MapJsons.Length} maps");
+                    UnityEngine.Debug.Log($"map index is {Plugin.CurrentMapIndex}");
+                    Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+                    var type = Convert.ToString(MetaData["MapType"]);
+                    UnityEngine.Debug.Log("getting map type");
+                    switch (type)
+                    {
+                        case "space":
+                            GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                            break;
+                        case "snow":
+                            GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                            break;
+                        default:
+                            GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                            break;
+                    }
+                    var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+                    Plugin.CurrentMapUUID = UUID;
+                }
                 if (SteamManager.instance.currentLobby.IsOwnedBy(sourceInfo.Identity.SteamId))
                 {
                     SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);

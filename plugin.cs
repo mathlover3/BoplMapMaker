@@ -2527,30 +2527,6 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static bool Awake_MapMaker_Plug(CharacterSelectHandler_online __instance, ref PlayerColors pcs)
         {
             MonoBehaviour.print("FORCE START GAME");
-            //its max exsclusive min inclusinve
-            if (Plugin.MapJsons.Length != 0)
-            {
-                Debug.Log($"we have {Plugin.MapJsons.Length} maps");
-                Debug.Log($"map index is {Plugin.CurrentMapIndex}");
-                Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
-                var type = Convert.ToString(MetaData["MapType"]);
-                Debug.Log("getting map type");
-                switch (type)
-                {
-                    case "space":
-                        GameSession.currentLevel = (byte)Plugin.SpaceMapId;
-                        break;
-                    case "snow":
-                        GameSession.currentLevel = (byte)Plugin.SnowMapId;
-                        break;
-                    default:
-                        GameSession.currentLevel = (byte)Plugin.GrassMapId;
-                        break;
-                }
-                var UUID = Convert.ToInt32(MetaData["MapUUID"]);
-                Plugin.CurrentMapUUID = UUID;
-                
-            }
             if (pcs == null)
             {
                 pcs = CharacterSelectHandler_online.selfRef.playerColors;
@@ -2713,6 +2689,29 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static bool Awake_MapMaker_Plug2(PlayerInit hostPlayer, SteamManager __instance)
         {
             Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+            //its max exsclusive min inclusinve
+            if (Plugin.MapJsons.Length != 0)
+            {
+                UnityEngine.Debug.Log($"we have {Plugin.MapJsons.Length} maps");
+                UnityEngine.Debug.Log($"map index is {Plugin.CurrentMapIndex}");
+                Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+                var type = Convert.ToString(MetaData["MapType"]);
+                UnityEngine.Debug.Log("getting map type");
+                switch (type)
+                {
+                    case "space":
+                        GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                        break;
+                    case "snow":
+                        GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                        break;
+                    default:
+                        GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                        break;
+                }
+                var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+                Plugin.CurrentMapUUID = UUID;
+            }
             __instance.currentLobby.SetData("LFM", "0");
             __instance.currentLobby.SetFriendsOnly();
             __instance.currentLobby.SetJoinable(false);
@@ -2780,6 +2779,29 @@ BindingFlags.NonPublic | BindingFlags.Static);
         private static bool Awake_MapMaker_Plug2(Player hostPlayer, NamedSpriteList abilityIcons, SteamManager __instance)
         {
             Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+            //its max exsclusive min inclusinve
+            if (Plugin.MapJsons.Length != 0)
+            {
+                UnityEngine.Debug.Log($"we have {Plugin.MapJsons.Length} maps");
+                UnityEngine.Debug.Log($"map index is {Plugin.CurrentMapIndex}");
+                Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
+                var type = Convert.ToString(MetaData["MapType"]);
+                UnityEngine.Debug.Log("getting map type");
+                switch (type)
+                {
+                    case "space":
+                        GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                        break;
+                    case "snow":
+                        GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                        break;
+                    default:
+                        GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                        break;
+                }
+                var UUID = Convert.ToInt32(MetaData["MapUUID"]);
+                Plugin.CurrentMapUUID = UUID;
+            }
             GameSession.CurrentLevel();
             SteamManager.startParameters.frameBufferSize = (byte)Host.CurrentDelayBufferSize;
             SteamManager.startParameters.seed = (uint)Environment.TickCount;
