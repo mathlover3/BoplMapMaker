@@ -2897,8 +2897,12 @@ BindingFlags.NonPublic | BindingFlags.Static);
         [HarmonyPostfix]
         private static void Awake_MapMaker_Plug(Host __instance)
         {
-            Host.host = __instance;
-            Debug.Log($"host is {__instance.gameObject.name}");
+            if (__instance.gameObject.scene.name == "DontDestroyOnLoad")
+            {
+                Host.host = __instance;
+                Debug.Log($"host is {__instance.gameObject.name}");
+            }
+
         }
         [HarmonyPatch("Init")]
         [HarmonyPostfix]
