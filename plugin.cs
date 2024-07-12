@@ -125,7 +125,7 @@ namespace MapMaker
                 Debug.Log("Maps folder created.");
             }
             //thanks almafa64 on discord for the path stuff.
-            MyAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/assetbundle");
+            MyAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakerassets");
             string[] assetNames = MyAssetBundle.GetAllAssetNames();
             //MapUUIDChannel = new EntwinedPacketChannel<int>(this, new IntEntwiner());
             //MapUUIDChannel.OnMessage += OnGetUUID; 
