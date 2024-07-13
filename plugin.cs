@@ -60,6 +60,7 @@ namespace MapMaker
         public static ZipArchive[] MyZipArchives = { };
         public static Sprite sprite;
         public static Material PlatformMat;
+        public static Material GrassMat;
         public static GameObject SlimeCamObject;
         public static List<Drill.PlatformColors> CustomDrillColors;
         public static List<NamedSprite> CustomMatchoManSprites;
@@ -90,6 +91,7 @@ namespace MapMaker
         public static ShakableCamera shakableCamera;
         //make it a weak refrence?
         public static List<PlayerInput> playerInputs = new();
+        private static bool GettingGrassMat = false;
         //map ids
         public static readonly int GrassMapId = 0;
         public static readonly int SnowMapId = 21;
@@ -727,6 +729,16 @@ namespace MapMaker
                         //rotate object
                         StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
                         StickyRect.GetGroundBody().rotation = FloorToThousandnths((double)rotatson);
+                        //fix mats
+                        foreach (Transform t in Platform.transform)
+                        {
+                            //if its a grass
+                            if (t.gameObject.name == "AnimatedGrass_0" || t.gameObject.name == "AnimatedGrass_0 (2)" || t.gameObject.name == "AnimatedGrass_0 (3)" || t.gameObject.name == "AnimatedGrass")
+                            {
+                                //set its mat
+                                t.gameObject.GetComponent<SpriteRenderer>().material = GrassMat;
+                            }
+                        }
                         if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                         {
                             //antilock platform
@@ -1103,6 +1115,21 @@ return b");*/
                     {
                         //steal matual 
                         PlatformMat = tplatform.gameObject.GetComponent<SpriteRenderer>().material;
+                        //TODO: if its null and this isnt a grass map get it some outer way? idk how but do it!
+                        if (GrassMat == null)
+                        {
+                            //this will give a grass object if this is a grass map
+                            var grass = tplatform.GetChild(1);
+                            //if it is a grass object
+                            if (grass != null && grass.gameObject.name == "AnimatedGrass_0")
+                            {
+                                GrassMat = grass.gameObject.GetComponent<SpriteRenderer>().material;
+                            }
+                            else
+                            {
+
+                            }
+                        }
                     }
                     index++;
                     //distroy it
