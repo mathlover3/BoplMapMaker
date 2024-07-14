@@ -124,7 +124,7 @@ namespace MapMaker.Lua_stuff
             SmokeGrenade,
             Explosion
         }
-        public static void SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
+        public static BoplBody SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(arrow, pos);
             boplBody.Scale = scale;
@@ -132,6 +132,7 @@ namespace MapMaker.Lua_stuff
             boplBody.rotation = CalculateAngle(StartVel);
             boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
             boplBody.GetComponent<SpriteRenderer>().color = color;
+            return boplBody;
         }
         //modifyed chatgpt code
         public static Fix CalculateAngle(Vec2 vec2)
@@ -155,7 +156,7 @@ namespace MapMaker.Lua_stuff
 
             return angleDegrees;
         }
-        public static void SpawnGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
+        public static BoplBody SpawnGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(grenade, pos, angle);
             boplBody.Scale = scale;
@@ -175,6 +176,7 @@ namespace MapMaker.Lua_stuff
                     dphysicsCircle.ManualInit();
                 }
             }
+            return boplBody;
         }
         public static void SpawnAbilityPickup(Vec2 pos, Fix scale, Vec2 StartVel)
         {
@@ -184,7 +186,7 @@ namespace MapMaker.Lua_stuff
             var body = dynamicAbilityPickup.GetComponent<BoplBody>();
             body.Scale = scale;
         }
-        public static void SpawnSmokeGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
+        public static BoplBody SpawnSmokeGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(SmokeGrenade, pos, angle);
             boplBody.Scale = scale;
@@ -203,6 +205,7 @@ namespace MapMaker.Lua_stuff
                     dphysicsCircle.ManualInit();
                 }
             }
+            return boplBody;
         }
         public static void SpawnNormalExplosion(Vec2 pos, Fix scale)
         {

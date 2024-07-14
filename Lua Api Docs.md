@@ -9,21 +9,21 @@ the following are global funcsons.
 for the following angle is in degrees.
 the type before the funcson are its return type.
 
-Red, Green and Blue are all number between 0 and 1.
-none SpawnArrow(number posX, number posY, number scale, number StartVelX, number StartVelY, number Red, number Green, number Blue)
+Red, Green, Blue and Alpha are all number between 0 and 1.
+BoplBody SpawnArrow(number posX, number posY, number scale, number StartVelX, number StartVelY, number Red, number Green, number Blue, number Alpha)
 
-none SpawnGrenade(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
+BoplBody SpawnGrenade(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
 
 none SpawnAbilityPickup(number posX, number posY, number scale, number StartVelX, number StartVelY)
 
-none SpawnSmokeGrenade(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
+BoplBody SpawnSmokeGrenade(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity)
 
 none SpawnExplosion(number posX, number posY, number scale)
 
 type can be the following: "grass", "snow", "ice", "space", "slime" if it isnt one of those it will throw a error.
-only if the type is slime does R, G and B mater
-R, G and B are numbers between 0 and 1.
-none SpawnBoulder(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity, string type, number R, number G, number B)
+only if the type is slime does R, G, B and Amater
+R, G, B and A are numbers between 0 and 1.
+Platform SpawnBoulder(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity, string type, number R, number G, number B, number A)
 
 sends a raycast from a point that can only hit RoundedRects (platforms and matchoman boulders) into the world and returning the distance it went and the RoundedRect it hit.
 the number is the distance it travaled before hitting anything. returns a very big negitive number if it doesnt hit anything
@@ -58,6 +58,9 @@ number GetDeltaTime()
 
 gets the time sence the level loaded. this includes the time before the players have spawned in.
 number GetTimeSenceLevelLoad()
+
+returns true if time is stoped
+bool IsTimeStopped()
 
 gets the value of the logic gate input with that id. uses 1 based indexing. returns a error if the id is > then the number of inputs
 bool GetInputValueWithId(number id)
@@ -94,6 +97,15 @@ none Player.SetJumpKeptMomentum(number NewValue)
 none Player.SetAirAccel(number NewValue)
 none Player.SetMass(number NewValue)
 none Player.AddForce(number ForceX, number ForceY)
+
+gets the ability in that slot. valid indexs are 1, 2 and 3.
+string Player.GetAbility(number index)
+
+sets the ability in that slot. valid indexs are 1, 2 and 3.
+valid abilitys are {"Roll", "Dash", "Grenade", "Bow", "Engine", "Blink", "Gust", "Grow", "Rock", "Missle", "Spike", "TimeStop", "SmokeGrenade", "Platform", "Revive", "Shrink", "BlackHole", "Invisibility", "Meteor", "Macho", "Push", "Tesla", "Mine", "Teleport", "Drill", "Grapple", "Beam"}
+if there is 1 ability it will ignore index and add it to the player. same for if theres 2 abilitys.
+void Player.SetAbility(number index, string ability, bool PlayAbilityPickupSound)
+
 returns "Player"
 string Player.GetClassType()
 
@@ -117,6 +129,12 @@ none Platform.DropAllPlayers(number DropForce)
 BoplBody Platform.GetBoplBody()
 bool Platform.IsBoulder()
 
+this is true for custom shaped platforms and platforms created by the platform ability.
+bool Platform.IsResizable()
+
+resizes the platform. only works if Platform.IsResizable() is true. Width and Height are distances from a edge to the center - Radius. To calculate the true Width/Height in bopl units you do (Width + Radius)*2. same for Height but with Height instead of Width.
+none ResizePlatform(number Width, number Height, number Radius)
+
 # BoplBody
 this is the funcsons the BoplBody has.
 returns "BoplBody"
@@ -136,6 +154,11 @@ none BoplBody.SetScale(number Scale)
 none BoplBody.SetVelocity(number VelX, number VelY)
 none BoplBody.SetMass(number Mass)
 none BoplBody.AddForce(number ForceX, number ForceY)
+none BoplBody.Destroy()
+
+R, G, B and A are numbers between 0 and 1.
+may not do anything on some objects.
+BoplBody.SetColor(number R, number G, number B, number A)
 
 can return "Arrow", "RocketEngine", "Mine", "Telsa", "AbilityPickup", "Missile", "MatchoBoulder", "Spike", "Rock", "Smoke", "Smoke Grenade", "Grenade", "Platform", "Unknown/Modded"
 string BoplBody.GetObjectType()

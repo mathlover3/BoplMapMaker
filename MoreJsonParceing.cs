@@ -208,7 +208,9 @@ namespace MapMaker
                 FileName = Convert.ToString(gate["LuaCodeFileName"]);
                 var file = Plugin.GetFileFromZipArchiveBytes(Plugin.zipArchives[index], DoesFileHaveSameName)[0];
                 var Code = System.Text.Encoding.Default.GetString(file);
-                Plugin.CreateLuaGate(inputArray, outputArray, Vec2Pos, rot, Code);
+                var gate2 =Plugin.CreateLuaGate(inputArray, outputArray, Vec2Pos, rot, Code);
+                gate2.Name = FileName;
+
             }
         }
         public static bool DoesFileHaveSameName(string filepath)

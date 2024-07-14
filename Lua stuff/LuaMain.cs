@@ -1,6 +1,7 @@
 ﻿using BoplFixedMath;
 using MonoMod.Utils;
 using MoonSharp.Interpreter;
+using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +11,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.UIElements;
+using static MapMaker.Lua_stuff.LuaPlayerPhysicsProxy;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace MapMaker.Lua_stuff
 {
@@ -55,6 +59,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["ShootShrink"] = (object)ShootShrink;
             script.Globals["GetDeltaTime"] = (object)GetDeltaTime;
             script.Globals["GetTimeSenceLevelLoad"] = (object)GetTimeSenceLevelLoad;
+            script.Globals["IsTimeStopped"] = (object)IsTimeStopped;
             script.Globals["GetInputValueWithId"] = (object)GetInputValueWithId;
             script.Globals["SetOutputWithId"] = (object)SetOutputWithId;
             script.Options.DebugPrint = s => { Console.WriteLine(s); };
@@ -114,21 +119,21 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
-        public static void SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B)
+        public static BoplBody SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
         {
-            SpawnArrow((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, R, G, B);
+            return SpawnArrow((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, R, G, B, A);
         }
-        public static void SpawnArrow(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, float R, float G, float B)
+        public static BoplBody SpawnArrow(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, float R, float G, float B, float A)
         {
-            LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B));
+            return LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B,A));
         }
-        public static void SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
+        public static BoplBody SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {
-            SpawnGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
+            return SpawnGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
         }
-        public static void SpawnGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
+        public static BoplBody SpawnGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
         {
-            LuaSpawner.SpawnGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
+            return LuaSpawner.SpawnGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
         }
         public static void SpawnAbilityPickupDouble(double posX, double posY, double scale, double StartVelX, double StartVelY)
         {
@@ -138,13 +143,13 @@ namespace MapMaker.Lua_stuff
         {
             LuaSpawner.SpawnAbilityPickup(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY));
         }
-        public static void SpawnSmokeGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
+        public static BoplBody SpawnSmokeGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {
-            SpawnSmokeGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
+            return SpawnSmokeGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
         }
-        public static void SpawnSmokeGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
+        public static BoplBody SpawnSmokeGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
         {
-            LuaSpawner.SpawnSmokeGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
+            return LuaSpawner.SpawnSmokeGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
         }
         public static void SpawnExplosionDouble(double posX, double posY, double scale)
         {
@@ -154,7 +159,7 @@ namespace MapMaker.Lua_stuff
         {
             LuaSpawner.SpawnNormalExplosion(new Vec2(posX, posY), scale);
         }
-        public static void SpawnBoulderDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity, string type, float R, float G, float B)
+        public static StickyRoundedRectangle SpawnBoulderDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity, string type, float R, float G, float B, float A)
         {
             PlatformType platformType;
             var color = Color.white;
@@ -174,19 +179,20 @@ namespace MapMaker.Lua_stuff
                     break;
                 case "slime":
                     platformType = PlatformType.slime;
-                    color = new Color(R, G, B);
+                    color = new Color(R, G, B, A);
                     break;
                 default:
                     throw new ScriptRuntimeException($"{type} is not a valid platform type.");
             }
-            SpawnBoulder((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity, platformType, color);
+            return SpawnBoulder((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity, platformType, color);
         }
-        public static void SpawnBoulder(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity, PlatformType type, Color color)
+        public static StickyRoundedRectangle SpawnBoulder(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity, PlatformType type, Color color)
         {
             var boulder = PlatformApi.PlatformApi.SpawnBoulder(new Vec2(posX, posY), scale, type, color);
             var dphysicsRoundedRect = boulder.hitbox;
             dphysicsRoundedRect.velocity = new Vec2(StartVelX, StartVelY);
             dphysicsRoundedRect.angularVelocity = StartAngularVelocity;
+            return dphysicsRoundedRect.stickyRR;
         }
         public static DynValue RaycastRoundedRect(double posX, double posY, double angle, double maxDist)
         {
@@ -372,6 +378,10 @@ namespace MapMaker.Lua_stuff
             }
             OutputSignals[id - 1].IsOn = value;
         }
+        public bool IsTimeStopped()
+        {
+            return GameTime.IsTimeStopped();
+        }
         public override void Logic(Fix SimDeltaTime)
         {
             if (script == null)
@@ -428,10 +438,233 @@ namespace MapMaker.Lua_stuff
         {
             target.AddForce(new Vec2((Fix)ForceX, (Fix)ForceY));
         }
-        
+        public string GetAbility(int index)
+        {
+            if (index >= 1 && index <= 3)
+            {
+                var TrueIndex = index - 1;
+                var SlimeControaler = target.gameObject.GetComponent<SlimeController>();
+                var icons = SteamManager.instance.abilityIconsFull;
+                var AbilitySprite = SlimeControaler.AbilityReadyIndicators[TrueIndex].spriteRen.sprite;
+                var AbilityIndex = icons.IndexOf(AbilitySprite);
+                return AbilityToString((Ability)AbilityIndex);
+            }
+            else
+            {
+                throw new ScriptRuntimeException($"ability slot {index} is not a valid ability slot. only ability slots 1, 2 and 3 are valid");
+            }
+        }
+        public void SetAbility(int index, string ability, bool PlayAbilityPickupSound)
+        {
+            if (index >= 1 && index <= 3)
+            {
+                //code attapted from https://github.com/almafa64/almafa64-bopl-mods/blob/master/AbilityRandomizer/Plugin.cs
+                var TrueIndex = index - 1;
+                var SlimeControaler = target.gameObject.GetComponent<SlimeController>();
+                var icons = SteamManager.instance.abilityIconsFull;
+                var Ability = StringToAbility(ability);
+                var NamedSprite = icons.sprites[(int)Ability];
+                GameObject AbilityPrefab = NamedSprite.associatedGameObject;
+                GameObject AbilityObject = FixTransform.InstantiateFixed(AbilityPrefab, Vec2.zero, Fix.Zero);
+                AbilityMonoBehaviour abilityMonoBehaviour = AbilityObject.GetComponent<AbilityMonoBehaviour>();
+                if (SlimeControaler.abilities.Count == 3)
+                {
+                    SlimeControaler.abilities[TrueIndex] = abilityMonoBehaviour;
+                    AbilityReadyIndicator indicator = SlimeControaler.AbilityReadyIndicators[TrueIndex];
+                    PlayerHandler.Get().GetPlayer(SlimeControaler.playerNumber).CurrentAbilities[TrueIndex] = AbilityPrefab;
+                    indicator.SetSprite(NamedSprite.sprite, true);
+                    indicator.ResetAnimation();
+                    SlimeControaler.abilityCooldownTimers[TrueIndex] = (Fix)100000L;
+                    if (PlayAbilityPickupSound)
+                    {
+                        AudioManager.Get().Play("abilityPickup");
+                    }
+                }
+                else if (SlimeControaler.abilities.Count > 0 && SlimeControaler.AbilityReadyIndicators[0] != null)
+                {
+                    SlimeControaler.abilities.Add(abilityMonoBehaviour);
+                    PlayerHandler.Get().GetPlayer(SlimeControaler.playerNumber).CurrentAbilities.Add(AbilityPrefab);
+                    SlimeControaler.AbilityReadyIndicators[SlimeControaler.abilities.Count - 1].SetSprite(NamedSprite.sprite, true);
+                    SlimeControaler.AbilityReadyIndicators[SlimeControaler.abilities.Count - 1].ResetAnimation();
+                    SlimeControaler.abilityCooldownTimers[SlimeControaler.abilities.Count - 1] = (Fix)100000L;
+                    for (int i = 0; i < SlimeControaler.abilities.Count; i++)
+                    {
+                        if (SlimeControaler.abilities[i] == null || SlimeControaler.abilities[i].IsDestroyed)
+                        {
+                            return;
+                        }
+                        SlimeControaler.AbilityReadyIndicators[i].gameObject.SetActive(true);
+                        SlimeControaler.AbilityReadyIndicators[i].InstantlySyncTransform();
+                    }
+                }
+            }
+            else
+            {
+                throw new ScriptRuntimeException($"ability slot {index} is not a valid ability slot. only ability slots 1, 2 and 3 are valid");
+            }
+            
+
+        }
         public string GetClassType()
         {
             return "Player";
+        }
+        [MoonSharpHidden]
+        public static Ability StringToAbility(string str)
+        {
+            switch (str)
+            {
+                case "Roll":
+                    return Ability.Roll;
+                case "Dash":
+                    return Ability.Dash;
+                case "Grenade":
+                    return Ability.Grenade;
+                case "Bow":
+                    return Ability.Bow;
+                case "Engine":
+                    return Ability.Engine;
+                case "Blink":
+                    return Ability.Blink;
+                case "Gust":
+                    return Ability.Gust;
+                case "Grow":
+                    return Ability.Grow;
+                case "Rock":
+                    return Ability.Rock;
+                case "Missle":
+                    return Ability.Missle;
+                case "Spike":
+                    return Ability.Spike;
+                case "TimeStop":
+                    return Ability.TimeStop;
+                case "SmokeGrenade":
+                    return Ability.SmokeGrenade;
+                case "Platform":
+                    return Ability.Platform;
+                case "Revive":
+                    return Ability.Revive;
+                case "Shrink":
+                    return Ability.Shrink;
+                case "BlackHole":
+                    return Ability.BlackHole;
+                case "Invisibility":
+                    return Ability.Invisibility;
+                case "Meteor":
+                    return Ability.Meteor;
+                case "Macho":
+                    return Ability.Macho;
+                case "Push":
+                    return Ability.Push;
+                case "Tesla":
+                    return Ability.Tesla;
+                case "Mine":
+                    return Ability.Mine;
+                case "Teleport":
+                    return Ability.Teleport;
+                case "Drill":
+                    return Ability.Drill;
+                case "Grapple":
+                    return Ability.Grapple;
+                case "Beam":
+                    return Ability.Beam;
+                default:
+                    throw new ScriptRuntimeException($"{str} is not a valid ability");
+            }
+        }
+        [MoonSharpHidden]
+        public static string AbilityToString(Ability ability)
+        {
+            switch (ability)
+            {
+                case Ability.Roll:
+                    return "Roll";
+                case Ability.Dash:
+                    return "Dash";
+                case Ability.Grenade:
+                    return "Grenade";
+                case Ability.Bow:
+                    return "Bow";
+                case Ability.Engine:
+                    return "Engine";
+                case Ability.Blink:
+                    return "Blink";
+                case Ability.Gust:
+                    return "Gust";
+                case Ability.Grow:
+                    return "Grow";
+                case Ability.Rock:
+                    return "Rock";
+                case Ability.Missle:
+                    return "Missle";
+                case Ability.Spike:
+                    return "Spike";
+                case Ability.TimeStop:
+                    return "TimeStop";
+                case Ability.SmokeGrenade:
+                    return "SmokeGrenade";
+                case Ability.Platform:
+                    return "Platform";
+                case Ability.Revive:
+                    return "Revive";
+                case Ability.Shrink:
+                    return "Shrink";
+                case Ability.BlackHole:
+                    return "BlackHole";
+                case Ability.Invisibility:
+                    return "Invisibility";
+                case Ability.Meteor:
+                    return "Meteor";
+                case Ability.Macho:
+                    return "Macho";
+                case Ability.Push:
+                    return "Push";
+                case Ability.Tesla:
+                    return "Tesla";
+                case Ability.Mine:
+                    return "Mine";
+                case Ability.Teleport:
+                    return "Teleport";
+                case Ability.Drill:
+                    return "Drill";
+                case Ability.Grapple:
+                    return "Grapple";
+                case Ability.Beam:
+                    return "Beam";
+                default:
+                    return "Unknown/Modded/None";
+            }
+        }
+        public enum Ability
+        {
+            None = 0,
+            Roll = 1,
+            Dash = 2,
+            Grenade = 3,
+            Bow = 4,
+            Engine = 5,
+            Blink = 6,
+            Gust = 7,
+            Grow = 8,
+            Rock = 9,
+            Missle = 10,
+            Spike = 11,
+            TimeStop = 12,
+            SmokeGrenade = 13,
+            Platform = 14,
+            Revive = 15,
+            Shrink = 17,
+            BlackHole = 18,
+            Invisibility = 19,
+            Meteor = 20,
+            Macho = 21,
+            Push = 22,
+            Tesla = 23,
+            Mine = 24,
+            Teleport = 25,
+            Drill = 26,
+            Grapple = 27,
+            Beam = 28
         }
     }
     public class PlatformProxy
@@ -521,6 +754,21 @@ namespace MapMaker.Lua_stuff
         {
             return target.gameObject.GetComponent<Boulder>() != null;
         }
+        public bool IsResizable()
+        {
+            return target.GetComponent<ResizablePlatform>() != null;
+        }
+        public void ResizePlatform(double Width, double Height, double Radius)
+        {
+            if (IsResizable())
+            {
+                target.GetComponent<ResizablePlatform>().ResizePlatform((Fix)Height, (Fix)Width, (Fix)Radius);
+            }
+            else
+            {
+                throw new ScriptRuntimeException("called ResizePlatform on a platform thats not Resizable. check IsResizable() before calling!");
+            }
+        }
     }
     public class BoplBodyProxy
     {
@@ -573,11 +821,11 @@ namespace MapMaker.Lua_stuff
         {
             if (!target.HasBeenInitialized)
             {
-                throw new ScriptRuntimeException("called GetScale on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+                throw new ScriptRuntimeException("called GetScale on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
             }
             if (IsBeingDestroyed())
             {
-                throw new ScriptRuntimeException("called GetScale on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+                throw new ScriptRuntimeException("called GetScale on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
             return (double)target.Scale;
         }
@@ -585,11 +833,11 @@ namespace MapMaker.Lua_stuff
         {
             if (!target.HasBeenInitialized)
             {
-                throw new ScriptRuntimeException("called GetVelocity on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+                throw new ScriptRuntimeException("called GetVelocity on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
             }
             if (IsBeingDestroyed())
             {
-                throw new ScriptRuntimeException("called GetVelocity on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+                throw new ScriptRuntimeException("called GetVelocity on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
             return LuaMain.Vec2ToTuple(target.velocity);
         }
@@ -597,11 +845,11 @@ namespace MapMaker.Lua_stuff
         {
             if (!target.HasBeenInitialized)
             {
-                throw new ScriptRuntimeException("called GetMass on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+                throw new ScriptRuntimeException("called GetMass on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
             }
             if (IsBeingDestroyed())
             {
-                throw new ScriptRuntimeException("called GetMass on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+                throw new ScriptRuntimeException("called GetMass on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
             return (double)(Fix.One / target.InverseMass);
         }
@@ -619,11 +867,11 @@ namespace MapMaker.Lua_stuff
         {
             if (!target.HasBeenInitialized)
             {
-                throw new ScriptRuntimeException("called SetScale on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+                throw new ScriptRuntimeException("called SetScale on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
             }
             if (IsBeingDestroyed())
             {
-                throw new ScriptRuntimeException("called SetScale on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+                throw new ScriptRuntimeException("called SetScale on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
             target.Scale = (Fix)Scale;
         }
@@ -631,11 +879,11 @@ namespace MapMaker.Lua_stuff
         {
             if (!target.HasBeenInitialized)
             {
-                throw new ScriptRuntimeException("called SetVelocity on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+                throw new ScriptRuntimeException("called SetVelocity on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
             }
             if (IsBeingDestroyed())
             {
-                throw new ScriptRuntimeException("called SetVelocity on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+                throw new ScriptRuntimeException("called SetVelocity on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
             target.velocity = new Vec2((Fix)VelX, (Fix)VelY);
         }
@@ -643,11 +891,11 @@ namespace MapMaker.Lua_stuff
         {
             if (!target.HasBeenInitialized)
             {
-                throw new ScriptRuntimeException("called SetMass on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+                throw new ScriptRuntimeException("called SetMass on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
             }
             if (IsBeingDestroyed())
             {
-                throw new ScriptRuntimeException("called SetMass on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+                throw new ScriptRuntimeException("called SetMass on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
             target.InverseMass = Fix.One / (Fix)Mass; 
         }
@@ -655,13 +903,25 @@ namespace MapMaker.Lua_stuff
         {
             if (!target.HasBeenInitialized)
             {
-                throw new ScriptRuntimeException("called AddForce on a BoplBody before it was initialized. pls make sure it has been initialized before calling by calling HasBeenInitialized()");
+                throw new ScriptRuntimeException("called AddForce on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
             }
             if (IsBeingDestroyed())
             {
-                throw new ScriptRuntimeException("called AddForce on a BoplBody when it was being Destroyed. pls make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+                throw new ScriptRuntimeException("called AddForce on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
             target.AddForce(new Vec2((Fix)ForceX, (Fix)ForceY));
+        }
+        public void Destroy()
+        {
+            Updater.DestroyFix(target.gameObject);
+        }
+        public void SetColor(float R, float G, float B, float A)
+        {
+            var render = target.GetComponent<SpriteRenderer>();
+            if (render != null)
+            {
+                render.color = new Color(R, G, B, A);
+            }
         }
     }
 }

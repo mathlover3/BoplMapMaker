@@ -1025,88 +1025,11 @@ namespace MapMaker
                 //CreateDropPlayers(platform, 2, (Fix)100, true);
                 int[] UUids3 = { };
                 int[] UUids4 = { };
-                /*CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"
---a, b = RaycastRoundedRect(0, 0, 90, 3000)
---print(""Raycast results: a ="", a, ""b ="", b)
-if (player == nil) then
-    player = GetClosestPlayer(0, 0)
-end
-Players = GetAllPlayers()
+                CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"
+player = GetClosestPlayer(0, 0)
 if (player ~= nil) then
-    if (Px ~= nil) then
-        LastPx = Px
-        LastPy = Py
-    end
-    Px, Py = player.GetPosition()
-    
-    if (LastPx ~= nil and Px - LastPx > 0) then
-        --player.SetMaxSpeed(38)
-        --print(""max speed 38"")
-    else
-        --player.SetMaxSpeed(19)
-        --print(""max speed 19"")
-    end
-end
-c, plats = GetAllPlatforms()
-i = 1
-if (plats ~= nil) then
-    while(plats[i] ~= nil) do
-        plat = plats[i]
-        if (plat ~= nil and plat.IsBoulder() == false) then
-            body = plat.GetBoplBody()
-            if (body ~= nil) then
-                --x, y = body.GetPos()
-                --plat.SetHome(x, y)
-                --rot = body.GetRot()
-                --plat.SetHomeRot(rot)
-            end
-        end
-        i = i + 1
-    end
-end
-BodyCount, Bodys = GetAllBoplBodys()
-i = 1
-while(Bodys[i] ~= nil) do
-    Body = Bodys[i]
-    if (true) then
-        --Body.SetMass(i)
-        Body.AddForce(50, 10)
-    end
-    i = i + 1
-end
---SetOutputWithId(1, i >= 10)
-PlayerCount, Players = GetAllPlayers()
-i = 1
-while(Players[i] ~= nil) do
-    Player = Players[i]
-    Player.AddForce(0.01, 0)
-    i = i + 1
-end
-if (math.random() > 0.995) then
-    ShootBlink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.5,4,1,0.3)
-end
-if (math.random() > 0.995) then
-    ShootGrow(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),0.8,0.8,50)
-end
-if (math.random() > 0.995) then
-    ShootShrink(math.random(-97.27, 97.6),math.random(-11, 40),math.random(0, 360),-0.8,-0.8,50)
-end
-if (math.random() > 0.995) then
-    SpawnArrow(math.random(-97.27, 97.6), 40, math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), math.random(), math.random(), math.random())
-end
-if (math.random() > 0.995) then
-    SpawnGrenade(math.random(-97.27, 97.6), 40, math.random(0.5, 1.5), math.random(-25, 25), math.random(-25, 25), 0)
-end
-if (math.random() > 0.995) then
-    --SpawnExplosion(math.random(-97.27, 97.6), math.random(-11, 40), math.random(0.2, 1.5))
-end
-if (math.random() > 0.995) then
-    SpawnBoulder(math.random(-97.27, 97.6), 40, math.random(0.5, 1), math.random(-25, 25), math.random(-25, 25), 10, ""slime"", math.random(), math.random(), math.random())
-end
-if (b ~= nil) then
-    return b.GetClassType()
-end
-return b");*/
+    player.SetAbility(2, ""Beam"", false)
+end");
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)0, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
