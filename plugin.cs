@@ -31,6 +31,7 @@ using Mono.Cecil.Cil;
 using UnityEngine.Events;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using Entwined;
+using System.Collections;
 
 namespace MapMaker
 {
@@ -91,7 +92,7 @@ namespace MapMaker
         public static ShakableCamera shakableCamera;
         //make it a weak refrence?
         public static List<PlayerInput> playerInputs = new();
-        private static bool GettingGrassMat = false;
+        public static bool FirstUpdate = true;
         //map ids
         public static readonly int GrassMapId = 0;
         public static readonly int SnowMapId = 21;
@@ -221,6 +222,31 @@ namespace MapMaker
                     }
                 }
             }
+        }
+        public void Update()
+        {
+            if (FirstUpdate)
+            {
+                FirstUpdate = false;
+                StartCoroutine(GetGrassMat());
+            }
+        }
+        IEnumerator GetGrassMat()
+        {
+            //enter the tutorial to get the grass mat
+            SceneManager.LoadScene("Tutorial", LoadSceneMode.Single);
+            //https://forum.unity.com/threads/how-to-wait-for-a-frame-in-c.24616/
+            //wait one frame (no clue how this works but it does)
+            yield return 0;
+            var grass = GameObject.Find("AnimatedGrass");
+            GrassMat = grass.gameObject.GetComponent<SpriteRenderer>().material;
+            //exit the tutorial
+            PlayerHandler.Get().PlayerList().Clear();
+            TutorialGameHandler.isInTutorial = false;
+            Updater.PreLevelLoad();
+            SceneManager.LoadScene("MainMenu");
+            Updater.PostLevelLoad();
+            Debug.Log("got mat!");
         }
         public static bool IsBoplMap(string path)
         {
@@ -1115,21 +1141,6 @@ return b");*/
                     {
                         //steal matual 
                         PlatformMat = tplatform.gameObject.GetComponent<SpriteRenderer>().material;
-                        //TODO: if its null and this isnt a grass map get it some outer way? idk how but do it!
-                        if (GrassMat == null)
-                        {
-                            //this will give a grass object if this is a grass map
-                            var grass = tplatform.GetChild(1);
-                            //if it is a grass object
-                            if (grass != null && grass.gameObject.name == "AnimatedGrass_0")
-                            {
-                                GrassMat = grass.gameObject.GetComponent<SpriteRenderer>().material;
-                            }
-                            else
-                            {
-
-                            }
-                        }
                     }
                     index++;
                     //distroy it
