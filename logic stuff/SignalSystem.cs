@@ -22,7 +22,7 @@ namespace MapMaker
         //the orderd list of gates. run them in this order
         public static List<LogicGate> LogicGatesInOrder = new List<LogicGate>();
         //if true it shows all of the logic gates and there connectsons
-        public static bool LogicDebugMode = true;
+        public static bool LogicDebugMode = false;
         //this is for rendering the connectsons.
         public static Dictionary<LogicInput, LineRenderer> LineRenderers = new();
         //these are for the connectsons connected to platforms.
@@ -283,14 +283,18 @@ namespace MapMaker
                     //UnityEngine.Debug.Log($"added output to inputs");
                     //they have the same UUid so lets just get them both out of the way in one fail swoop.
                     output.outputs.Add(input);
-                    GameObject LineRendererGameObject = new GameObject("LineRenderer");
-                    LineRenderer lineRenderer = LineRendererGameObject.AddComponent<LineRenderer>();
-                    lineRenderer.material = new Material(Shader.Find("Hidden/Internal-Colored"));
-                    lineRenderer.endColor = (lineRenderer.startColor = Color.red);
-                    lineRenderer.endWidth = (lineRenderer.startWidth = 0.2f);
-                    lineRenderer.positionCount = 2;
-                    SetLinePosForLine(lineRenderer, input, output);
-                    LineRenderers.Add(input, lineRenderer);
+                    if (LogicDebugMode)
+                    {
+                        GameObject LineRendererGameObject = new GameObject("LineRenderer");
+                        LineRenderer lineRenderer = LineRendererGameObject.AddComponent<LineRenderer>();
+                        lineRenderer.material = new Material(Shader.Find("Hidden/Internal-Colored"));
+                        lineRenderer.endColor = (lineRenderer.startColor = Color.red);
+                        lineRenderer.endWidth = (lineRenderer.startWidth = 0.2f);
+                        lineRenderer.positionCount = 2;
+                        SetLinePosForLine(lineRenderer, input, output);
+                        LineRenderers.Add(input, lineRenderer);
+                    }
+
                     //if its not a dealy then add it to the graph to check for cycles
                     if ((input.gate != null && output.Owner.GetComponent<SignalDelay>() == null))
                     {
@@ -308,6 +312,16 @@ namespace MapMaker
 
                     //UnityEngine.Debug.Log($"added input to outputs");
 
+                }
+            }
+            if (LogicDebugMode == false)
+            {
+                foreach(LogicGate gate in AllLogicGates)
+                {
+                    if (gate.gameObject && gate.gameObject.GetComponent<SpriteRenderer>() != null && gate.gameObject.GetComponent<StickyRoundedRectangle>() == null)
+                    {
+                        Destroy(gate.gameObject.GetComponent<SpriteRenderer>());
+                    }
                 }
             }
             if (graph.isCyclic())
@@ -493,18 +507,21 @@ namespace MapMaker
                     {
                         var output = input.inputs[0];    
                         input.IsOn = output.IsOn;
-                        //update the line color
-                        var Line = LineRenderers[input];
-                        //if the line isnt null update the colors.
-                        if (Line)
+                        if (LogicDebugMode)
                         {
-                            if (input.IsOn)
+                            //update the line color
+                            var Line = LineRenderers[input];
+                            //if the line isnt null update the colors.
+                            if (Line)
                             {
-                                Line.endColor = (Line.startColor = Color.green);
+                                if (input.IsOn)
+                                {
+                                    Line.endColor = (Line.startColor = Color.green);
+                                }
+                                else Line.endColor = (Line.startColor = Color.red);
                             }
-                            else Line.endColor = (Line.startColor = Color.red);
                         }
-                        //if the input has changed run the gates code
+                        //run the gates code
                         if (gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded)
                         {
                             gate.Logic(SimDeltaTime);
@@ -519,11 +536,14 @@ namespace MapMaker
                     FirstUpdateOfTheRound = false;
                 }
 
-                foreach (var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
+                if (LogicDebugMode)
                 {
-                    var Line = LineRenderers[input];
-                    var output = input.inputs[0];
-                    SetLinePosForLine(Line, input, output);
+                    foreach (var input in LogicInputsThatAlwaysUpdateThereLineConnectsons)
+                    {
+                        var Line = LineRenderers[input];
+                        var output = input.inputs[0];
+                        SetLinePosForLine(Line, input, output);
+                    }
                 }
             }
             //in case time is stoped.
