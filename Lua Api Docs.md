@@ -185,3 +185,13 @@ string BoplBody.GetObjectType()
 ## Errors
 When a script has a error/fails to parse it logs the error to the consule. for runtime errors it says where in the code the error happend, what script it happend in, and what the error is. for a parseing error it says aproxamently where the error is.
 
+## Defult Lua Apis
+you get the following built in lua apis:
+The global constants: "_G", "_VERSION" and "_MOONSHARP",
+The table iterators: "next", "ipairs" and "pairs",
+The string package,
+The table package,
+The math package,
+The bit32 package,
+The error handling methods: "pcall" and "xpcall",
+The coroutine package.

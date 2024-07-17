@@ -1031,11 +1031,11 @@ namespace MapMaker
                 //CreateDropPlayers(platform, 2, (Fix)100, true);
                 int[] UUids3 = { };
                 int[] UUids4 = { };
-                CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"
+                /*CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"
 if (not first) then
     SpawnPlatform(0, 0, 1, 1, 1, 90, 1, 0, 0, 1)
 end
-first = true");
+first = true");*/
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)0, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
