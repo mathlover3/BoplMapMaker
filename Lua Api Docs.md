@@ -21,9 +21,14 @@ BoplBody SpawnSmokeGrenade(number posX, number posY, number scale, number StartV
 none SpawnExplosion(number posX, number posY, number scale)
 
 type can be the following: "grass", "snow", "ice", "space", "slime" if it isnt one of those it will throw a error.
-only if the type is slime does R, G, B and Amater
+only if the type is slime does R, G, B and A mater
 R, G, B and A are numbers between 0 and 1.
 Platform SpawnBoulder(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity, string type, number R, number G, number B, number A)
+
+Width and Height are distances from a edge to the center - Radius. To calculate the true Width/Height in bopl units you do (Width + Radius)*2. same for Height but with Height instead of Width.
+R, G, B and A are numbers between 0 and 1.
+Rot is in degress as normal.
+Platform SpawnPlatform(number posX, number posY, number Width, number Height, number Radius, number Rot, number R, number G, number B, number A)
 
 sends a raycast from a point that can only hit RoundedRects (platforms and matchoman boulders) into the world and returning the distance it went and the RoundedRect it hit.
 the number is the distance it travaled before hitting anything. returns a very big negitive number if it doesnt hit anything
@@ -98,13 +103,24 @@ none Player.SetAirAccel(number NewValue)
 none Player.SetMass(number NewValue)
 none Player.AddForce(number ForceX, number ForceY)
 
-gets the ability in that slot. valid indexs are 1, 2 and 3.
+gets the ability in that slot. valid indexs are 1, 2 and 3. ability slots are in the order of left, right, middle.
 string Player.GetAbility(number index)
 
 sets the ability in that slot. valid indexs are 1, 2 and 3.
 valid abilitys are {"Roll", "Dash", "Grenade", "Bow", "Engine", "Blink", "Gust", "Grow", "Rock", "Missle", "Spike", "TimeStop", "SmokeGrenade", "Platform", "Revive", "Shrink", "BlackHole", "Invisibility", "Meteor", "Macho", "Push", "Tesla", "Mine", "Teleport", "Drill", "Grapple", "Beam"}
-if there is 1 ability it will ignore index and add it to the player. same for if theres 2 abilitys.
+if there is 1 ability it will ignore index and add it to the player. same for if theres 2 abilitys. this is due to how the game works. abilitys that are added also have there cooldowns reset
 void Player.SetAbility(number index, string ability, bool PlayAbilityPickupSound)
+
+number Player.GetAbilityCount()
+
+returns 1,000,000 if theres no ability in that slot. if theres a ability in the slot it returns the time remaining of the cooldown. may be negitive if the ability is ready
+number Player.GetAbilityCooldownRemaining(number index)
+
+sets the cooldown remaining for the ability in that slot. does nothing if theres no ability in the slot
+none Player.SetAbilityCooldownRemaining(number index, number NewRemainingCooldown)
+
+returns true if the player is currently disappeared from blink
+bool IsDisappeared()
 
 returns "Player"
 string Player.GetClassType()
@@ -129,7 +145,7 @@ none Platform.DropAllPlayers(number DropForce)
 BoplBody Platform.GetBoplBody()
 bool Platform.IsBoulder()
 
-this is true for custom shaped platforms and platforms created by the platform ability.
+this is true for custom shaped platforms,  platforms created by the platform ability and platforms created with lua.
 bool Platform.IsResizable()
 
 resizes the platform. only works if Platform.IsResizable() is true. Width and Height are distances from a edge to the center - Radius. To calculate the true Width/Height in bopl units you do (Width + Radius)*2. same for Height but with Height instead of Width.
@@ -156,9 +172,16 @@ none BoplBody.SetMass(number Mass)
 none BoplBody.AddForce(number ForceX, number ForceY)
 none BoplBody.Destroy()
 
+returns true if the BoplBody is currently disappeared from blink or a DisappearPlatformOnSignal.
+bool IsDisappeared()
+
 R, G, B and A are numbers between 0 and 1.
 may not do anything on some objects.
 BoplBody.SetColor(number R, number G, number B, number A)
 
 can return "Arrow", "RocketEngine", "Mine", "Telsa", "AbilityPickup", "Missile", "MatchoBoulder", "Spike", "Rock", "Smoke", "Smoke Grenade", "Grenade", "Platform", "Unknown/Modded"
 string BoplBody.GetObjectType()
+
+## Errors
+When a script has a error/fails to parse it logs the error to the consule. for runtime errors it says where in the code the error happend, what script it happend in, and what the error is. for a parseing error it says aproxamently where the error is.
+

@@ -1,6 +1,9 @@
-﻿using BoplFixedMath;
+﻿using AsmResolver.PE.DotNet.ReadyToRun;
+using BoplFixedMath;
 using MonoMod.Utils;
 using MoonSharp.Interpreter;
+using MoonSharp.Interpreter.Debugging;
+using MoonSharp.VsCodeDebugger;
 using Steamworks;
 using System;
 using System.Collections;
@@ -25,6 +28,8 @@ namespace MapMaker.Lua_stuff
         public string Name = "Lua default name";
         public string code = null;
         public Script script;
+        public static MoonSharpVsCodeDebugServer server;
+        public static bool UseDebugServer = false;
         private static Fix deltaTime = Fix.Zero;
         public void Awake()
         {
@@ -39,6 +44,14 @@ namespace MapMaker.Lua_stuff
                 ShootBlinkObject = gameObject.AddComponent<ShootBlink>();
             }
         }
+        void OnDestroy()
+        {
+            if (UseDebugServer)
+            {
+                //remove this script from the debuger.
+                server.Detach(script);
+            }
+        }
         public Script SetUpScriptFuncsons()
         {
             //dont want to let people use librays that would give them acsess outside of the game like os and io now do we? also no time package eather as thats just asking for desinks.
@@ -49,6 +62,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["SpawnSmokeGrenade"] = (object)SpawnSmokeGrenadeDouble;
             script.Globals["SpawnExplosion"] = (object)SpawnExplosionDouble;
             script.Globals["SpawnBoulder"] = (object)SpawnBoulderDouble;
+            script.Globals["SpawnPlatform"] = (object)SpawnPlatform;
             script.Globals["RaycastRoundedRect"] = (object)RaycastRoundedRect;
             script.Globals["GetClosestPlayer"] = (object)GetClosestPlayer;
             script.Globals["GetAllPlatforms"] = (object)GetAllPlatforms;
@@ -105,6 +119,16 @@ namespace MapMaker.Lua_stuff
             catch (ScriptRuntimeException e)
             {
                 Console.WriteLine($"ERROR IN LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
+                return DynValue.Nil;
+            }
+            catch (MoonSharp.Interpreter.SyntaxErrorException e)
+            {
+                Console.WriteLine($"ERROR PARSING LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
+                return DynValue.Nil;
+            }
+            catch (InternalErrorException e)
+            {
+                Console.WriteLine($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e.DecoratedMessage} pls send me the map so i can report the bug.");
                 return DynValue.Nil;
             }
             /*foreach (var Key in script.Globals.Keys)
@@ -193,6 +217,13 @@ namespace MapMaker.Lua_stuff
             dphysicsRoundedRect.velocity = new Vec2(StartVelX, StartVelY);
             dphysicsRoundedRect.angularVelocity = StartAngularVelocity;
             return dphysicsRoundedRect.stickyRR;
+        }
+        public static StickyRoundedRectangle SpawnPlatform(double posX, double posY, double Width, double Height, double Radius, double Rot, float R, float G, float B, float A)
+        {
+            var plat = PlatformApi.PlatformApi.SpawnPlatform((Fix)posX, (Fix)posY, (Fix)Width, (Fix)Height, (Fix)Radius, (Fix)Rot * (Fix)PhysTools.DegreesToRadians);
+            var color = new Color(R, G, B, A);
+            plat.GetComponent<SpriteRenderer>().color = color;
+            return plat.GetComponent<StickyRoundedRectangle>();
         }
         public static DynValue RaycastRoundedRect(double posX, double posY, double angle, double maxDist)
         {
@@ -387,6 +418,11 @@ namespace MapMaker.Lua_stuff
             if (script == null)
             {
                 script = SetUpScriptFuncsons();
+                if (UseDebugServer)
+                {
+                    server.AttachToScript(script, Name);
+                    UnityEngine.Debug.Log($"attaching script {Name} to debug server");
+                }
             }
             Dictionary<string, object> paramiters = new Dictionary<string, object>();
             deltaTime = SimDeltaTime;
@@ -474,7 +510,7 @@ namespace MapMaker.Lua_stuff
                     PlayerHandler.Get().GetPlayer(SlimeControaler.playerNumber).CurrentAbilities[TrueIndex] = AbilityPrefab;
                     indicator.SetSprite(NamedSprite.sprite, true);
                     indicator.ResetAnimation();
-                    SlimeControaler.abilityCooldownTimers[TrueIndex] = (Fix)100000L;
+                    SlimeControaler.abilityCooldownTimers[TrueIndex] = (Fix)0;
                     if (PlayAbilityPickupSound)
                     {
                         AudioManager.Get().Play("abilityPickup");
@@ -486,7 +522,7 @@ namespace MapMaker.Lua_stuff
                     PlayerHandler.Get().GetPlayer(SlimeControaler.playerNumber).CurrentAbilities.Add(AbilityPrefab);
                     SlimeControaler.AbilityReadyIndicators[SlimeControaler.abilities.Count - 1].SetSprite(NamedSprite.sprite, true);
                     SlimeControaler.AbilityReadyIndicators[SlimeControaler.abilities.Count - 1].ResetAnimation();
-                    SlimeControaler.abilityCooldownTimers[SlimeControaler.abilities.Count - 1] = (Fix)100000L;
+                    SlimeControaler.abilityCooldownTimers[SlimeControaler.abilities.Count - 1] = (Fix)0;
                     for (int i = 0; i < SlimeControaler.abilities.Count; i++)
                     {
                         if (SlimeControaler.abilities[i] == null || SlimeControaler.abilities[i].IsDestroyed)
@@ -504,6 +540,60 @@ namespace MapMaker.Lua_stuff
             }
             
 
+        }
+        public int GetAbilityCount()
+        {
+            return target.gameObject.GetComponent<SlimeController>().abilities.Count;
+        }
+        public double GetAbilityCooldownRemaining(int index)
+        {
+            if (index >= 1 && index <= 3)
+            {
+                var slimeController = target.gameObject.GetComponent<SlimeController>();
+                if (slimeController.abilities.Count == 1)
+                {
+                    if (index == 1) return (double)(slimeController.abilityCooldownTimers[0] - slimeController.abilities[0].GetCooldown());
+                    else return 1000000;
+                }
+                if (slimeController.abilities.Count == 2)
+                {
+                    if (index == 1) return (double)(slimeController.abilityCooldownTimers[0] - slimeController.abilities[0].GetCooldown());
+                    if (index == 2) return (double)(slimeController.abilityCooldownTimers[1] - slimeController.abilities[1].GetCooldown());
+                    else return 1000000;
+                }
+                return (double)(slimeController.abilityCooldownTimers[index - 1] - slimeController.abilities[index - 1].GetCooldown());
+            }
+            else throw new ScriptRuntimeException($"index {index} is not a valid ability index. valid indexs are 1, 2 and 3");
+
+        }
+        public void SetAbilityCooldownRemaining(int index, double NewRemainingCooldown)
+        {
+            if (index >= 1 && index <= 3)
+            {
+                var slimeController = target.gameObject.GetComponent<SlimeController>();
+                if (slimeController.abilities.Count == 1)
+                {
+                    if (index == 1)
+                    {
+                        slimeController.abilityCooldownTimers[0] = slimeController.abilities[0].GetCooldown() - (Fix)NewRemainingCooldown;
+                    }
+                }
+                if (slimeController.abilities.Count == 2)
+                {
+                    if (index == 1) slimeController.abilityCooldownTimers[0] = slimeController.abilities[0].GetCooldown() - (Fix)NewRemainingCooldown;
+                    if (index == 2) slimeController.abilityCooldownTimers[1] = slimeController.abilities[1].GetCooldown() - (Fix)NewRemainingCooldown;
+                }
+                if (slimeController.abilities.Count == 3)
+                {
+                    slimeController.abilityCooldownTimers[index - 1] = slimeController.abilities[index - 1].GetCooldown() - (Fix)NewRemainingCooldown;
+                }
+            }
+            else throw new ScriptRuntimeException($"index {index} is not a valid ability index. valid indexs are 1, 2 and 3");
+
+        }
+        public bool IsDisappeared()
+        {
+            return !target.gameObject.activeInHierarchy;
         }
         public string GetClassType()
         {
@@ -922,6 +1012,10 @@ namespace MapMaker.Lua_stuff
             {
                 render.color = new Color(R, G, B, A);
             }
+        }
+        public bool IsDisappeared()
+        {
+            return !target.gameObject.activeInHierarchy;
         }
     }
 }

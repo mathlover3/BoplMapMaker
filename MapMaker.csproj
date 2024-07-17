@@ -44,6 +44,9 @@
     <Reference Include="MoonSharp.Interpreter">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BepInEx\plugins\mapMaker\MoonSharp.Interpreter.dll</HintPath>
     </Reference>
+    <Reference Include="MoonSharp.VsCodeDebugger">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BepInEx\plugins\mapMaker\MoonSharp.VsCodeDebugger.dll</HintPath>
+    </Reference>
     <Reference Include="PlatformApi">
       <HintPath>..\..\PlatformApi\PlatformApi\bin\Debug\net471\PlatformApi.dll</HintPath>
     </Reference>

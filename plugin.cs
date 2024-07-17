@@ -32,6 +32,7 @@ using UnityEngine.Events;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using Entwined;
 using System.Collections;
+using MoonSharp.VsCodeDebugger;
 
 namespace MapMaker
 {
@@ -228,7 +229,12 @@ namespace MapMaker
             if (FirstUpdate)
             {
                 FirstUpdate = false;
+                // Create the debugger server
+                LuaMain.server = new MoonSharpVsCodeDebugServer();
+                // Start the debugger server
+                LuaMain.server.Start();
                 StartCoroutine(GetGrassMat());
+
             }
         }
         IEnumerator GetGrassMat()
@@ -1026,10 +1032,10 @@ namespace MapMaker
                 int[] UUids3 = { };
                 int[] UUids4 = { };
                 CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"
-player = GetClosestPlayer(0, 0)
-if (player ~= nil) then
-    player.SetAbility(2, ""Beam"", false)
-end");
+if (not first) then
+    SpawnPlatform(0, 0, 1, 1, 1, 90, 1, 0, 0, 1)
+end
+first = true");
                 //CreateShootBlink(3, new Vec2((Fix)(0), (Fix)20), (Fix)90, (Fix)360, (Fix)1, (Fix)1, (Fix)3, (Fix)2.5);
                 //CreateShootGrow(3, new Vec2((Fix)(-30), (Fix)20), (Fix)90, (Fix)360, (Fix)50, (Fix)(0.4), (Fix)0.4);
                 //CreateShootStrink(3, new Vec2((Fix)(30), (Fix)20), (Fix)90, (Fix)0, (Fix)(-500), (Fix)(-0.4), (Fix)(-0.4));
@@ -1553,27 +1559,19 @@ end");
         //lua stuff
         public static DynValue exec1(CallbackArguments args, string funcName, Func<double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
-            MethodInfo dynMethod = typeof(MoonSharp.Interpreter.CoreLib.MathModule).GetMethod("exec1",
-BindingFlags.NonPublic | BindingFlags.Static);
-            return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
+            return MoonSharp.Interpreter.CoreLib.MathModule.exec1(args, funcName, func);
         }
         public static DynValue exec2(CallbackArguments args, string funcName, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
-            MethodInfo dynMethod = typeof(MoonSharp.Interpreter.CoreLib.MathModule).GetMethod("exec2",
-BindingFlags.NonPublic | BindingFlags.Static);
-            return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
+            return MoonSharp.Interpreter.CoreLib.MathModule.exec2(args, funcName, func);
         }
         public static DynValue exec2n(CallbackArguments args, string funcName, double defVal, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
-            MethodInfo dynMethod = typeof(MoonSharp.Interpreter.CoreLib.MathModule).GetMethod("exec2n",
-BindingFlags.NonPublic | BindingFlags.Static);
-            return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
+            return MoonSharp.Interpreter.CoreLib.MathModule.exec2n(args, funcName, defVal, func);
         }
         public static DynValue execaccum(CallbackArguments args, string funcName, Func<double, double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
-            MethodInfo dynMethod = typeof(MoonSharp.Interpreter.CoreLib.MathModule).GetMethod("execaccum",
-BindingFlags.NonPublic | BindingFlags.Static);
-            return (DynValue)dynMethod.Invoke(null, new object[] { args, funcName, func });
+            return MoonSharp.Interpreter.CoreLib.MathModule.execaccum(args, funcName, func);
         }
         public static Fix Tanh(Fix d)
         {
@@ -2620,7 +2618,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
     {
         [HarmonyPatch("OnLobbyMemberJoinedCallback")]
         [HarmonyPostfix]
-        private static void Awake_MapMaker_Plug(Lobby lobby, Friend friend, SteamManager __instance)
+        private static void Awake_MapMaker_Plug(ref Lobby lobby, Friend friend, SteamManager __instance)
         {
             if (__instance.currentLobby.Id != lobby.Id)
             {
@@ -2647,7 +2645,7 @@ BindingFlags.NonPublic | BindingFlags.Static);
         }
         [HarmonyPatch("HostGame")]
         [HarmonyPrefix]
-        private static bool Awake_MapMaker_Plug2(PlayerInit hostPlayer, SteamManager __instance)
+        private static bool Awake_MapMaker_Plug2(ref PlayerInit hostPlayer, SteamManager __instance)
         {
             Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
             //its max exsclusive min inclusinve
