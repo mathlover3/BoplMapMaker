@@ -130,8 +130,6 @@ the following are the funcsons of the Platform type.
 note that Platform is for both Platforms and Boulders.
 returns "Platform"
 string Platform.GetClassType()
-Vec2 Platform.GetPos()
-number Platform.GetRot()
 
 home is basicly what posison it would like to be in. its what the springs try to get the platform to. GetHome, GetHomeRot, SetHome, SetHomeRot dont work on Boulders and will cause a error.
 Vec2 Platform.GetHome()
@@ -142,7 +140,10 @@ none Platform.SetHome(number posX, number posY)
 none Platform.SetHomeRot(number NewRot)
 none Platform.ShakePlatform(number Duratson, number ShakeAmount)
 none Platform.DropAllPlayers(number DropForce)
+
+may be nil.
 BoplBody Platform.GetBoplBody()
+
 bool Platform.IsBoulder()
 
 this is true for custom shaped platforms,  platforms created by the platform ability and platforms created with lua.
@@ -150,6 +151,12 @@ bool Platform.IsResizable()
 
 resizes the platform. only works if Platform.IsResizable() is true. Width and Height are distances from a edge to the center - Radius. To calculate the true Width/Height in bopl units you do (Width + Radius)*2. same for Height but with Height instead of Width.
 none ResizePlatform(number Width, number Height, number Radius)
+
+gets the Width, Height and Radius of the platform in the same way as ResizePlatform takes in. this works on all platforms and boulders.
+number, number, number GetPlatformSize()
+
+gets the True Width and Height taking into acount rotatsons. returns Width, Height
+number, number GetTrueWidthAndHeight()
 
 # BoplBody
 this is the funcsons the BoplBody has.
@@ -183,7 +190,7 @@ can return "Arrow", "RocketEngine", "Mine", "Telsa", "AbilityPickup", "Missile",
 string BoplBody.GetObjectType()
 
 ## Errors
-When a script has a error/fails to parse it logs the error to the consule. for runtime errors it says where in the code the error happend, what script it happend in, and what the error is. for a parseing error it says aproxamently where the error is.
+When a script has a error/fails to parse it logs the error to the consule. for runtime errors it says where in the code the error happend, what script it happend in, and what the error is. for a parseing error it says aproxamently where the error is. print() also logs the first pramiter to the consule
 
 ## Defult Lua Apis
 you get the following built in lua apis:

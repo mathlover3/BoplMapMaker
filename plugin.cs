@@ -87,7 +87,7 @@ namespace MapMaker
         private static LuaMain LuaPrefab = null;
         public static SignalSystem signalSystem;
         public static int NextUUID = 0;
-
+        public static string PluginPath;
         //used to fix a unity bug
         public static PlayerAverageCamera averageCamera;
         public static ShakableCamera shakableCamera;
@@ -128,6 +128,7 @@ namespace MapMaker
                 Directory.CreateDirectory(mapsFolderPath);
                 Debug.Log("Maps folder created.");
             }
+            PluginPath = Info.Location;
             //thanks almafa64 on discord for the path stuff.
             MyAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakerassets");
             string[] assetNames = MyAssetBundle.GetAllAssetNames();
@@ -1179,7 +1180,9 @@ first = true");*/
         //gets all of the .zip files from the maps folder and turns them into a array of ZipArchive's (david) ONLY CALL ON START!
         public static ZipArchive[] GetZipArchives()
         {
-            string[] MapZipFiles = Directory.GetFiles(mapsFolderPath, "*.zip");
+            Debug.Log(Path.GetDirectoryName(PluginPath));
+            Debug.Log(Directory.Exists(Path.GetDirectoryName(PluginPath)));
+            string[] MapZipFiles = Directory.GetFiles(Path.GetDirectoryName(PluginPath), "*.zip");
             Debug.Log($"{MapZipFiles.Length} .zip's");
             foreach (string zipFile in MapZipFiles)
             {
@@ -1189,7 +1192,6 @@ first = true");*/
             Debug.Log($"zipArchivesLength is {zipArchives.Length}");
             MyZipArchives = zipArchives;
             return zipArchives;
-
         }
         //get the custom drill color from a dicsanry
         public static Drill.PlatformColors DrillColors(int PlatformType, Dictionary<string, object> dict)
@@ -2160,7 +2162,7 @@ first = true");*/
 
             if (ln.HasValue && rn.HasValue)
             {
-                m_ValueStack.Push(DynValue.NewNumber((double)((Fix)ln.Value % (Fix)rn.Value)));
+                m_ValueStack.Push(DynValue.NewNumber((double)(Fix.SlowMod((Fix)ln.Value , (Fix)rn.Value))));
                 __result = instructionPtr;
                 return;
             }
@@ -2187,18 +2189,26 @@ first = true");*/
 
             double? rn = r.CastToNumber();
             double? ln = l.CastToNumber();
+            try
+            {
 
-            if (ln.HasValue && rn.HasValue)
-            {
-                m_ValueStack.Push(DynValue.NewNumber((double)((Fix)ln.Value / (Fix)rn.Value)));
-                __result = instructionPtr;
-                return;
+
+                if (ln.HasValue && rn.HasValue)
+                {
+                    m_ValueStack.Push(DynValue.NewNumber((double)((Fix)ln.Value / (Fix)rn.Value)));
+                    __result = instructionPtr;
+                    return;
+                }
+                else
+                {
+                    int ip = __instance.Internal_InvokeBinaryMetaMethod(l, r, "__div", instructionPtr);
+                    if (ip >= 0) __result = ip;
+                    else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
+                }
             }
-            else
+            catch ( Exception e )
             {
-                int ip = __instance.Internal_InvokeBinaryMetaMethod(l, r, "__div", instructionPtr);
-                if (ip >= 0) __result = ip;
-                else throw ScriptRuntimeException.ArithmeticOnNonNumber(l, r);
+                throw new ScriptRuntimeException(e.Message);
             }
         }
         [HarmonyPatch("ExecDiv")]

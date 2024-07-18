@@ -859,6 +859,38 @@ namespace MapMaker.Lua_stuff
                 throw new ScriptRuntimeException("called ResizePlatform on a platform thats not Resizable. check IsResizable() before calling!");
             }
         }
+        public DynValue GetPlatformSize()
+        {
+            var exstents = target.extents;
+            var r = target.rr.radius;
+            return DynValue.NewTuple(
+    DynValue.NewNumber((double)exstents.x),
+    DynValue.NewNumber((double)exstents.y),
+    DynValue.NewNumber((double)r)
+);
+        }
+        public DynValue GetTrueWidthAndHeight()
+        {
+            var bounds = target.GetBoundingRect();
+            var MaxX = Fix.Max(bounds.bl.x, bounds.br.x);
+            MaxX = Fix.Max(MaxX, bounds.tl.x);
+            MaxX = Fix.Max(MaxX, bounds.tr.x);
+            var MinX = Fix.Min(bounds.bl.x, bounds.br.x);
+            MinX = Fix.Min(MinX, bounds.tl.x);
+            MinX = Fix.Min(MinX, bounds.tr.x);
+            var MaxY = Fix.Max(bounds.bl.y, bounds.br.y);
+            MaxY = Fix.Max(MaxY, bounds.tl.y);
+            MaxY = Fix.Max(MaxY, bounds.tr.y);
+            var MinY = Fix.Min(bounds.bl.y, bounds.br.y);
+            MinY = Fix.Min(MinY, bounds.tl.y);
+            MinY = Fix.Min(MinY, bounds.tr.y);
+            var Width = Fix.Abs(MaxX - MinX);
+            var Height = Fix.Abs(MaxY - MinY);
+            return DynValue.NewTuple(
+    DynValue.NewNumber((double)Width),
+    DynValue.NewNumber((double)Height)
+);
+        }
     }
     public class BoplBodyProxy
     {
