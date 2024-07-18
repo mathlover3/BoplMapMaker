@@ -91,9 +91,10 @@ namespace MapMaker
         //used to fix a unity bug
         public static PlayerAverageCamera averageCamera;
         public static ShakableCamera shakableCamera;
-        //make it a weak refrence?
         public static List<PlayerInput> playerInputs = new();
         public static bool FirstUpdate = true;
+        //used to chose a map from the random bag
+        public static List<int> MapIndexsUsed = new();
         //map ids
         public static readonly int GrassMapId = 0;
         public static readonly int SnowMapId = 21;
@@ -1222,6 +1223,37 @@ first = true");*/
                 Floats.Add((float)Convert.ToDouble(ObjectList[i]));
             }
             return Floats;
+        }
+        public static int RandomBagLevel()
+        {
+            var TimesToGoForwords = UnityEngine.Random.Range(0, Plugin.MapJsons.Length - MapIndexsUsed.Count);
+            //if we used all of them reset it.
+            if (Plugin.MapJsons.Length == MapIndexsUsed.Count)
+            {
+                MapIndexsUsed = new();
+            }
+            byte Index = 0;
+            //we start at index 0
+            while ((int)Index < Plugin.MapJsons.Length)
+            {
+                //if we havent used the id Index yet
+                if (!MapIndexsUsed.Contains(Index))
+                {
+                    //if we have finished going forwords
+                    if (TimesToGoForwords == 0)
+                    {
+                        //we add the index and return the new map id
+                        MapIndexsUsed.Add(Index);
+                        return Index;
+                    }
+                    //if we havent finished going forwords then we go back 1
+                    TimesToGoForwords -= 1;
+                }
+                //incress the index by 1 so its not a infanent loop
+                Index += 1;
+            }
+            //this will never happen
+            throw new Exception("random bag broke");
         }
         public static Spawner CreateSpawner(Vec2 Pos, Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity, UnityEngine.Color color, Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
         {
@@ -2374,7 +2406,7 @@ first = true");*/
             //its max exsclusive min inclusinve
             if (Plugin.MapJsons.Length != 0)
             {
-                Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+                Plugin.CurrentMapIndex = Plugin.RandomBagLevel();
                 Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
                 var type = Convert.ToString(MetaData["MapType"]);
                 switch (type)
@@ -2452,7 +2484,7 @@ first = true");*/
                 if (Plugin.MapJsons.Length != 0)
                 {
                     //its max exsclusive min inclusinve
-                    Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+                    Plugin.CurrentMapIndex = Plugin.RandomBagLevel();
                     Dictionary<string, object> MetaData = MiniJSON.Json.Deserialize(Plugin.MetaDataJsons[Plugin.CurrentMapIndex]) as Dictionary<string, object>;
                     var type = Convert.ToString(MetaData["MapType"]);
                     switch (type)
