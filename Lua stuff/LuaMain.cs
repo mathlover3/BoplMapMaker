@@ -610,6 +610,26 @@ namespace MapMaker.Lua_stuff
             else throw new ScriptRuntimeException($"index {index} is not a valid ability index. valid indexs are 1, 2 and 3");
 
         }
+        public double GetAbilityMaxCooldown(int index)
+        {
+            if (index >= 1 && index <= 3)
+            {
+                var slimeController = target.gameObject.GetComponent<SlimeController>();
+                if (slimeController.abilities.Count == 1)
+                {
+                    if (index == 1) return (double)(slimeController.abilities[0].GetCooldown());
+                    else return 1000000;
+                }
+                if (slimeController.abilities.Count == 2)
+                {
+                    if (index == 1) return (double)(slimeController.abilities[0].GetCooldown());
+                    if (index == 2) return (double)(slimeController.abilities[1].GetCooldown());
+                    else return 1000000;
+                }
+                return (double)(slimeController.abilities[index - 1].GetCooldown());
+            }
+            else throw new ScriptRuntimeException($"index {index} is not a valid ability index. valid indexs are 1, 2 and 3");
+        }
         public bool IsDisappeared()
         {
             return !target.gameObject.activeInHierarchy;

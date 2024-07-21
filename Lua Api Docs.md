@@ -121,6 +121,9 @@ number Player.GetAbilityCooldownRemaining(number index)
 sets the cooldown remaining for the ability in that slot. does nothing if theres no ability in the slot
 none Player.SetAbilityCooldownRemaining(number index, number NewRemainingCooldown)
 
+returns 1,000,000 if theres no ability in that slot. if theres a ability in the slot it returns the time it takes for the ability to recharge after use.
+number GetAbilityMaxCooldown(number index)
+
 returns true if the player is currently disappeared from blink
 bool IsDisappeared()
 
