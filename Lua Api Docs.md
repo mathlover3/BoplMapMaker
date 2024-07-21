@@ -73,6 +73,8 @@ bool GetInputValueWithId(number id)
 sets the value of the logic gates output with that id. returns a error if the id is > then the number of outputs. the output will stay the value you set untill you set it agien.
 none SetOutputWithId(number id, bool value)
 
+gets a file from inside the map file with the given name including the exstencon. exsample name is "File.dat". it cant acsess files inside founders inside the map (maps are just zips in descise). returns a Sequence of bytes or a error if the file doesnt exsit.
+Sequence (of bytes) GetFileFromMapFile(string FileName)
 ## Vec2
 the type before the funcson are its return type. Vec2 is just a shorthand for outputing 2 numbers x, y
 
@@ -196,6 +198,7 @@ When a script has a error/fails to parse it logs the error to the consule. for r
 you get the following built in lua apis:
 The global constants: "_G", "_VERSION" and "_MOONSHARP",
 The table iterators: "next", "ipairs" and "pairs",
+The metatable methods : "setmetatable", "getmetatable", "rawset", "rawget", "rawequal" and "rawlen",
 The string package,
 The table package,
 The math package,

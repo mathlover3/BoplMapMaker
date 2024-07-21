@@ -1017,7 +1017,7 @@ namespace MapMaker
                 Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
                 Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
                 //var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
-                //CreateTrigger(new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0, true);
+                //CreateTrigger(new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
                 //CreateTrigger(new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1, true);
                 int[] UUids = { 4, 0 };
                 //CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
@@ -1122,20 +1122,20 @@ first = true");*/
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
                 // If entry is a directory, skip it
-                Debug.Log("check if its a drectory");
+                //Debug.Log("check if its a drectory");
                 if (entry.FullName.EndsWith("/"))
                     continue;
-                Debug.Log("it isnt a drectory");
+                //Debug.Log("it isnt a drectory");
                 //see if it is valid (if the predicate returns true)
                 string[] path = { entry.FullName };
                 string[] ValidPathArray = Array.FindAll(path, predicate);
                 if (ValidPathArray.Length != 0)
                 {
-                    Debug.Log("about to read the contents of entry");
+                    //Debug.Log("about to read the contents of entry");
                     // Read the contents of the entry
                     using (StreamReader reader = new StreamReader(entry.Open()))
                     {
-                        Debug.Log("reading the contents of entry");
+                        //Debug.Log("reading the contents of entry");
                         string contents = reader.ReadToEnd();
                         //add the contents to data
                         data = data.Append(contents).ToArray();
@@ -1153,21 +1153,21 @@ first = true");*/
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
                 // If entry is a directory, skip it
-                Debug.Log("check if its a drectory");
+                //Debug.Log("check if its a drectory");
                 if (entry.FullName.EndsWith("/"))
                     continue;
-                Debug.Log("it isnt a drectory");
+                //Debug.Log("it isnt a drectory");
                 //see if it is valid (if the predicate returns true)
                 string[] path = { entry.FullName };
                 string[] ValidPathArray = Array.FindAll(path, predicate);
                 if (ValidPathArray.Length != 0)
                 {
-                    Debug.Log("about to read the contents of entry");
+                    //Debug.Log("about to read the contents of entry");
                     // Read the contents of the entry
                     using (var entryStream = entry.Open())
                     using (var memoryStream = new MemoryStream())
                     {
-                        Debug.Log("reading the contents of entry");
+                        //Debug.Log("reading the contents of entry");
                         entryStream.CopyTo(memoryStream);
                         //add the contents to data
                         data = data.Append(memoryStream.ToArray()).ToArray();
@@ -1557,7 +1557,7 @@ first = true");*/
             dropPlayers.Register();
             return dropPlayers;
         }
-        public static LuaMain CreateLuaGate(int[] InputUUids, int[] OutputUUids, Vec2 pos, Fix rot, string LuaCode)
+        public static LuaMain CreateLuaGate(int[] InputUUids, int[] OutputUUids, Vec2 pos, Fix rot, string LuaCode, int ZipIndex)
         {
             var Lua = FixTransform.InstantiateFixed<LuaMain>(LuaPrefab, pos, (Fix)ConvertToRadians((double)rot));
             var LogicInputs = new List<LogicInput>();
@@ -1587,6 +1587,7 @@ first = true");*/
             Lua.InputSignals.AddRange(LogicInputs);
             Lua.OutputSignals.AddRange(LogicOutputs);
             Lua.code = LuaCode;
+            Lua.ZipIndex = ZipIndex;
             Lua.Register();
             return Lua;
         }
@@ -2689,7 +2690,7 @@ first = true");*/
         [HarmonyPrefix]
         private static bool Awake_MapMaker_Plug2(ref PlayerInit hostPlayer, SteamManager __instance)
         {
-            Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+            Plugin.CurrentMapIndex = Plugin.RandomBagLevel();
             //its max exsclusive min inclusinve
             if (Plugin.MapJsons.Length != 0)
             {
@@ -2779,7 +2780,7 @@ first = true");*/
         [HarmonyPrefix]
         private static bool Awake_MapMaker_Plug2(Player hostPlayer, NamedSpriteList abilityIcons, SteamManager __instance)
         {
-            Plugin.CurrentMapIndex = UnityEngine.Random.Range(0, Plugin.MapJsons.Length);
+            Plugin.CurrentMapIndex = Plugin.RandomBagLevel();
             //its max exsclusive min inclusinve
             if (Plugin.MapJsons.Length != 0)
             {

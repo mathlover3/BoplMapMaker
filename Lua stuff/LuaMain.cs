@@ -31,6 +31,8 @@ namespace MapMaker.Lua_stuff
         public static MoonSharpVsCodeDebugServer server;
         public static bool UseDebugServer = false;
         private static Fix deltaTime = Fix.Zero;
+        private static string FileNameToGet;
+        public int ZipIndex;
         public void Awake()
         {
             if (LuaSpawner == null)
@@ -55,7 +57,7 @@ namespace MapMaker.Lua_stuff
         public Script SetUpScriptFuncsons()
         {
             //dont want to let people use librays that would give them acsess outside of the game like os and io now do we? also no time package eather as thats just asking for desinks.
-            Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine);
+            Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Metatables);
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
             script.Globals["SpawnGrenade"] = (object)SpawnGrenadeDouble;
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
@@ -76,6 +78,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["IsTimeStopped"] = (object)IsTimeStopped;
             script.Globals["GetInputValueWithId"] = (object)GetInputValueWithId;
             script.Globals["SetOutputWithId"] = (object)SetOutputWithId;
+            script.Globals["GetFileFromMapFile"] = (object)GetFileFromMapFile;
             script.Options.DebugPrint = s => { Console.WriteLine(s); };
             // Register just MyClass, explicitely.
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
@@ -412,6 +415,22 @@ namespace MapMaker.Lua_stuff
         public bool IsTimeStopped()
         {
             return GameTime.IsTimeStopped();
+        }
+        public List<byte> GetFileFromMapFile(string FileName)
+        {
+            FileNameToGet = FileName;
+            var File = Plugin.GetFileFromZipArchiveBytes(Plugin.zipArchives[ZipIndex], IsCorrectFile);
+            if (File.Length == 0)
+            {
+                throw new ScriptRuntimeException($"File {FileName} doesnt exsit in map file");
+            }
+            return File[0].ToList();
+        }
+        public static bool IsCorrectFile(string path)
+        {
+            if (path == FileNameToGet) return true;
+            //will only be reached if its not a boplmap
+            return false;
         }
         public override void Logic(Fix SimDeltaTime)
         {
