@@ -753,27 +753,18 @@ namespace MapMaker
 
                         //scale object
                         var ScaleFactor = FloorToThousandnths(Convert.ToDouble(PresetPlatform["ScaleFactor"]));
-                        if (Platform.GetComponent<GrowOnStart>() == null)
-                        {
-                            var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
-                            GrowOnStartComp.scaleUp = ScaleFactor;
-                            Debug.Log("added GrowOnStart");
-                        }
-                        else
-                        {
-                            Platform.GetComponent<GrowOnStart>().scaleUp = ScaleFactor;
-                        }
-                        
+                        var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
+                        GrowOnStartComp.scaleUp = ScaleFactor;
+                        Debug.Log("added GrowOnStart");
                         //spawn object
                         Debug.Log($"pos is {pos}");
-                        var PlatformObject = UnityEngine.Object.Instantiate<GameObject>(Platform, pos, Quaternion.identity);
-                        Destroy(Platform.GetComponent<GrowOnStart>());
-                        PlatformApi.PlatformApi.SetPos(PlatformObject, (Vec2)pos);
+                        Platform = UnityEngine.Object.Instantiate<GameObject>(Platform, pos, Quaternion.identity);
+                        PlatformApi.PlatformApi.SetPos(Platform, (Vec2)pos);
                         //rotate object
-                        StickyRoundedRectangle StickyRect = PlatformObject.GetComponent<StickyRoundedRectangle>();
+                        StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
                         StickyRect.GetGroundBody().rotation = FloorToThousandnths((double)rotatson);
                         //fix mats
-                        foreach (Transform t in PlatformObject.transform)
+                        foreach (Transform t in Platform.transform)
                         {
                             //if its a grass
                             if (t.gameObject.name == "AnimatedGrass_0" || t.gameObject.name == "AnimatedGrass_0 (2)" || t.gameObject.name == "AnimatedGrass_0 (3)" || t.gameObject.name == "AnimatedGrass")
@@ -785,7 +776,7 @@ namespace MapMaker
                         if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                         {
                             //antilock platform
-                            var AntiLockPlatformComp = PlatformObject.AddComponent(typeof(AntiLockPlatform)) as AntiLockPlatform;
+                            var AntiLockPlatformComp = Platform.AddComponent(typeof(AntiLockPlatform)) as AntiLockPlatform;
                             AntiLockPlatformComp.OrbitForce = FloorToThousandnths(OrbitForce);
                             AntiLockPlatformComp.OrbitPath = OrbitPath;
                             AntiLockPlatformComp.DelaySeconds = FloorToThousandnths(DelaySeconds);
@@ -793,7 +784,7 @@ namespace MapMaker
                         }
                         if (pathType == PlatformApi.PlatformApi.PathType.VectorFieldPlatform)
                         {
-                            var VectorFieldPlatformComp = PlatformObject.AddComponent(typeof(VectorFieldPlatform)) as VectorFieldPlatform;
+                            var VectorFieldPlatformComp = Platform.AddComponent(typeof(VectorFieldPlatform)) as VectorFieldPlatform;
                             VectorFieldPlatformComp.centerPoint = centerPoint;
                             VectorFieldPlatformComp.DeadZoneDist = FloorToThousandnths(DeadZoneDist);
                             VectorFieldPlatformComp.DelaySeconds = FloorToThousandnths(DelaySeconds);
@@ -807,7 +798,7 @@ namespace MapMaker
                         {
                             var movingPlatformSignalStuff = (Dictionary<string, object>)platform["MovingPlatformSignalStuff"];
                             var UUID = Convert.ToInt32(movingPlatformSignalStuff["InputUUID"]);
-                            AddMovingPlatformSignalStuff(PlatformObject, UUID);
+                            AddMovingPlatformSignalStuff(Platform, UUID);
                         }
                         if (platform.ContainsKey("DisappearPlatformOnSignal"))
                         {
@@ -815,7 +806,7 @@ namespace MapMaker
                             var UUID = Convert.ToInt32(disappearPlatformOnSignal["InputUUID"]);
                             var SecondsToReapper = Convert.ToDouble(disappearPlatformOnSignal["SecondsToReapper"]);
                             var Delay = Convert.ToDouble(disappearPlatformOnSignal["Delay"]);
-                            CreateDisappearPlatformsOnSignal(PlatformObject, UUID, (Fix)SecondsToReapper, (Fix)Delay);
+                            CreateDisappearPlatformsOnSignal(Platform, UUID, (Fix)SecondsToReapper, (Fix)Delay);
                         }
                         if (platform.ContainsKey("ShakePlatform"))
                         {
@@ -824,7 +815,7 @@ namespace MapMaker
                             var Duration = Convert.ToDouble(shakePlatform["Duration"]);
                             var OnlyActivateOnRise = Convert.ToBoolean(shakePlatform["OnlyActivateOnRise"]);
                             var ShakeAmount = Convert.ToDouble(shakePlatform["ShakeAmount"]);
-                            CreateShakePlatform(PlatformObject, UUID, (Fix)Duration, OnlyActivateOnRise, (Fix)ShakeAmount);
+                            CreateShakePlatform(Platform, UUID, (Fix)Duration, OnlyActivateOnRise, (Fix)ShakeAmount);
                         }
                         if (platform.ContainsKey("DropPlayers"))
                         {
@@ -832,7 +823,7 @@ namespace MapMaker
                             var UUID = Convert.ToInt32(DropPlayers["InputUUID"]);
                             var OnlyActivateOnRise = Convert.ToBoolean(DropPlayers["OnlyActivateOnRise"]);
                             var DropForce = Convert.ToDouble(DropPlayers["DropForce"]);
-                            CreateDropPlayers(PlatformObject, UUID, (Fix)DropForce, OnlyActivateOnRise);
+                            CreateDropPlayers(Platform, UUID, (Fix)DropForce, OnlyActivateOnRise);
                         }
                     }
 
