@@ -44,6 +44,7 @@ namespace MapMaker
         public static GameObject PlatformAbility;
         public static Transform levelt;
         public static StickyRoundedRectangle platformPrefab;
+        public static ParticleSystem WavePrefab;
         public static List<ResizablePlatform> Platforms;
         public static int t;
         public static string mapsFolderPath; // Create blank folder path var
@@ -699,8 +700,8 @@ namespace MapMaker
                         Vec2[] centerPoint2 = { centerPoint };
                         //spawn platform
                         var PlatformObject = PlatformApi.PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
+                        PlatformObject.GetComponent<WaterWaves>().WavePrefab = WavePrefab;
                         //signal time!
-
                         if (platform.ContainsKey("MovingPlatformSignalStuff"))
                         {
                             var movingPlatformSignalStuff = (Dictionary<string, object>)platform["MovingPlatformSignalStuff"];
@@ -750,7 +751,7 @@ namespace MapMaker
                         Platform.GetComponent<SpriteRenderer>().material = PlatformMat;
                         //set home
                         PlatformApi.PlatformApi.SetHome(Platform, (Vec2)pos);
-
+                        Platform.GetComponent<WaterWaves>().WavePrefab = WavePrefab;
                         //scale object
                         var ScaleFactor = FloorToThousandnths(Convert.ToDouble(PresetPlatform["ScaleFactor"]));
                         if (Platform.GetComponent<GrowOnStart>() == null)
@@ -1080,6 +1081,7 @@ first = true");*/
                     {
                         //steal matual 
                         PlatformMat = tplatform.gameObject.GetComponent<SpriteRenderer>().material;
+                        WavePrefab = tplatform.gameObject.GetComponent<WaterWaves>().WavePrefab;
                     }
                     index++;
                     //distroy it
