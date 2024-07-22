@@ -442,7 +442,7 @@ namespace MapMaker
                 GameSessionHandler.playerSpawns_readonly = Vecs;
             }
             List<object> platforms = (List<object>)Dict["platforms"];
-            Debug.Log("platforms set");
+            //Debug.Log("platforms set");
             //empty the list of Drill colors so the indexs start at 0 agien
             CustomDrillColors = new List<Drill.PlatformColors>();
             NextPlatformTypeValue = StartingNextPlatformTypeValue;
@@ -479,9 +479,9 @@ namespace MapMaker
                     {
                         rotatson = ConvertToRadians(Convert.ToDouble(platform["rotation"]));
                     }
-                    Debug.Log("getting IsPresetPatform");
+                    //Debug.Log("getting IsPresetPatform");
                     bool IsPresetPatform = platform.ContainsKey("PresetPlatform");
-                    Debug.Log("IsPresetPatform is: " + IsPresetPatform);
+                    //Debug.Log("IsPresetPatform is: " + IsPresetPatform);
 
                     //path stuff
 
@@ -753,11 +753,19 @@ namespace MapMaker
 
                         //scale object
                         var ScaleFactor = FloorToThousandnths(Convert.ToDouble(PresetPlatform["ScaleFactor"]));
-                        var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
-                        GrowOnStartComp.scaleUp = ScaleFactor;
-                        Debug.Log("added GrowOnStart");
+                        if (Platform.GetComponent<GrowOnStart>() == null)
+                        {
+                            var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
+                            GrowOnStartComp.scaleUp = ScaleFactor;
+                            //Debug.Log("added GrowOnStart");
+                        }
+                        else
+                        {
+                            Platform.GetComponent<GrowOnStart>().scaleUp = ScaleFactor;
+                        }
+
                         //spawn object
-                        Debug.Log($"pos is {pos}");
+                        //Debug.Log($"pos is {pos}");
                         Platform = UnityEngine.Object.Instantiate<GameObject>(Platform, pos, Quaternion.identity);
                         PlatformApi.PlatformApi.SetPos(Platform, (Vec2)pos);
                         //rotate object
