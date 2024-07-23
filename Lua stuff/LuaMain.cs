@@ -812,7 +812,16 @@ namespace MapMaker.Lua_stuff
         public PlatformProxy(StickyRoundedRectangle p)
         {
             target = p;
-            shakable = p.gameObject.GetComponent<ShakablePlatform>();
+            try
+            {
+                shakable = p.gameObject.GetComponent<ShakablePlatform>();
+            }
+            catch (Exception ex)
+            {
+                //do nothing. the reson we have to do it like this is that if a component doesnt have a gameobject just the act of doing...
+                //p.gameObject causes a null ref error.
+            }
+            
         }
         public string GetClassType()
         {
@@ -872,7 +881,10 @@ namespace MapMaker.Lua_stuff
         }
         public void ShakePlatform(double Duratson, double ShakeAmount)
         {
-            shakable.AddShake((Fix)Duratson, (Fix)ShakeAmount);
+            if (shakable)
+            {
+                shakable.AddShake((Fix)Duratson, (Fix)ShakeAmount);
+            }
         }
         public void DropAllPlayers(double DropForce)
         {
@@ -976,7 +988,7 @@ namespace MapMaker.Lua_stuff
         }
         public bool IsBeingDestroyed()
         {
-            return target.physicsCollider.IsDestroyed;
+            return target.physicsCollider.IsDestroyed || target.gameObject == null;
         }
         public DynValue GetPos()
         {
