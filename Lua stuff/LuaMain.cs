@@ -33,6 +33,8 @@ namespace MapMaker.Lua_stuff
         private static Fix deltaTime = Fix.Zero;
         private static string FileNameToGet;
         public int ZipIndex;
+        //handled in plugin
+        public static List<PlayerPhysics> players = new();
         public void Awake()
         {
             if (LuaSpawner == null)
@@ -286,25 +288,39 @@ namespace MapMaker.Lua_stuff
         }
         public static DynValue GetAllPlayers(Script script)
         {
-            //PlayerList (1)
-            var playerlist = GameObject.Find("PlayerList");
-            if (playerlist == null)
-            {
-                playerlist = GameObject.Find("PlayerList (1)");
-            }
-            var players = playerlist.transform;
             List<PlayerPhysics> Players = new();
-            foreach (Transform player in players)
+            //lists are refrece types so i cant drectly set it and instead must copy it manualy
+            foreach (PlayerPhysics player in players)
             {
-                if (player.gameObject.name == "Player(Clone)")
+                Players.Add(player);
+            }
+            //remove any invalid players from the players list
+            foreach (PlayerPhysics player in players)
+            {
+                if (player == null)
                 {
-                    Players.Add(player.gameObject.GetComponent<PlayerPhysics>());
+                    Players.Remove(player);
+                    //end this iteratson of the loop
+                    continue;
+                }
+                try
+                {
+                    if (player.gameObject == null)
+                    {
+                        //this code will never be reaced as if theres no gameobject just the act of doing player.gameObject cause a null ref error even if player isnt null. but just in case
+                        Players.Remove(player);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Players.Remove(player);
                 }
             }
+            players = Players;
             //DynValue.FromObject
             return DynValue.NewTuple(
-                DynValue.NewNumber(Players.Count),
-                DynValue.FromObject(script, Players)
+                DynValue.NewNumber(players.Count),
+                DynValue.FromObject(script, players)
             );
         }
         public static DynValue GetAllBoplBodys(Script script)

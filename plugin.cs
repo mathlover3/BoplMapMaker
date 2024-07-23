@@ -3133,4 +3133,14 @@ first = true");*/
             return false;
         }
     }
+    [HarmonyPatch(typeof(SlimeController))]
+    public class SlimeControllerPatches
+    {
+        [HarmonyPatch("Awake")]
+        [HarmonyPrefix]
+        private static void Awake_MapMaker_Plug(SlimeController __instance)
+        {
+            LuaMain.players.Add(__instance.GetComponent<PlayerPhysics>());
+        }
+    }
 }
