@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace MapMaker
 {
-    public class Trigger : MonoUpdatable, ICollisionCallback, IUpdatable
+    public class Trigger : MonoUpdatable, ICollisionCallback
     {
         //TRIGGERS PHYSICS BOXES ARE ON LAYER 3!
         public static DPhysicsBox DPhysicsBoxPrefab;

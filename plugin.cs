@@ -73,6 +73,7 @@ namespace MapMaker
         public static UnityEngine.Color[] ignore = { new UnityEngine.Color(1, 1, 1, 1) };
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
         public static AssetBundle MyAssetBundle;
+        public static AssetBundle SpriteAssetBundle;
         public static PlatformApi.PlatformApi platformApi = new PlatformApi.PlatformApi();
         private static Trigger TriggerPrefab = null;
         private static Spawner SpawnerPrefab = null;
@@ -133,6 +134,7 @@ namespace MapMaker
             //thanks almafa64 on discord for the path stuff.
             MyAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakerassets");
             string[] assetNames = MyAssetBundle.GetAllAssetNames();
+            SpriteAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakericons");
             //MapUUIDChannel = new EntwinedPacketChannel<int>(this, new IntEntwiner());
             //MapUUIDChannel.OnMessage += OnGetUUID; 
             foreach (string name in assetNames)
@@ -889,7 +891,7 @@ namespace MapMaker
                     spawnerGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     spawnerGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
                     var spriteRender = spawnerGameObject.AddComponent<SpriteRenderer>();
-                    var SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/spawnericon.prefab");
+                    var SpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/spawnericon.prefab");
                     spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
@@ -903,7 +905,7 @@ namespace MapMaker
                     DisappearGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     DisappearGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
                     spriteRender = DisappearGameObject.AddComponent<SpriteRenderer>();
-                    SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/disapearingplatform.prefab");
+                    SpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/disapearingplatform.prefab");
                     spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
                     // Create a new GameObject
                     GameObject AndGateObject = new GameObject("AndGateObject");
@@ -916,7 +918,7 @@ namespace MapMaker
                     andGatePrefab = AndGateObject.AddComponent<AndGate>();
                     var AndGateRender = AndGateObject.AddComponent<SpriteRenderer>();
                     Debug.Log(MyAssetBundle.LoadAsset("assets/assetbundleswanted/andgate.prefab"));
-                    var AndGateSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/andgate.prefab");
+                    var AndGateSpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/andgate.prefab");
                     AndGateRender.sprite = AndGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
@@ -928,7 +930,7 @@ namespace MapMaker
                     SignalDelayObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     SignalDelayPrefab = SignalDelayObject.AddComponent<SignalDelay>();
                     var SignalDelaySpriteRender = SignalDelayObject.AddComponent<SpriteRenderer>();
-                    var SignalDelaySpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/delaygate.prefab");
+                    var SignalDelaySpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/delaygate.prefab");
                     SignalDelaySpriteRender.sprite = SignalDelaySpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
@@ -940,7 +942,7 @@ namespace MapMaker
                     OrGateObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     OrGatePrefab = OrGateObject.AddComponent<OrGate>();
                     var OrGateSpriteRender = OrGateObject.AddComponent<SpriteRenderer>();
-                    var OrGateSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/orgate.prefab");
+                    var OrGateSpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/orgate.prefab");
                     OrGateSpriteRender.sprite = OrGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
@@ -952,7 +954,7 @@ namespace MapMaker
                     NotGateObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     NotGatePrefab = NotGateObject.AddComponent<NotGate>();
                     var NotGateSpriteRender = NotGateObject.AddComponent<SpriteRenderer>();
-                    var NotGateSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/notgate.prefab");
+                    var NotGateSpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/notgate.prefab");
                     NotGateSpriteRender.sprite = NotGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
@@ -974,7 +976,7 @@ namespace MapMaker
                     DropPlayersGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     DropPlayersGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
                     spriteRender = DropPlayersGameObject.AddComponent<SpriteRenderer>();
-                    SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/playerdrop.prefab");
+                    SpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/playerdrop.prefab");
                     spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
@@ -985,7 +987,7 @@ namespace MapMaker
                     ShakePlatformGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     ShakePlatformGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
                     var ShakePlatformRender = ShakePlatformGameObject.AddComponent<SpriteRenderer>();
-                    var ShakePlatformSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/shaker.prefab");
+                    var ShakePlatformSpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/shaker.prefab");
                     ShakePlatformRender.sprite = ShakePlatformSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
@@ -996,7 +998,7 @@ namespace MapMaker
                     LuaGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     LuaGameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     var LuaRender = LuaGameObject.AddComponent<SpriteRenderer>();
-                    var LuaSpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/luagate.prefab");
+                    var LuaSpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/luagate.prefab");
                     LuaRender.sprite = LuaSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
@@ -1462,7 +1464,7 @@ first = true");*/
             var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
             //icon
             var spriteRender = shootRay.GetComponent<SpriteRenderer>();
-            var SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/blinkemitter.prefab");
+            var SpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/blinkemitter.prefab");
             spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
             var input = new LogicInput
@@ -1487,7 +1489,7 @@ first = true");*/
             var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
             //icon stuff
             var spriteRender = shootRay.GetComponent<SpriteRenderer>();
-            var SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/growemitter.prefab");
+            var SpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/growemitter.prefab");
             spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
             var input = new LogicInput
@@ -1512,7 +1514,7 @@ first = true");*/
             var shootRay = FixTransform.InstantiateFixed<ShootRay>(ShootRayPrefab, pos, (Fix)ConvertToRadians((double)rot));
             //icon stuff
             var spriteRender = shootRay.GetComponent<SpriteRenderer>();
-            var SpriteGameObject = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/shrinkemitter.prefab");
+            var SpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/shrinkemitter.prefab");
             spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
             var input = new LogicInput
             {

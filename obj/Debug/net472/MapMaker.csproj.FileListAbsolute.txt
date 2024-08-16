@@ -38,7 +38,6 @@ C:\Users\djhlo\bopl mods\MapMaker!\obj\Debug\net472\MapMaker.pdb
 C:\Users\djhlo\bopl mods\MapMaker!\bin\Debug\net472\Newtonsoft.Json.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\MapMaker.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\MapMaker.pdb
-C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\Assembly-CSharp.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\com.unity.multiplayer-hlapi.Runtime.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\Facepunch.Steamworks.Win64.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\Mono.Posix.dll
@@ -85,3 +84,4 @@ C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\PlatformApi.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\PlatformApi.pdb
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.IgnoresAccessChecksTo.cs
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\MoonSharp.VsCodeDebugger.dll
+C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\Assembly-CSharp_publicized.dll

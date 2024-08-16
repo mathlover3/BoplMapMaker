@@ -12,6 +12,9 @@ using System.IO.Compression;
 using MapMaker.Lua_stuff;
 using MoonSharp.Interpreter;
 using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System.Linq;
+
 namespace MapMaker
 {
     public class Patches
@@ -1357,23 +1360,28 @@ namespace MapMaker
         [HarmonyPatch(typeof(Beam))]
         public class BeamPatches
         {
+            static FieldInfo f_Shakeable_Field = AccessTools.Field(typeof(Plugin), nameof(Plugin.shakableCamera));
+            static MethodInfo m_Find_Object_Of_Type = SymbolExtensions.GetMethodInfo(() => UnityEngine.Object.FindObjectOfType<ShakableCamera>());
+
             [HarmonyPatch("Awake")]
-            [HarmonyPrefix]
-            private static bool Awake_MapMaker_Plug(Beam __instance)
+            [HarmonyTranspiler]
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                Updater.RegisterUpdatable(__instance);
-                __instance.animator = __instance.GetComponent<SpriteAnimator>();
-                __instance.spriteRen = __instance.GetComponent<SpriteRenderer>();
-                __instance.body = __instance.GetComponent<PlayerBody>();
-                __instance.ability = __instance.GetComponent<Ability>();
-                __instance.physics = __instance.GetComponent<PlayerPhysics>();
-                __instance.shakeCam = Plugin.shakableCamera;
-                __instance.hurtbox = __instance.GetComponent<DPhysicsBox>();
-                __instance.origFixTransOffset = __instance.GetComponent<FixTransform>().offset;
-                __instance.origExtents = __instance.hurtbox.CalcExtents();
-                __instance.physics.OnAttachedToGround += __instance.OnGrounded;
-                __instance.physics.OnNoLongerGrounded += __instance.OnUngrounded;
-                return false;
+                var codes = new List<CodeInstruction>(instructions);
+                var found = false;
+                foreach (var instruction in instructions)
+                {
+                    if (instruction.Calls(m_Find_Object_Of_Type))
+                    {
+                        yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldsfld, f_Shakeable_Field);
+                        found = true;
+                    }
+                    else { yield return instruction; }
+                    
+                }
+                if (found is false)
+                    Debug.LogError("error beam awake transpiler failed");
+                
             }
         }
         [HarmonyPatch(typeof(ControlPlatform))]
@@ -1534,6 +1542,57 @@ namespace MapMaker
                 LuaMain.players.Add(__instance.GetComponent<PlayerPhysics>());
             }
         }
-
+        [HarmonyPatch(typeof(DetPhysics))]
+        public class DetPhysicsPatches
+        {
+            [HarmonyPatch("SyncGameObject")]
+            [HarmonyPostfix]
+            private static void Awake_MapMaker_Plug(DetPhysics __instance, IShape shape, ref PhysicsParent pp, ref PhysicsBody body)
+            {
+                if (pp.fixTrans.gameObject.name == "Player(Clone)")
+                {
+                    Debug.Log($"SyncGameObject set players pos to x: {pp.fixTrans.position.x} and y {pp.fixTrans.position.y}");
+                }
+            }
+        }
+        [HarmonyPatch(typeof(DPhysicsBox))]
+        public class DPhysicsBoxPatches
+        {
+            [HarmonyPatch("position", MethodType.Setter)]
+            [HarmonyPostfix]
+            private static void Awake_MapMaker_Plug(Vec2 value, DPhysicsBox __instance)
+            {
+                if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
+                {
+                    Debug.Log($"DPhysicsBox set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()}");
+                }
+            }
+        }
+        [HarmonyPatch(typeof(DPhysicsCircle))]
+        public class DPhysicsCirclePatches
+        {
+            [HarmonyPatch("position", MethodType.Setter)]
+            [HarmonyPostfix]
+            private static void Awake_MapMaker_Plug(Vec2 value, DPhysicsCircle __instance)
+            {
+                if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
+                {
+                    Debug.Log($"DPhysicsCircle set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()}");
+                }
+            }
+        }
+        [HarmonyPatch(typeof(PlayerBody))]
+        public class PlayerBodyPatches
+        {
+            [HarmonyPatch("position", MethodType.Setter)]
+            [HarmonyPostfix]
+            private static void Awake_MapMaker_Plug(Vec2 value, PlayerBody __instance)
+            {
+                if (__instance.fixTransform.gameObject.name == "Player(Clone)")
+                {
+                    Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()}");
+                }
+            }
+        }
     }
 }
