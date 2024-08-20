@@ -1401,6 +1401,40 @@ namespace MapMaker
                 __instance.hurtbox = __instance.GetComponent<DPhysicsBox>();
                 return false;
             }
+            static FieldInfo f_Plugin_Cam_X_Min_Field = AccessTools.Field(typeof(Plugin), nameof(Plugin.Camera_XMin));
+            static FieldInfo f_Old_Cam_X_Min_Field = AccessTools.Field(typeof(SceneBounds), nameof(SceneBounds.Camera_XMin));
+            static FieldInfo f_Plugin_Cam_X_Max_Field = AccessTools.Field(typeof(Plugin), nameof(Plugin.Camera_XMax));
+            static FieldInfo f_Old_Cam_X_Max_Field = AccessTools.Field(typeof(SceneBounds), nameof(SceneBounds.Camera_XMax));
+            static FieldInfo f_Plugin_Cam_Y_Max_Field = AccessTools.Field(typeof(Plugin), nameof(Plugin.Camera_YMax));
+            static FieldInfo f_Old_Cam_Y_Max_Field = AccessTools.Field(typeof(SceneBounds), nameof(SceneBounds.Camera_YMax));
+            [HarmonyPatch("UpdateSim")]
+            [HarmonyTranspiler]
+
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var found = 0;
+                foreach (var instruction in instructions)
+                {
+                    if (instruction.LoadsField(f_Old_Cam_X_Min_Field))
+                    {
+                        yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldsfld, f_Plugin_Cam_X_Min_Field);
+                        found = found + 1;
+                    }
+                    else if (instruction.LoadsField(f_Old_Cam_X_Max_Field))
+                    {
+                        yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldsfld, f_Plugin_Cam_X_Max_Field);
+                        found = found + 1;
+                    }
+                    else if (instruction.LoadsField(f_Old_Cam_Y_Max_Field))
+                    {
+                        yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldsfld, f_Plugin_Cam_Y_Max_Field);
+                        found = found + 1;
+                    }
+                    else { yield return instruction; }
+                }
+                if (found < 3)
+                    Debug.LogError("ControlPlatform transpiler failed");
+            }
         }
         [HarmonyPatch(typeof(CastSpell))]
         public class CastSpellPatches
@@ -1551,7 +1585,7 @@ namespace MapMaker
             {
                 if (pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"SyncGameObject set players pos to x: {pp.fixTrans.position.x} and y {pp.fixTrans.position.y}");
+                    Debug.Log($"SyncGameObject set players pos to x: {pp.fixTrans.position.x} and y {pp.fixTrans.position.y} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1564,7 +1598,7 @@ namespace MapMaker
             {
                 if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"DPhysicsBox set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()}");
+                    Debug.Log($"DPhysicsBox set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1577,7 +1611,7 @@ namespace MapMaker
             {
                 if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"DPhysicsCircle set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()}");
+                    Debug.Log($"DPhysicsCircle set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1590,7 +1624,7 @@ namespace MapMaker
             {
                 if (__instance.fixTransform.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()}");
+                    Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }

@@ -103,6 +103,24 @@ namespace MapMaker
 
         //used to make shakeable platform to know its being called by a blink gun.
         public static bool CurrentlyBlinking;
+        //used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
+        public static Fix Camera_XMin = (Fix)(-97.27f);
+
+        public static Fix Camera_XMax = (Fix)97.6f;
+
+        public static Fix Camera_YMax = (Fix)40f;
+
+        private static Fix waterHeight = (Fix)(-11.3f);
+
+        private static Fix spaceWaterHeight = (Fix)(-50f);
+
+        public static Fix Camera_YMin = -(Fix)26L;
+
+        public static Fix BlastZone_XMin = (Fix)(-105L);
+
+        public static Fix BlastZone_XMax = (Fix)105L;
+
+        public static Fix BlastZone_YMax = (Fix)58L;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -752,6 +770,9 @@ namespace MapMaker
                         Platform.GetComponent<SpriteRenderer>().material = PlatformMat;
                         //set home
                         PlatformApi.PlatformApi.SetHome(Platform, (Vec2)pos);
+                        BoplBody body = Platform.GetComponent<BoplBody>();
+                        //make the space junk not start with rotatsonal velosity
+                        body.StartAngularVelocity = Fix.Zero;
                         Platform.GetComponent<WaterWaves>().WavePrefab = WavePrefab;
                         //scale object
                         var ScaleFactor = FloorToThousandnths(Convert.ToDouble(PresetPlatform["ScaleFactor"]));
@@ -765,7 +786,14 @@ namespace MapMaker
                         {
                             Platform.GetComponent<GrowOnStart>().scaleUp = ScaleFactor;
                         }
-
+                        if (ScaleFactor < Platform.GetComponent<DPhysicsRoundedRect>().MinScale)
+                        {
+                            Platform.GetComponent<DPhysicsRoundedRect>().MinScale = ScaleFactor;
+                        }
+                        if (ScaleFactor > Platform.GetComponent<DPhysicsRoundedRect>().MaxScale)
+                        {
+                            Platform.GetComponent<DPhysicsRoundedRect>().MaxScale = ScaleFactor;
+                        }
                         //spawn object
                         //Debug.Log($"pos is {pos}");
                         Platform = UnityEngine.Object.Instantiate<GameObject>(Platform, pos, Quaternion.identity);
