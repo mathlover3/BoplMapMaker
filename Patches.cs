@@ -1316,6 +1316,80 @@ namespace MapMaker
             private static void Awake_MapMaker_Plug(PlayerAverageCamera __instance)
             {
                 Plugin.averageCamera = __instance;
+                __instance.UpdateY = true;
+            }
+            [HarmonyPatch("UpdateCamera")]
+            [HarmonyPrefix]
+            private static bool Awake_MapMaker_Plug2(PlayerAverageCamera __instance)
+            {
+                List<Player> list = PlayerHandler.Get().PlayerList();
+                Vector2 vector = default(Vector2);
+                float d = (float)list.Count;
+                float num = 0f;
+                float num2 = 0f;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (list[i].IsAlive)
+                    {
+                        Vector2 vector2 = (Vector2)list[i].Position;
+                        vector += vector2;
+                        num = Mathf.Max(num, vector2.x);
+                        num2 = Mathf.Min(num2, vector2.x);
+                    }
+                }
+                Vec2[] playerSpawns_readonly = GameSessionHandler.playerSpawns_readonly;
+                vector /= d;
+                if (__instance.useMinMaxForCameraX)
+                {
+                    vector = new Vector2((num2 + num) * 0.5f, vector.y);
+                }
+                float num3 = Mathf.Min(__instance.maxDeltaTime, Time.unscaledDeltaTime);
+                Vector2 vector3 = (1f - __instance.weight * num3) * (Vector2)__instance.transform.localPosition + __instance.weight * num3 * vector;
+                float num4 = __instance.camera.orthographicSize * __instance.camera.aspect + __instance.outsideLevelX;
+                vector3.x = Mathf.Max((float)SceneBounds.Camera_XMin + num4, vector3.x);
+                vector3.x = Mathf.Min((float)SceneBounds.Camera_XMax - num4, vector3.x);
+                vector3.x = __instance.RoundToNearestPixel(vector3.x);
+                vector3.y = Mathf.Max((float)SceneBounds.WaterHeight + __instance.MinHeightAboveFloor, vector3.y);
+                vector3.y = Mathf.Min((float)SceneBounds.Camera_YMax, vector3.y);
+                vector3.y = __instance.RoundToNearestPixel(vector3.y);
+                if (!__instance.UpdateX)
+                {
+                    vector3.x = __instance.transform.position.x;
+                }
+                if (!__instance.UpdateY)
+                {
+                    vector3.y = __instance.transform.position.y;
+                }
+                Vector3 position = new Vector3(vector3.x, vector3.y, __instance.transform.position.z);
+                __instance.transform.position = position;
+                float num5 = 0f;
+                float num6 = 0f;
+                for (int j = 0; j < list.Count; j++)
+                {
+                    Vector2 vector4 = (Vector2)list[j].Position;
+                    float b = Mathf.Abs(vector4.x - vector.x);
+                    num5 = Mathf.Max(num5, b);
+                    b = Mathf.Abs(vector4.y - vector.y);
+                    num6 = Mathf.Max(num6, b);
+                }
+                float num7 = (float)(Screen.width / Screen.height);
+                num5 *= num7;
+                float num8 = Mathf.Max(num5, num6);
+                num8 += __instance.extraZoomRoom;
+                if (num8 > __instance.MAX_ZOOM)
+                {
+                    num8 = __instance.MAX_ZOOM;
+                }
+                if (num8 < __instance.MIN_ZOOM)
+                {
+                    num8 = __instance.MIN_ZOOM;
+                }
+                float num9 = Mathf.Clamp((1f - __instance.zoomWeight * num3) * __instance.camera.orthographicSize + __instance.zoomWeight * num3 * num8, __instance.MIN_ZOOM, __instance.MAX_ZOOM);
+                if (__instance.camera.orthographicSize != num9)
+                {
+                    __instance.camera.orthographicSize = num9;
+                }
+                return false;
             }
         }
         [HarmonyPatch(typeof(Host))]
