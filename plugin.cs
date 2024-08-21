@@ -1220,9 +1220,7 @@ first = true");*/
         //gets all of the .zip files from the maps folder and turns them into a array of ZipArchive's (david) ONLY CALL ON START!
         public static ZipArchive[] GetZipArchives()
         {
-            Debug.Log(Path.GetDirectoryName(PluginPath));
-            Debug.Log(Directory.Exists(Path.GetDirectoryName(PluginPath)));
-            string[] MapZipFiles = Directory.GetFiles(Path.GetDirectoryName(PluginPath), "*.zip");
+            string[] MapZipFiles = Directory.GetFiles(mapsFolderPath, "*.zip");
             Debug.Log($"{MapZipFiles.Length} .zip's");
             foreach (string zipFile in MapZipFiles)
             {
