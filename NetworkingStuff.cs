@@ -19,7 +19,7 @@ namespace MapMaker
         public static EntwinedPacketChannel<int[]> MapUUIDsChannel;
         public static List<int> MapUUIDsReceved = new();
         public static EntwinedPacketChannel<bool> DoWeHaveDifrentMapIdsChannel;
-        public static EntwinedPacketChannel<ZipArchivePacket[]> ZipChannel;
+        public static EntwinedPacketChannel<ZipArchivePacket> ZipChannel;
         public static EntwinedPacketChannel<BetterStartRequestPacket> StartChannel;
         public static bool HasResetListsYet = false;
         public static int NumberOfZipsReceved = 0;
@@ -32,9 +32,9 @@ namespace MapMaker
             MapUUIDsChannel.OnMessage += OnUUIDs;
             DoWeHaveDifrentMapIdsChannel = new EntwinedPacketChannel<bool>(Plugin.instance, new BoolEntwiner());
             DoWeHaveDifrentMapIdsChannel.OnMessage += OnDifrentMapIds;
-            var entwinerZip = new GenericEntwiner<ZipArchivePacket[]>(ZipArchivePacketArrayToByteArray, ByteArrayToZipArchivePacketArray);
-            ZipChannel = new EntwinedPacketChannel<ZipArchivePacket[]>(Plugin.instance, entwinerZip);
-            ZipChannel.OnMessage += OnZipArchivePacketArray;
+            var entwinerZip = new GenericEntwiner<ZipArchivePacket>(ZipArchiveToByteArray, ByteArrayToZipArchive);
+            ZipChannel = new EntwinedPacketChannel<ZipArchivePacket>(Plugin.instance, entwinerZip);
+            ZipChannel.OnMessage += OnZipArchive;
             var entwinerStart = new GenericEntwiner<BetterStartRequestPacket>(BetterStartRequestPacketToByteArray, ByteArrayToBetterStartRequestPacket);
             StartChannel = new EntwinedPacketChannel<BetterStartRequestPacket>(Plugin.instance, entwinerStart);
             StartChannel.OnMessage += OnStartPacket;
@@ -91,7 +91,6 @@ namespace MapMaker
         {
             if (SteamManager.LocalPlayerIsLobbyOwner)
             {
-                List<ZipArchivePacket> zips = new();
                 var i = 0;
                 foreach (ZipArchive archive in Plugin.zipArchives)
                 {
@@ -101,45 +100,13 @@ namespace MapMaker
                         length = Plugin.zipArchives.Length,
                         id = i
                     };
-                    UnityEngine.Debug.Log("sending map number " + i);
-                    zips.Add(zipPacket);
+                    ZipChannel.SendMessage(zipPacket);
                     i++;
                 }
-                NetworkingStuff.ZipChannel.SendMessage(zips.ToArray());
             }
         }
 
-        public static byte[] ZipArchivePacketArrayToByteArray(ZipArchivePacket[] zips)
-        {
-            List<byte> bytes = new List<byte>();
-            foreach(ZipArchivePacket zipArchivePacket in zips)
-            {
-                bytes.AddRange(ZipArchiveToByteArray(zipArchivePacket));
-            }
-            return bytes.ToArray(); 
-        }
-        public static ZipArchivePacket[] ByteArrayToZipArchivePacketArray(byte[] bytes)
-        {
-            List<ZipArchivePacket> zipArchivePackets = new List<ZipArchivePacket>();
-            int i = 0;
-            while (i < bytes.Length)
-            {
-                //get some metadata
-                var bytes2 = bytes.ToList();
-                //set the length (includes the exstra data)
-                byte[] ZipLengthBytes = { bytes[i + 9], bytes[i + 10], bytes[i + 11], bytes[i + 12] };
-                
-                if (!BitConverter.IsLittleEndian)
-                {
-                    Array.Reverse(ZipLengthBytes);
-                }
-                int PacketLength = BitConverter.ToInt32(ZipLengthBytes, 0);
-                UnityEngine.Debug.Log("zip archive size is " + PacketLength);
-                var zipBytes = bytes2.GetRange(i, PacketLength);
-                zipArchivePackets.Add(ByteArrayToZipArchive(zipBytes.ToArray()));
-            }
-            return zipArchivePackets.ToArray();
-        }
+        
         public static byte[] ZipArchiveToByteArray(ZipArchivePacket archive)
         {
             //chatgpt code
@@ -160,11 +127,8 @@ namespace MapMaker
                 }
                 //my code
                 var bytes = memoryStream.ToArray().ToList();
-                //set the length (includes the exstra data)
-                int PacketLength = bytes.Count + 12;
                 bytes.AddRange(BitConverter.GetBytes(Plugin.zipArchives.Length));
                 bytes.AddRange(BitConverter.GetBytes(ZipId));
-                bytes.AddRange(BitConverter.GetBytes(PacketLength));
                 ZipId++;
                 if (ZipId >= Plugin.zipArchives.Length)
                 {
@@ -176,58 +140,51 @@ namespace MapMaker
         public static ZipArchivePacket ByteArrayToZipArchive(byte[] byteArray)
         {
             List<byte> bytes = byteArray.ToList();
-            bytes.RemoveRange(bytes.Count - 12, 12);
+            bytes.RemoveRange(bytes.Count - 8, 8);
             byte[] data = bytes.ToArray();
             var memoryStream = new MemoryStream(data);
             //https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/types/how-to-convert-a-byte-array-to-an-int
             // If the system architecture is little-endian (that is, little end first),
             // reverse the byte array.
-            byte[] ZipCountBytes = { byteArray[byteArray.Length - 12], byteArray[byteArray.Length - 11], byteArray[byteArray.Length - 10], byteArray[byteArray.Length - 9] };
-            byte[] IdBytes = { byteArray[byteArray.Length - 8], byteArray[byteArray.Length - 7], byteArray[byteArray.Length - 6], byteArray[byteArray.Length - 5] };
-            byte[] PacketLengthBytes = { byteArray[byteArray.Length - 4], byteArray[byteArray.Length - 3], byteArray[byteArray.Length - 2], byteArray[byteArray.Length - 1] };
-
+            byte[] bytes2 = { byteArray[byteArray.Length - 8], byteArray[byteArray.Length - 7], byteArray[byteArray.Length - 6], byteArray[byteArray.Length - 5] };
+            byte[] bytes3 = { byteArray[byteArray.Length - 4], byteArray[byteArray.Length - 3], byteArray[byteArray.Length - 2], byteArray[byteArray.Length - 1] };
             //idk why but the microsoft exsample is backwords?
             if (!BitConverter.IsLittleEndian)
             {
-                Array.Reverse(ZipCountBytes);
-                Array.Reverse(IdBytes);
-                Array.Reverse(PacketLengthBytes);
+                Array.Reverse(bytes2);
+                Array.Reverse(bytes3);
             }
             var zipPacket = new ZipArchivePacket
             {
                 zip = new ZipArchive(memoryStream, ZipArchiveMode.Read),
 
-                length = BitConverter.ToInt32(ZipCountBytes, 0),
-                id = BitConverter.ToInt32(IdBytes, 0),
-                PacketLength = BitConverter.ToInt32(PacketLengthBytes, 0)
+                length = BitConverter.ToInt32(bytes2, 0),
+                id = BitConverter.ToInt32(bytes3, 0)
             };
             return zipPacket;
         }
-        public static void OnZipArchivePacketArray(ZipArchivePacket[] zipArchivePackets, PacketSourceInfo sourceInfo)
+        public static void OnZipArchive(ZipArchivePacket payload, PacketSourceInfo sourceInfo)
         {
 
             //if its the host we add them to the list of zip archives and do the rest of the initalison for them.
             if (SteamManager.instance.currentLobby.IsOwnedBy(sourceInfo.Identity.SteamId))
             {
-                foreach (var payload in zipArchivePackets)
+                UnityEngine.Debug.Log($"number of zips to reseve is {payload.length}");
+                UnityEngine.Debug.Log($"id is {payload.id}");
+                if (!HasResetListsYet)
                 {
-                    UnityEngine.Debug.Log($"number of zips to reseve is {payload.length}");
-                    UnityEngine.Debug.Log($"id is {payload.id}");
-                    if (!HasResetListsYet)
-                    {
-                        Plugin.zipArchives = new ZipArchive[payload.length];
-                        Plugin.MapJsons = new string[payload.length];
-                        Plugin.MetaDataJsons = new string[payload.length];
-                        HasResetListsYet = true;
-                    }
-                    Plugin.zipArchives[payload.id] = payload.zip;
-                    Plugin.MapJsons[payload.id] = Plugin.GetFileFromZipArchive(payload.zip, Plugin.IsBoplMap)[0];
-                    Plugin.MetaDataJsons[payload.id] = Plugin.GetFileFromZipArchive(payload.zip, Plugin.IsMetaDataFile)[0];
-                    NumberOfZipsReceved++;
-                    if (NumberOfZipsReceved == payload.length)
-                    {
-                        HasResetListsYet = false;
-                    }
+                    Plugin.zipArchives = new ZipArchive[payload.length];
+                    Plugin.MapJsons = new string[payload.length];
+                    Plugin.MetaDataJsons = new string[payload.length];
+                    HasResetListsYet = true;
+                }
+                Plugin.zipArchives[payload.id] = payload.zip;
+                Plugin.MapJsons[payload.id] = Plugin.GetFileFromZipArchive(payload.zip, Plugin.IsBoplMap)[0];
+                Plugin.MetaDataJsons[payload.id] = Plugin.GetFileFromZipArchive(payload.zip, Plugin.IsMetaDataFile)[0];
+                NumberOfZipsReceved++;
+                if (NumberOfZipsReceved == payload.length)
+                {
+                    HasResetListsYet = false;
                 }
             }
         }
@@ -315,7 +272,6 @@ namespace MapMaker
     }
     public struct ZipArchivePacket
     {
-        public int PacketLength;
         public ZipArchive zip;
         public int length;
         public int id;

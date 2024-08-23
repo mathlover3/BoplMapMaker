@@ -14,7 +14,6 @@ using MoonSharp.Interpreter;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System.Linq;
-using Entwined;
 
 namespace MapMaker
 {
@@ -1317,7 +1316,7 @@ namespace MapMaker
             private static void Awake_MapMaker_Plug(PlayerAverageCamera __instance)
             {
                 Plugin.averageCamera = __instance;
-                //__instance.UpdateY = true;
+                __instance.UpdateY = true;
             }
             [HarmonyPatch("UpdateCamera")]
             [HarmonyPrefix]
@@ -1660,7 +1659,7 @@ namespace MapMaker
             {
                 if (pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    //Debug.Log($"SyncGameObject set players pos to x: {pp.fixTrans.position.x} and y {pp.fixTrans.position.y} at time {Updater.SimTimeSinceLevelLoaded}");
+                    Debug.Log($"SyncGameObject set players pos to x: {pp.fixTrans.position.x} and y {pp.fixTrans.position.y} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1673,7 +1672,7 @@ namespace MapMaker
             {
                 if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    //Debug.Log($"DPhysicsBox set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
+                    Debug.Log($"DPhysicsBox set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1686,7 +1685,7 @@ namespace MapMaker
             {
                 if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    //Debug.Log($"DPhysicsCircle set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
+                    Debug.Log($"DPhysicsCircle set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1699,31 +1698,9 @@ namespace MapMaker
             {
                 if (__instance.fixTransform.gameObject.name == "Player(Clone)")
                 {
-                    //Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
+                    Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
-        /*[HarmonyPatch(typeof(Entwined.Entwined))]
-        public class EntwinedPatches
-        {
-            [HarmonyPatch("SendMessage")]
-            [HarmonyTranspiler]
-
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                var found = 0;
-                foreach (var instruction in instructions)
-                {
-                    if (instruction.opcode == System.Reflection.Emit.OpCodes.Ldc_I4_8)
-                    {
-                        yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldc_I4_4);
-                        found = found + 1;
-                    }
-                    else { yield return instruction; }
-                }
-                if (found < 1)
-                    Debug.LogError("Entwined transpiler failed");
-            }
-        }*/
     }
 }

@@ -402,10 +402,6 @@ namespace MapMaker
 
         public static void SpawnPlatformsFromMap(Dictionary<string, object> Dict, int index)
         {
-            if (Dict == null)
-            {
-                throw new Exception("error invalid json");
-            }
             //get the platform prefab out of the Platform ability gameobject (david) DO NOT REMOVE!
             //chatgpt code to get the Platform ability object
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
