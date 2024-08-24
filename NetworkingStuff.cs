@@ -74,7 +74,10 @@ namespace MapMaker
                 foreach (string json in Plugin.MetaDataJsons)
                 {
                     Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(json) as Dictionary<string, object>;
-                    UUIDs.Add(Convert.ToInt32(Meta["MapUUID"]));
+                    if (Meta.ContainsKey("MapUUID"))
+                    {
+                        UUIDs.Add(Convert.ToInt32(Meta["MapUUID"]));
+                    }
                 }
                 if (UUIDs.ToArray() != payload)
                 {
