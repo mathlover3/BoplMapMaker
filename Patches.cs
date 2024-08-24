@@ -1071,16 +1071,17 @@ namespace MapMaker
                 {
                     return;
                 }
-                //if we own the lobby send the new player the list of our map uuids in order so we can know if we both have the same maps.
+                //if we own the lobby send the new player the first map
                 if (SteamManager.LocalPlayerIsLobbyOwner)
                 {
-                    List<int> UUIDs = new List<int>();
-                    foreach (string json in Plugin.MetaDataJsons)
+                    Plugin.NextMapIndex = Plugin.RandomBagLevel();
+                    ZipArchivePacket zipArchivePacket = new ZipArchivePacket
                     {
-                        Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(json) as Dictionary<string, object>;
-                        UUIDs.Add(Convert.ToInt32(Meta["MapUUID"]));
-                    }
-                    NetworkingStuff.MapUUIDsChannel.SendMessage(UUIDs.ToArray());
+                        zip = Plugin.MyZipArchives[Plugin.NextMapIndex],
+                        length = Plugin.MyZipArchives.Length,
+                        id = Plugin.NextMapIndex
+                    };
+                    NetworkingStuff.ZipChannel.SendMessage(zipArchivePacket);
                 }
             }
             [HarmonyPatch("OnLevelWasLoaded")]
@@ -1094,7 +1095,16 @@ namespace MapMaker
             [HarmonyPrefix]
             private static bool Awake_MapMaker_Plug2(ref PlayerInit hostPlayer, SteamManager __instance)
             {
-                Plugin.CurrentMapIndex = Plugin.RandomBagLevel();
+                
+                Plugin.CurrentMapIndex = Plugin.NextMapIndex;
+                Plugin.NextMapIndex = Plugin.RandomBagLevel();
+                ZipArchivePacket zipArchivePacket = new ZipArchivePacket
+                {
+                    zip = Plugin.MyZipArchives[Plugin.NextMapIndex],
+                    length = Plugin.MyZipArchives.Length,
+                    id = Plugin.NextMapIndex
+                };
+                NetworkingStuff.ZipChannel.SendMessage(zipArchivePacket);
                 //its max exsclusive min inclusinve
                 if (Plugin.MapJsons.Length != 0)
                 {
@@ -1184,7 +1194,15 @@ namespace MapMaker
             [HarmonyPrefix]
             private static bool Awake_MapMaker_Plug2(Player hostPlayer, NamedSpriteList abilityIcons, SteamManager __instance)
             {
-                Plugin.CurrentMapIndex = Plugin.RandomBagLevel();
+                Plugin.CurrentMapIndex = Plugin.NextMapIndex;
+                Plugin.NextMapIndex = Plugin.RandomBagLevel();
+                ZipArchivePacket zipArchivePacket = new ZipArchivePacket
+                {
+                    zip = Plugin.MyZipArchives[Plugin.NextMapIndex],
+                    length = Plugin.MyZipArchives.Length,
+                    id = Plugin.NextMapIndex
+                };
+                NetworkingStuff.ZipChannel.SendMessage(zipArchivePacket);
                 //its max exsclusive min inclusinve
                 if (Plugin.MapJsons.Length != 0)
                 {
@@ -1659,7 +1677,7 @@ namespace MapMaker
             {
                 if (pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"SyncGameObject set players pos to x: {pp.fixTrans.position.x} and y {pp.fixTrans.position.y} at time {Updater.SimTimeSinceLevelLoaded}");
+                    //Debug.Log($"SyncGameObject set players pos to x: {pp.fixTrans.position.x} and y {pp.fixTrans.position.y} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1672,7 +1690,7 @@ namespace MapMaker
             {
                 if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"DPhysicsBox set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
+                    //Debug.Log($"DPhysicsBox set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1685,7 +1703,7 @@ namespace MapMaker
             {
                 if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"DPhysicsCircle set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
+                    //Debug.Log($"DPhysicsCircle set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
@@ -1698,7 +1716,7 @@ namespace MapMaker
             {
                 if (__instance.fixTransform.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
+                    //Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }

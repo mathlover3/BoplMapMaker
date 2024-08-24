@@ -103,6 +103,8 @@ namespace MapMaker
 
         //used to make shakeable platform to know its being called by a blink gun.
         public static bool CurrentlyBlinking;
+        //networking
+        public static int NextMapIndex;
         //used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
         public static Fix Camera_XMin = (Fix)(-97.27f);
 

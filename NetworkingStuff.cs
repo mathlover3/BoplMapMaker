@@ -21,9 +21,6 @@ namespace MapMaker
         public static EntwinedPacketChannel<bool> DoWeHaveDifrentMapIdsChannel;
         public static EntwinedPacketChannel<ZipArchivePacket> ZipChannel;
         public static EntwinedPacketChannel<BetterStartRequestPacket> StartChannel;
-        public static bool HasResetListsYet = false;
-        public static int NumberOfZipsReceved = 0;
-        public static int ZipId = 0;
         public static void Awake()
         {
             //networking stuff
@@ -131,12 +128,7 @@ namespace MapMaker
                 //my code
                 var bytes = memoryStream.ToArray().ToList();
                 bytes.AddRange(BitConverter.GetBytes(Plugin.zipArchives.Length));
-                bytes.AddRange(BitConverter.GetBytes(ZipId));
-                ZipId++;
-                if (ZipId >= Plugin.zipArchives.Length)
-                {
-                    ZipId = 0;
-                }
+                bytes.AddRange(BitConverter.GetBytes(archive.id));
                 return bytes.ToArray();
             }
         }
@@ -172,23 +164,17 @@ namespace MapMaker
             //if its the host we add them to the list of zip archives and do the rest of the initalison for them.
             if (SteamManager.instance.currentLobby.IsOwnedBy(sourceInfo.Identity.SteamId))
             {
-                UnityEngine.Debug.Log($"number of zips to reseve is {payload.length}");
+                UnityEngine.Debug.Log($"length of zip array is {payload.length}");
                 UnityEngine.Debug.Log($"id is {payload.id}");
-                if (!HasResetListsYet)
+                if (Plugin.zipArchives.Length < payload.length)
                 {
                     Plugin.zipArchives = new ZipArchive[payload.length];
                     Plugin.MapJsons = new string[payload.length];
                     Plugin.MetaDataJsons = new string[payload.length];
-                    HasResetListsYet = true;
                 }
                 Plugin.zipArchives[payload.id] = payload.zip;
                 Plugin.MapJsons[payload.id] = Plugin.GetFileFromZipArchive(payload.zip, Plugin.IsBoplMap)[0];
                 Plugin.MetaDataJsons[payload.id] = Plugin.GetFileFromZipArchive(payload.zip, Plugin.IsMetaDataFile)[0];
-                NumberOfZipsReceved++;
-                if (NumberOfZipsReceved == payload.length)
-                {
-                    HasResetListsYet = false;
-                }
             }
         }
 
