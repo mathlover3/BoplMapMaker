@@ -159,7 +159,9 @@ namespace MapMaker
             {
                 Debug.Log("asset name is: " + name);
             }
+
         }
+
         public void Start()
         {
 

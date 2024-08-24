@@ -1316,7 +1316,7 @@ namespace MapMaker
             private static void Awake_MapMaker_Plug(PlayerAverageCamera __instance)
             {
                 Plugin.averageCamera = __instance;
-                __instance.UpdateY = true;
+                //__instance.UpdateY = true;
             }
             [HarmonyPatch("UpdateCamera")]
             [HarmonyPrefix]
