@@ -736,7 +736,7 @@ namespace MapMaker
                         bool flag = true;
                         if (__instance.ropeBody.segmentSeparation < __instance.separationBeforeReelinDeletion)
                         {
-                            flag = __instance.ropeBody.ReelInSegment(__instance.playerInfo.topAttachment);
+                            flag = __instance.ropeBody.ReelInSegment(8);
                         }
                         if (!flag)
                         {
@@ -1716,7 +1716,7 @@ namespace MapMaker
             {
                 if (__instance.fixTransform.gameObject.name == "Player(Clone)")
                 {
-                    //Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
+                    Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
