@@ -1,4 +1,4 @@
-# Boplmap Mod
+# Bopl Map Maker
 
 ## Overview
 The Boplmap Mod is a custom modification for Bopl Battle that introduces support for loading custom map configurations from `.boplmap` files. These files contain detailed information about map elements such as platforms, their positions, rotations, biomes, and types.
