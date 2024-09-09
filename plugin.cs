@@ -438,7 +438,7 @@ namespace MapMaker
                     var floatVec = new Vec2((Fix)floatList[0], FloorToThousandnths(floatList[1]));
                     Vecs1.Add(floatVec);
                 }
-                Vec2[] Vecs = Vecs1.ToArray();
+                Vec2[] Vecs = Vecs1.Count == 1 ? Enumerable.Repeat(Vecs1[0], 4).ToArray() : Vecs1.ToArray();
                 //get the PlayerList
                 //set it to null to avoid using unasigned local var error. it will be assigend when the code runs unless somthing goes very badly.
                 GameObject PlayerList = null;
