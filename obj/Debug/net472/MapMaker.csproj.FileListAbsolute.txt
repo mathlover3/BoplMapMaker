@@ -69,7 +69,6 @@ C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.Generat
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.AssemblyInfoInputs.cache
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.AssemblyInfo.cs
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.csproj.CoreCompileInputs.cache
-C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.csproj.CopyComplete
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.pdb
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\AsmResolver.DotNet.dll
@@ -85,3 +84,5 @@ C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\PlatformApi.pdb
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.IgnoresAccessChecksTo.cs
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\MoonSharp.VsCodeDebugger.dll
 C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\bin\Debug\net472\Assembly-CSharp_publicized.dll
+C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.sourcelink.json
+C:\Users\djhlo\bopl mods\MapMaker\BoplMapMaker\obj\Debug\net472\MapMaker.csproj.Up2Date

@@ -163,16 +163,37 @@ namespace MapMaker
             }
 
         }
+        public static bool IsReplay()
+        {
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+            for (int i = 0; i < commandLineArgs.Length; i++)
+            {
+                if (commandLineArgs[i].EndsWith(".rep"))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         public void Start()
         {
-
-            //fill the MapJsons array up
-            ZipArchive[] zipArchives = GetZipArchives();
+            ZipArchive[] zipArchives2;
+            // if we are loading a replay the zip archive is already set
+            if (!IsReplay())
+            {
+                //fill the MapJsons array up
+                zipArchives2 = GetZipArchives();
+            }
+            else
+            {
+                zipArchives2 = zipArchives;
+            }
+            
             //Create a List for the json for a bit
             List<string> JsonList = new List<string>();
             List<string> MetaDataList = new();
-            foreach (ZipArchive zipArchive in zipArchives)
+            foreach (ZipArchive zipArchive in zipArchives2)
             {
                 //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
@@ -255,11 +276,11 @@ namespace MapMaker
             if (FirstUpdate)
             {
                 FirstUpdate = false;
-                // Create the debugger server
-                LuaMain.server = new MoonSharpVsCodeDebugServer();
-                // Start the debugger server
-                LuaMain.server.Start();
-                StartCoroutine(GetGrassMat());
+                if (!IsReplay())
+                {
+                    StartCoroutine(GetGrassMat());
+                }
+                
 
             }
         }

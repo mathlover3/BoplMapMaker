@@ -14,6 +14,7 @@ using MoonSharp.Interpreter;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System.Linq;
+using System.IO;
 
 namespace MapMaker
 {
@@ -1438,6 +1439,50 @@ namespace MapMaker
                 }
                 //throw new NotImplementedException();
             }
+            [HarmonyPatch("SaveReplay")]
+            [HarmonyPrefix]
+            private static bool SaveReplay_MapMaker_Plug(Host __instance)
+            {
+                Updater.gameHasStopped = true;
+                if (Host.recordReplay && __instance.inputRecording.Count != 0 && !(SteamManager.instance == null))
+                {
+                    string arg = Application.persistentDataPath + "/replays/";
+                    byte[] bytes = NetworkTools.SerializeReplay_compressed(__instance.inputRecording, __instance.EncodedStartRequest);
+                    ZipArchive zip = Plugin.zipArchives[Plugin.CurrentMapIndex];
+                    //chatgpt code
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        // Create a new ZipArchive in the MemoryStream
+                        using (var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                        {
+                            foreach (var entry in zip.Entries)
+                            {
+                                var newEntry = zipArchive.CreateEntry(entry.FullName);
+                                using (var entryStream = entry.Open())
+                                using (var newEntryStream = newEntry.Open())
+                                {
+                                    entryStream.CopyTo(newEntryStream);
+                                }
+                            }
+                        }
+                        //my code
+                        //first the length
+                        var bytes2 = BitConverter.GetBytes(memoryStream.ToArray().Length).ToList();
+                        //now the zip
+                        bytes2.AddRange(memoryStream.ToArray().ToList());
+                        //then the main replay stuff
+                        bytes2.AddRange(bytes);
+
+                        Host.replaysSaved++;
+                        string str = arg + Host.replaysSaved + ".rep";
+                        File.WriteAllBytes(arg + Host.replaysSaved + ".rep", bytes2.ToArray());
+                        Debug.Log("saved replay " + str);
+                    }
+                }
+                __instance.inputRecording.Clear();
+                return false;
+            }
+
         }
         [HarmonyPatch(typeof(ShakableCamera))]
         public class ShakableCameraPatches
@@ -1716,9 +1761,165 @@ namespace MapMaker
             {
                 if (__instance.fixTransform.gameObject.name == "Player(Clone)")
                 {
-                    Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
+                    //Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
                 }
             }
         }
+        [HarmonyPatch(typeof(NetworkTools))]
+        public class NetworkToolsPatches
+        {
+            private static StartRequestPacket ReadStartRequestReplay(byte[] data, ref byte[] uintConversionHelperArray, ref byte[] ulongConversionHelperArray, ref byte[] ushortConversionHelperArray)
+            {
+                //edited chatgpt code (tryed myself for a while but eventualy just asked chatgpt to fix my code lol)
+                // Extract the ZIP size (first 4 bytes)
+                byte[] zipSizeBytes = new byte[4];
+                Array.Copy(data, 0, zipSizeBytes, 0, 4);
+                int zipSize = BitConverter.ToInt32(zipSizeBytes, 0);
+
+                // Extract the ZIP archive bytes
+                byte[] zipArchiveBytes = new byte[zipSize];
+                Array.Copy(data, 4, zipArchiveBytes, 0, zipSize);
+
+                // Create a memory stream for the ZIP archive
+                var memoryStream = new MemoryStream(zipArchiveBytes);
+                var zipArchive = new ZipArchive(memoryStream, ZipArchiveMode.Read);
+                // Replace the plugin's zip archive with the loaded one
+                Plugin.zipArchives = new[] { zipArchive };
+                Plugin.CurrentMapIndex = 0;
+                //my code
+                var __result = default(StartRequestPacket);
+                int num = zipSize + 4;
+                //game code
+                ushortConversionHelperArray[0] = data[num++];
+                ushortConversionHelperArray[1] = data[num++];
+                __result.seqNum = NetworkTools.SwapBytesIfLittleEndian(BitConverter.ToUInt16(ushortConversionHelperArray, 0));
+                uintConversionHelperArray[0] = data[num++];
+                uintConversionHelperArray[1] = data[num++];
+                uintConversionHelperArray[2] = data[num++];
+                uintConversionHelperArray[3] = data[num++];
+                __result.seed = NetworkTools.SwapBytesIfLittleEndian(BitConverter.ToUInt32(uintConversionHelperArray, 0));
+                __result.nrOfPlayers = data[num++];
+                __result.nrOfAbilites = data[num++];
+                __result.currentLevel = data[num++];
+                __result.frameBufferSize = data[num++];
+                __result.isDemoMask = data[num++];
+                ulongConversionHelperArray[0] = data[num++];
+                ulongConversionHelperArray[1] = data[num++];
+                ulongConversionHelperArray[2] = data[num++];
+                ulongConversionHelperArray[3] = data[num++];
+                ulongConversionHelperArray[4] = data[num++];
+                ulongConversionHelperArray[5] = data[num++];
+                ulongConversionHelperArray[6] = data[num++];
+                ulongConversionHelperArray[7] = data[num++];
+                __result.p1_id = NetworkTools.SwapBytesIfLittleEndian(BitConverter.ToUInt64(ulongConversionHelperArray, 0));
+                ulongConversionHelperArray[0] = data[num++];
+                ulongConversionHelperArray[1] = data[num++];
+                ulongConversionHelperArray[2] = data[num++];
+                ulongConversionHelperArray[3] = data[num++];
+                ulongConversionHelperArray[4] = data[num++];
+                ulongConversionHelperArray[5] = data[num++];
+                ulongConversionHelperArray[6] = data[num++];
+                ulongConversionHelperArray[7] = data[num++];
+                __result.p2_id = NetworkTools.SwapBytesIfLittleEndian(BitConverter.ToUInt64(ulongConversionHelperArray, 0));
+                ulongConversionHelperArray[0] = data[num++];
+                ulongConversionHelperArray[1] = data[num++];
+                ulongConversionHelperArray[2] = data[num++];
+                ulongConversionHelperArray[3] = data[num++];
+                ulongConversionHelperArray[4] = data[num++];
+                ulongConversionHelperArray[5] = data[num++];
+                ulongConversionHelperArray[6] = data[num++];
+                ulongConversionHelperArray[7] = data[num++];
+                __result.p3_id = NetworkTools.SwapBytesIfLittleEndian(BitConverter.ToUInt64(ulongConversionHelperArray, 0));
+                ulongConversionHelperArray[0] = data[num++];
+                ulongConversionHelperArray[1] = data[num++];
+                ulongConversionHelperArray[2] = data[num++];
+                ulongConversionHelperArray[3] = data[num++];
+                ulongConversionHelperArray[4] = data[num++];
+                ulongConversionHelperArray[5] = data[num++];
+                ulongConversionHelperArray[6] = data[num++];
+                ulongConversionHelperArray[7] = data[num++];
+                __result.p4_id = NetworkTools.SwapBytesIfLittleEndian(BitConverter.ToUInt64(ulongConversionHelperArray, 0));
+                __result.p1_color = data[num++];
+                __result.p2_color = data[num++];
+                __result.p3_color = data[num++];
+                __result.p4_color = data[num++];
+                __result.p1_team = data[num++];
+                __result.p2_team = data[num++];
+                __result.p3_team = data[num++];
+                __result.p4_team = data[num++];
+                __result.p1_ability1 = data[num++];
+                __result.p1_ability2 = data[num++];
+                __result.p1_ability3 = data[num++];
+                __result.p2_ability1 = data[num++];
+                __result.p2_ability2 = data[num++];
+                __result.p2_ability3 = data[num++];
+                __result.p3_ability1 = data[num++];
+                __result.p3_ability2 = data[num++];
+                __result.p3_ability3 = data[num++];
+                __result.p4_ability1 = data[num++];
+                __result.p4_ability2 = data[num++];
+                __result.p4_ability3 = data[num++];
+                return __result;
+            }
+            //this isnt a patch but is part of one so im putting it here
+            public static int GetReplayDataOffset(byte[] data)
+            {
+                byte[] ZipSizeBytes = { data[0], data[1], data[2], data[3] };
+                var ZipSize = BitConverter.ToInt32(ZipSizeBytes, 0);
+                return ZipSize + 4 + 105;
+            }
+            [HarmonyPatch("ReadCompressedReplay")]
+            [HarmonyPrefix]
+            private static bool ReadCompressedReplay(byte[] compressedReplay, out StartRequestPacket startRequest)
+            {
+                //go to the postfix
+                startRequest = default(StartRequestPacket);
+                return false;
+            }
+            [HarmonyPatch("ReadCompressedReplay")]
+            [HarmonyPostfix]
+            private static void ReadCompressedReplay2(byte[] compressedReplay, out StartRequestPacket startRequest, ref Queue<InputPacketQuad> __result)
+            {
+                byte[] array = new byte[2];
+                byte[] array2 = new byte[4];
+                byte[] array3 = new byte[8];
+                List<InputPacketQuad> list = new List<InputPacketQuad>();
+                startRequest = ReadStartRequestReplay(compressedReplay, ref array2, ref array3, ref array);
+                int i = GetReplayDataOffset(compressedReplay);
+                InputPacketQuad inputPacketQuad = default(InputPacketQuad);
+                int num = 0;
+                while (i < compressedReplay.Length)
+                {
+                    for (int j = 0; j < 32; j++)
+                    {
+                        InputPacketQuad item = inputPacketQuad;
+                        list.Add(item);
+                    }
+                    i = NetworkTools.read32InputPacketsForPlayer1(list, inputPacketQuad, compressedReplay, i, ref array2);
+                    i = NetworkTools.read32InputPacketsForPlayer2(list, inputPacketQuad, compressedReplay, i, ref array2);
+                    i = NetworkTools.read32InputPacketsForPlayer3(list, inputPacketQuad, compressedReplay, i, ref array2);
+                    i = NetworkTools.read32InputPacketsForPlayer4(list, inputPacketQuad, compressedReplay, i, ref array2);
+                    num += 32;
+                    inputPacketQuad = list[num - 1];
+                }
+                for (int k = 0; k < list.Count; k++)
+                {
+                    InputPacketQuad value = list[k];
+                    value.p1.seqNumber = (uint)(k + 1);
+                    value.p2.seqNumber = (uint)(k + 1);
+                    value.p3.seqNumber = (uint)(k + 1);
+                    value.p4.seqNumber = (uint)(k + 1);
+                    list[k] = value;
+                }
+                Queue<InputPacketQuad> queue = new Queue<InputPacketQuad>();
+                for (int l = 0; l < list.Count; l++)
+                {
+                    queue.Enqueue(list[l]);
+                }
+                __result = queue;
+            }
+        }
+
+
     }
 }
