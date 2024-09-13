@@ -372,7 +372,7 @@ namespace MapMaker
                 try
                 {
                     Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(MetaDataJsons[i]) as Dictionary<string, object>;
-                    if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID)
+                    if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID || IsReplay())
                     {
                         Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
                         SpawnPlatformsFromMap(Dict, i);
@@ -427,24 +427,7 @@ namespace MapMaker
 
         public static void SpawnPlatformsFromMap(Dictionary<string, object> Dict, int index)
         {
-            //get the platform prefab out of the Platform ability gameobject (david) DO NOT REMOVE!
-            //chatgpt code to get the Platform ability object
-            GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
-            Debug.Log("getting platform object");
-            foreach (GameObject obj in allObjects)
-            {
-                if (obj.name == "Platform")
-                {
-                    //store its reference
-                    PlatformAbility = obj;
-                    Debug.Log("Found the object: " + obj.name);
-                    break;
-                }
-            }
-            var platformTransform = PlatformAbility.GetComponent(typeof(PlatformTransform)) as PlatformTransform;
-            platformPrefab = platformTransform.platformPrefab;
             //spawn point stuff
-
             if (Dict.ContainsKey("teamSpawns"))
             {
                 //object time! (objects are so confusing)
@@ -463,6 +446,8 @@ namespace MapMaker
                 //get the PlayerList
                 //set it to null to avoid using unasigned local var error. it will be assigend when the code runs unless somthing goes very badly.
                 GameObject PlayerList = null;
+                //if this causes a crash ill have to refactor it TODO!
+                GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
                 foreach (GameObject obj in allObjects)
                 {
                     if (obj.name == "PlayerList")
@@ -487,7 +472,6 @@ namespace MapMaker
                 GameSessionHandler.playerSpawns_readonly = Vecs;
             }
             List<object> platforms = (List<object>)Dict["platforms"];
-            //Debug.Log("platforms set");
             //empty the list of Drill colors so the indexs start at 0 agien
             CustomDrillColors = new List<Drill.PlatformColors>();
             NextPlatformTypeValue = StartingNextPlatformTypeValue;
@@ -777,7 +761,7 @@ namespace MapMaker
                             var DropForce = Convert.ToDouble(DropPlayers["DropForce"]);
                             CreateDropPlayers(PlatformObject, UUID, (Fix)DropForce, OnlyActivateOnRise);
                         }
-                        Debug.Log("Platform spawned successfully");
+                        //Debug.Log("Platform spawned successfully");
                     }
 
                     // if it is a preset platform then we do it difrently
@@ -888,6 +872,7 @@ namespace MapMaker
                             var DropForce = Convert.ToDouble(DropPlayers["DropForce"]);
                             CreateDropPlayers(Platform, UUID, (Fix)DropForce, OnlyActivateOnRise);
                         }
+                        //Debug.Log("Platform spawned successfully");
                     }
 
                 }
