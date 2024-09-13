@@ -1089,6 +1089,7 @@ namespace MapMaker
             [HarmonyPrefix]
             private static bool Awake_MapMaker_Plug(int level, SteamManager __instance)
             {
+                Debug.Log($"set network client to {Host.host}, is it null: {Host.host == null}");
                 __instance.networkClient = Host.host;
                 return false;
             }
@@ -1414,7 +1415,7 @@ namespace MapMaker
         [HarmonyPatch(typeof(Host))]
         public class HostPatches
         {
-            [HarmonyPatch("Start")]
+            [HarmonyPatch("Awake")]
             [HarmonyPostfix]
             private static void Awake_MapMaker_Plug(Host __instance)
             {
