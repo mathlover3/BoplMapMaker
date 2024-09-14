@@ -1099,7 +1099,9 @@ namespace MapMaker
             {
                 
                 Plugin.CurrentMapIndex = Plugin.NextMapIndex;
+                Debug.Log($"starting first game on map {Plugin.CurrentMapIndex}");
                 Plugin.NextMapIndex = Plugin.RandomBagLevel();
+                Debug.Log($"next map will be {Plugin.NextMapIndex}");
                 ZipArchivePacket zipArchivePacket = new ZipArchivePacket
                 {
                     zip = Plugin.MyZipArchives[Plugin.NextMapIndex],
@@ -1197,7 +1199,9 @@ namespace MapMaker
             private static bool Awake_MapMaker_Plug2(Player hostPlayer, NamedSpriteList abilityIcons, SteamManager __instance)
             {
                 Plugin.CurrentMapIndex = Plugin.NextMapIndex;
+                Debug.Log($"starting next level on map {Plugin.CurrentMapIndex}");
                 Plugin.NextMapIndex = Plugin.RandomBagLevel();
+                Debug.Log($"next map is {Plugin.NextMapIndex}");
                 ZipArchivePacket zipArchivePacket = new ZipArchivePacket
                 {
                     zip = Plugin.MyZipArchives[Plugin.NextMapIndex],
@@ -1267,7 +1271,7 @@ namespace MapMaker
                     startRequest = SteamManager.startParameters,
                     MapIndex = Plugin.CurrentMapIndex
                 };
-                NetworkingStuff.StartChannel.SendMessage(betterStartRequestPacket);
+                NetworkingStuff.StartChannel.SendMessage(betterStartRequestPacket); 
                 return false;
             }
         }

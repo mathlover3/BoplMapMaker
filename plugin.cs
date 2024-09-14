@@ -414,7 +414,7 @@ namespace MapMaker
                         }
                         if (Dict.ContainsKey("LuaGates"))
                         {
-                            //MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
+                            MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
                         }
                     }
                 }
@@ -1235,7 +1235,11 @@ first = true");*/
             foreach (string zipFile in MapZipFiles)
             {
                 zipArchives = zipArchives.Append(UnzipFile(zipFile)).ToArray();
-
+                if (Path.GetFileName(zipFile) == "TESTING.zip")
+                {
+                    zipArchives = [zipArchives[zipArchives.Length-1]];
+                    break;
+                }
             }
             Debug.Log($"zipArchivesLength is {zipArchives.Length}");
             MyZipArchives = zipArchives;
