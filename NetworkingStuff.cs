@@ -1,4 +1,5 @@
 ﻿using Entwined;
+using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.XR.Tango;
 
 namespace MapMaker
@@ -21,6 +23,12 @@ namespace MapMaker
         public static EntwinedPacketChannel<bool> DoWeHaveDifrentMapIdsChannel;
         public static EntwinedPacketChannel<ZipArchivePacket> ZipChannel;
         public static EntwinedPacketChannel<BetterStartRequestPacket> StartChannel;
+        //used to know if the ZipArchivePacket was receved so that if it wasnt we can send it agien. this is the id of the zip that was receved.
+        //make sure everyone receves it.
+        public static EntwinedPacketChannel<int> ZipRecevedChannel;
+        public static int MilisecondsToDelayBeforeResendingZip;
+        public static Dictionary<SteamId, bool> HasRecevedLatestZip = new();
+        public static float MilisecondsSenceLastZipSend = 0;
         public static void Awake()
         {
             //networking stuff
@@ -35,6 +43,28 @@ namespace MapMaker
             var entwinerStart = new GenericEntwiner<BetterStartRequestPacket>(BetterStartRequestPacketToByteArray, ByteArrayToBetterStartRequestPacket);
             StartChannel = new EntwinedPacketChannel<BetterStartRequestPacket>(Plugin.instance, entwinerStart);
             StartChannel.OnMessage += OnStartPacket;
+            ZipRecevedChannel = new EntwinedPacketChannel<int>(Plugin.instance, new IntEntwiner());
+            ZipRecevedChannel.OnMessage += OnZipRecevedConfermed;
+        }
+        public static void Update()
+        {
+            var delta = (Time.deltaTime * 1000f);
+            MilisecondsSenceLastZipSend = MilisecondsSenceLastZipSend + delta;
+            if (MilisecondsSenceLastZipSend > MilisecondsToDelayBeforeResendingZip && HasRecevedLatestZip.Count < SteamManager.instance.connectedPlayers.Count && SteamManager.LocalPlayerIsLobbyOwner)
+            {
+                //resend the zip
+                MilisecondsSenceLastZipSend = 0;
+                ZipArchivePacket zipArchivePacket = new ZipArchivePacket
+                {
+                    zip = Plugin.MyZipArchives[Plugin.NextMapIndex],
+                    length = Plugin.MyZipArchives.Length,
+                    id = Plugin.NextMapIndex
+                };
+                ZipChannel.SendMessage(zipArchivePacket);
+                //set all this stuff
+                MilisecondsToDelayBeforeResendingZip = NetworkingStuff.GetDelayForResendingZip();
+                UnityEngine.Debug.LogWarning("map file appears to have been droped, resending");
+            }
         }
         public static byte[] IntArrayToBytes(int[] array)
         {
@@ -175,6 +205,8 @@ namespace MapMaker
                 Plugin.zipArchives[payload.id] = payload.zip;
                 Plugin.MapJsons[payload.id] = Plugin.GetFileFromZipArchive(payload.zip, Plugin.IsBoplMap)[0];
                 Plugin.MetaDataJsons[payload.id] = Plugin.GetFileFromZipArchive(payload.zip, Plugin.IsMetaDataFile)[0];
+                //conferm we got the packet
+                ZipRecevedChannel.SendMessage(payload.id);
             }
         }
 
@@ -257,6 +289,27 @@ namespace MapMaker
                     return;
                 }
             }
+        }
+        public static void OnZipRecevedConfermed(int payload, PacketSourceInfo sourceInfo)
+        {
+            if (payload == Plugin.NextMapIndex)
+            {
+                HasRecevedLatestZip[sourceInfo.SenderSteamId] = true;
+            }
+        }
+        public static int GetDelayForResendingZip()
+        {
+            float maxping = 0;
+            foreach (var connectson in SteamManager.instance.connectedPlayers)
+            {
+                if (connectson.ping > maxping)
+                {
+                    maxping = connectson.ping;
+                }
+            }
+            UnityEngine.Debug.Log(maxping);
+            //the ping in milliseconds + 250 miliseconds of leway
+            return (int)(maxping * 1000f) + 250;
         }
     }
     public struct ZipArchivePacket

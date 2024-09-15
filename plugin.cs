@@ -280,9 +280,8 @@ namespace MapMaker
                 {
                     StartCoroutine(GetGrassMat());
                 }
-                
-
             }
+            NetworkingStuff.Update();
         }
         IEnumerator GetGrassMat()
         {

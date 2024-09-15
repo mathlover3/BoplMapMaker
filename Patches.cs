@@ -1083,6 +1083,9 @@ namespace MapMaker
                         id = Plugin.NextMapIndex
                     };
                     NetworkingStuff.ZipChannel.SendMessage(zipArchivePacket);
+                    //set all this stuff
+                    NetworkingStuff.MilisecondsToDelayBeforeResendingZip = NetworkingStuff.GetDelayForResendingZip();
+                    NetworkingStuff.HasRecevedLatestZip = new();
                 }
             }
             [HarmonyPatch("OnLevelWasLoaded")]
@@ -1109,6 +1112,9 @@ namespace MapMaker
                     id = Plugin.NextMapIndex
                 };
                 NetworkingStuff.ZipChannel.SendMessage(zipArchivePacket);
+                //set all this stuff
+                NetworkingStuff.MilisecondsToDelayBeforeResendingZip = NetworkingStuff.GetDelayForResendingZip();
+                NetworkingStuff.HasRecevedLatestZip = new();
                 //its max exsclusive min inclusinve
                 if (Plugin.MapJsons.Length != 0)
                 {
@@ -1209,6 +1215,9 @@ namespace MapMaker
                     id = Plugin.NextMapIndex
                 };
                 NetworkingStuff.ZipChannel.SendMessage(zipArchivePacket);
+                //set all this stuff
+                NetworkingStuff.MilisecondsToDelayBeforeResendingZip = NetworkingStuff.GetDelayForResendingZip();
+                NetworkingStuff.HasRecevedLatestZip = new();
                 //its max exsclusive min inclusinve
                 if (Plugin.MapJsons.Length != 0)
                 {
