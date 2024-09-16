@@ -819,12 +819,15 @@ namespace MapMaker
                     {
                         case "space":
                             GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                         case "snow":
                             GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                         default:
                             GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                     }
                     var UUID = Convert.ToInt32(MetaData["MapUUID"]);
@@ -897,12 +900,15 @@ namespace MapMaker
                         {
                             case "space":
                                 GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                                SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                                 break;
                             case "snow":
                                 GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                                SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                                 break;
                             default:
                                 GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                                SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                                 break;
                         }
                         var UUID = Convert.ToInt32(MetaData["MapUUID"]);
@@ -938,7 +944,11 @@ namespace MapMaker
                 {
                     pcs = CharacterSelectHandler_online.selfRef.playerColors;
                 }
-                SteamManager.startParameters.currentLevel = GameSession.currentLevel;
+                if (!Plugin.IsReplay())
+                {
+                    SteamManager.startParameters.currentLevel = GameSession.currentLevel;
+                }
+
                 StartRequestPacket startParameters = SteamManager.startParameters;
                 Updater.ReInit();
                 List<Player> list = new List<Player>();
@@ -1127,12 +1137,15 @@ namespace MapMaker
                     {
                         case "space":
                             GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                         case "snow":
                             GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                         default:
                             GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                     }
                     var UUID = Convert.ToInt32(MetaData["MapUUID"]);
@@ -1230,12 +1243,15 @@ namespace MapMaker
                     {
                         case "space":
                             GameSession.currentLevel = (byte)Plugin.SpaceMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                         case "snow":
                             GameSession.currentLevel = (byte)Plugin.SnowMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                         default:
                             GameSession.currentLevel = (byte)Plugin.GrassMapId;
+                            SteamManager.startParameters.currentLevel = GameSession.currentLevel;
                             break;
                     }
                     var UUID = Convert.ToInt32(MetaData["MapUUID"]);

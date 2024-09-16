@@ -371,6 +371,7 @@ namespace MapMaker
                 try
                 {
                     Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(MetaDataJsons[i]) as Dictionary<string, object>;
+                    Debug.Log(MetaDataJsons[i]);
                     if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID || IsReplay())
                     {
                         Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
