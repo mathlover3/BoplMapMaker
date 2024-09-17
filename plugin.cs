@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System;
 using MonoMod.Utils;
 using System.IO;
+using System.IO.Pipes;
 using MiniJSON;
 using System.Text.RegularExpressions;
 using UnityEngine.InputSystem;
@@ -20,6 +21,7 @@ using BepInEx.Configuration;
 using System.IO.Compression;
 using System.Runtime.Remoting.Contexts;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine.UI;
 using System.Reflection.Emit;
 using PlatformApi;
@@ -66,8 +68,8 @@ namespace MapMaker
         public static GameObject SlimeCamObject;
         public static List<Drill.PlatformColors> CustomDrillColors;
         public static List<NamedSprite> CustomMatchoManSprites;
-        public static int NextPlatformTypeValue = 5;
-        public const int StartingNextPlatformTypeValue = 5;
+        public static int NextPlatformTypeValue = 6;
+        public const int StartingNextPlatformTypeValue = 6;
         public static Sprite BoulderSprite;
         //used to make CustomBoulderSmokeColors start with a value.
         public static UnityEngine.Color[] ignore = { new UnityEngine.Color(1, 1, 1, 1) };
@@ -105,6 +107,8 @@ namespace MapMaker
         public static bool CurrentlyBlinking;
         //networking
         public static int NextMapIndex;
+        //pipes
+        internal static PipeStuff.PipeResponder pipeResponder;
         //used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
         public static Fix Camera_XMin = (Fix)(-97.27f);
 
@@ -161,7 +165,8 @@ namespace MapMaker
             {
                 Debug.Log("asset name is: " + name);
             }
-
+            pipeResponder = new PipeStuff.PipeResponder();
+            pipeResponder.StartPipe();
         }
         public static bool IsReplay()
         {
@@ -546,7 +551,6 @@ namespace MapMaker
                         //now we have a Vec2 array for orbit path
                         OrbitPath = Vecs;
                         //the rest is easy
-                        isBird = (bool)AntiLockPlatform["isBird"];
                         DelaySeconds = Convert.ToDouble(AntiLockPlatform["DelaySeconds"]);
                     }
                     if (pathType == PlatformApi.PlatformApi.PathType.VectorFieldPlatform)
@@ -727,7 +731,7 @@ namespace MapMaker
                         Vector4[] color2 = { color };
                         Vec2[] centerPoint2 = { centerPoint };
                         //spawn platform
-                        var PlatformObject = PlatformApi.PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, isBird, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
+                        var PlatformObject = PlatformApi.PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
                         PlatformObject.GetComponent<WaterWaves>().WavePrefab = WavePrefab;
                         //signal time!
                         if (platform.ContainsKey("MovingPlatformSignalStuff"))
@@ -827,7 +831,7 @@ namespace MapMaker
                             AntiLockPlatformComp.OrbitForce = FloorToThousandnths(OrbitForce);
                             AntiLockPlatformComp.OrbitPath = OrbitPath;
                             AntiLockPlatformComp.DelaySeconds = FloorToThousandnths(DelaySeconds);
-                            AntiLockPlatformComp.isBird = isBird;
+
                         }
                         if (pathType == PlatformApi.PlatformApi.PathType.VectorFieldPlatform)
                         {

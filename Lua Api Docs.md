@@ -109,7 +109,7 @@ gets the ability in that slot. valid indexs are 1, 2 and 3. ability slots are in
 string Player.GetAbility(number index)
 
 sets the ability in that slot. valid indexs are 1, 2 and 3.
-valid abilitys are {"Roll", "Dash", "Grenade", "Bow", "Engine", "Blink", "Gust", "Grow", "Rock", "Missle", "Spike", "TimeStop", "SmokeGrenade", "Platform", "Revive", "Shrink", "BlackHole", "Invisibility", "Meteor", "Macho", "Push", "Tesla", "Mine", "Teleport", "Drill", "Grapple", "Beam"}
+valid abilitys are {"Roll", "Dash", "Grenade", "Bow", "Engine", "Blink", "Gust", "Grow", "Rock", "Missle", "Spike", "TimeStop", "SmokeGrenade", "Platform", "Revive", "Shrink", "BlackHole", "Invisibility", "Meteor", "Macho", "Push", "Tesla", "Mine", "Teleport", "Drill", "Grapple", "Beam", "Duplicator"}
 if there is 1 ability it will ignore index and add it to the player. same for if theres 2 abilitys. this is due to how the game works. abilitys that are added also have there cooldowns reset
 void Player.SetAbility(number index, string ability, bool PlayAbilityPickupSound)
 
@@ -126,6 +126,9 @@ number GetAbilityMaxCooldown(number index)
 
 returns true if the player is currently disappeared from blink
 bool IsDisappeared()
+
+returns the platform the player is on. nil if they arent on a platform
+Platform GetPlatform()
 
 returns "Player"
 string Player.GetClassType()

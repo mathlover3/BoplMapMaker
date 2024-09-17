@@ -658,6 +658,14 @@ namespace MapMaker.Lua_stuff
         {
             return !target.gameObject.activeInHierarchy;
         }
+        public DynValue GetPlatform()
+        {
+            if (target.attachedGround != null)
+            {
+                return UserData.Create(target.attachedGround);
+            }
+            else { return DynValue.Nil; }
+        }
         public string GetClassType()
         {
             return "Player";
@@ -721,6 +729,8 @@ namespace MapMaker.Lua_stuff
                     return Ability.Grapple;
                 case "Beam":
                     return Ability.Beam;
+                case "Duplicator":
+                    return Ability.Duplicator;
                 default:
                     throw new ScriptRuntimeException($"{str} is not a valid ability");
             }
@@ -784,6 +794,8 @@ namespace MapMaker.Lua_stuff
                     return "Grapple";
                 case Ability.Beam:
                     return "Beam";
+                case Ability.Duplicator:
+                    return "Duplicator";
                 default:
                     return "Unknown/Modded/None";
             }
@@ -817,7 +829,8 @@ namespace MapMaker.Lua_stuff
             Teleport = 25,
             Drill = 26,
             Grapple = 27,
-            Beam = 28
+            Beam = 28,
+            Duplicator = 29
         }
     }
     public class PlatformProxy
