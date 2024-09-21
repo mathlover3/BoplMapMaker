@@ -929,7 +929,11 @@ namespace MapMaker
             [HarmonyPostfix]
             private static void Awake_MapMaker_Plug2(CharacterSelectHandler __instance)
             {
-                GameSessionHandler.LeaveGame(false, false);
+                if (!Plugin.IsInTestMode)
+                {
+                    GameSessionHandler.LeaveGame(false, false);
+                }
+                
             }
         }
         [HarmonyPatch(typeof(CharacterSelectHandler_online))]
@@ -1085,6 +1089,25 @@ namespace MapMaker
                 //if we own the lobby send the new player the first map
                 if (SteamManager.LocalPlayerIsLobbyOwner)
                 {
+                    //if someone joins us in test mode put the maps back to normal
+                    if (Plugin.IsInTestMode)
+                    {
+                        Debug.Log("someone joined us in test mode, putting the maps back to normal before sending them any maps");
+                        //fill the MapJsons array up
+                        ZipArchive[] zipArchives = Plugin.MyZipArchives;
+                        Plugin.zipArchives = Plugin.MyZipArchives;
+                        //Create a List for the json for a bit
+                        List<string> JsonList = new List<string>();
+                        List<string> MetaDataList = new();
+                        foreach (ZipArchive zipArchive in zipArchives)
+                        {
+                            //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
+                            JsonList.Add(Plugin.GetFileFromZipArchive(zipArchive, Plugin.IsBoplMap)[0]);
+                            MetaDataList.Add(Plugin.GetFileFromZipArchive(zipArchive, Plugin.IsMetaDataFile)[0]);
+                        }
+                        Plugin.MapJsons = JsonList.ToArray();
+                        Plugin.MetaDataJsons = MetaDataList.ToArray();
+                    }
                     Plugin.NextMapIndex = Plugin.RandomBagLevel();
                     ZipArchivePacket zipArchivePacket = new ZipArchivePacket
                     {
@@ -1307,22 +1330,25 @@ namespace MapMaker
             [HarmonyPostfix]
             private static void Awake_MapMaker_Plug(GameSessionHandler __instance)
             {
-                Debug.Log($"number of players is {SteamManager.startParameters.nrOfPlayers}");
-                //throw new NotImplementedException();
-                //fill the MapJsons array up
-                ZipArchive[] zipArchives = Plugin.MyZipArchives;
-                Plugin.zipArchives = Plugin.MyZipArchives;
-                //Create a List for the json for a bit
-                List<string> JsonList = new List<string>();
-                List<string> MetaDataList = new();
-                foreach (ZipArchive zipArchive in zipArchives)
+                if (!Plugin.IsInTestMode)
                 {
-                    //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
-                    JsonList.Add(Plugin.GetFileFromZipArchive(zipArchive, Plugin.IsBoplMap)[0]);
-                    MetaDataList.Add(Plugin.GetFileFromZipArchive(zipArchive, Plugin.IsMetaDataFile)[0]);
+                    Debug.Log($"number of players is {SteamManager.startParameters.nrOfPlayers}");
+                    //throw new NotImplementedException();
+                    //fill the MapJsons array up
+                    ZipArchive[] zipArchives = Plugin.MyZipArchives;
+                    Plugin.zipArchives = Plugin.MyZipArchives;
+                    //Create a List for the json for a bit
+                    List<string> JsonList = new List<string>();
+                    List<string> MetaDataList = new();
+                    foreach (ZipArchive zipArchive in zipArchives)
+                    {
+                        //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
+                        JsonList.Add(Plugin.GetFileFromZipArchive(zipArchive, Plugin.IsBoplMap)[0]);
+                        MetaDataList.Add(Plugin.GetFileFromZipArchive(zipArchive, Plugin.IsMetaDataFile)[0]);
+                    }
+                    Plugin.MapJsons = JsonList.ToArray();
+                    Plugin.MetaDataJsons = MetaDataList.ToArray();
                 }
-                Plugin.MapJsons = JsonList.ToArray();
-                Plugin.MetaDataJsons = MetaDataList.ToArray();
             }
             [HarmonyPatch("AnimateOutLevel")]
             [HarmonyPrefix]

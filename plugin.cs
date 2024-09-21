@@ -107,8 +107,10 @@ namespace MapMaker
         public static bool CurrentlyBlinking;
         //networking
         public static int NextMapIndex;
-        //pipes
+        //pipes and map testing stuff
         internal static PipeStuff.PipeResponder pipeResponder;
+        //if true it doesnt automaticly reset the map data when entering the singleplayer area. instead it does it when someone joins you.
+        public static bool IsInTestMode = false;
         //used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
         public static Fix Camera_XMin = (Fix)(-97.27f);
 
@@ -377,7 +379,7 @@ namespace MapMaker
                 {
                     Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(MetaDataJsons[i]) as Dictionary<string, object>;
                     Debug.Log(MetaDataJsons[i]);
-                    if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID || IsReplay())
+                    if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID || IsReplay() || IsInTestMode)
                     {
                         Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
                         SpawnPlatformsFromMap(Dict, i);
@@ -493,7 +495,6 @@ namespace MapMaker
                     double OrbitForce = 0;
                     Vec2[] OrbitPath = null;
                     double DelaySeconds = 0;
-                    bool isBird = false;
                     double orbitSpeed = 100;
                     double expandSpeed = 100;
                     Vec2 centerPoint = new Vec2(Fix.Zero, Fix.Zero);
@@ -1288,6 +1289,10 @@ first = true");*/
                 MapIndexsUsed = new();
             }
             byte Index = 0;
+            if (Plugin.MapJsons.Length == 0)
+            {
+                throw new Exception("Random Bag called with no maps!");
+            }
             //we start at index 0
             while ((int)Index < Plugin.MapJsons.Length)
             {

@@ -76,7 +76,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["ShootGrow"] = (object)ShootGrow;
             script.Globals["ShootShrink"] = (object)ShootShrink;
             script.Globals["GetDeltaTime"] = (object)GetDeltaTime;
-            script.Globals["GetTimeSenceLevelLoad"] = (object)GetTimeSenceLevelLoad;
+            script.Globals["GetTimeSenceLevelLoad"] = (object)GetTimeSinceLevelLoad;
             script.Globals["IsTimeStopped"] = (object)IsTimeStopped;
             script.Globals["GetInputValueWithId"] = (object)GetInputValueWithId;
             script.Globals["SetOutputWithId"] = (object)SetOutputWithId;
@@ -408,7 +408,7 @@ namespace MapMaker.Lua_stuff
         {
             return (double)deltaTime;
         }
-        public static double GetTimeSenceLevelLoad()
+        public static double GetTimeSinceLevelLoad()
         {
             return (double)Updater.SimTimeSinceLevelLoaded;
         }
@@ -492,6 +492,11 @@ namespace MapMaker.Lua_stuff
         public double GetJumpExtraXStrength() { return (double)target.jumpExtraXStrength; }
         public double GetJumpKeptMomentum() { return (double)target.jumpKeptMomentum; }
         public DynValue GetPosition(Script script) { return LuaMain.Vec2ToTuple(body.position); }
+        public void SetPosition(double PosX, double PosY) 
+        {
+            target.UnGround();
+            body.position = new Vec2((Fix)PosX, (Fix)PosY);
+        }
         public void GetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
         public double GetMass() { return (double)(Fix.One / target.inverseMass01); }
         public void SetSpeed(double NewValue) {target.Speed = (Fix)NewValue; }

@@ -4,6 +4,9 @@ the term sequence is used to denote a table where the set of all positive numeri
 
 ## Notes
 the camra has a Xmin of -97.27, a XMax of 97.6, a YMax of 40, a Ymin of -26, and waterHeight is at -11.3
+
+IF YOU BREAK THE GAME OR FREEZE THE GAME WITH LUA BY DOING SOMTHING ABSURD LIKE PUTTING A PLATFORM 1,000,000 UNITS UP ITS NOT MY FAULT!
+if the game errors do to a call that involves lua then it is infact a bug and should be reported. also dont worry you cant effect anything outside of bopl. so you cant get a virus from custom bopl maps lol.
 ## Global Funcsons
 the following are global funcsons.
 for the following angle is in degrees.
@@ -40,11 +43,12 @@ gets the closest player to that posison. returns nil if all the players are gone
 Player GetClosestPlayer(number posX, number posY)
 
 returns then number of platforms then all platforms (including boulders)
+dont rely on the order of the platforms being consistent. the order of the platforms might change due to outer mods or me changing stuff. dont blame me if your code breaks because the order changes
 number, Sequence (of Platforms) GetAllPlatforms()
-
+dont rely on the order of the players being consistent. the order of the platforms might change due to outer mods or me changing stuff. dont blame me if your code breaks because the order changes
 returns then number of players then all players. note that there may be no entrys if theres no players.
 number, Sequence (of Players) GetAllPlayers()
-
+dont rely on the order of the BoplBodys being consistent. the order of the platforms might change due to outer mods or me changing stuff. dont blame me if your code breaks because the order changes
 returns then number of BoplBodys then all BoplBodys. will not return BoplBodys that havent been initialized yet or is being destroyed on that frame.
 number, Sequence (of BoplBodys) GetAllBoplBodys()
 
@@ -62,7 +66,7 @@ gets the time in seconds that has pased sence the last frame.
 number GetDeltaTime()
 
 gets the time sence the level loaded. this includes the time before the players have spawned in.
-number GetTimeSenceLevelLoad()
+number GetTimeSinceLevelLoad()
 
 returns true if time is stoped
 bool IsTimeStopped()
@@ -92,6 +96,7 @@ number Player.GetJumpKeptMomentum()
 number Player.GetAirAccel()
 number Player.GetMass()
 Vec2 Player.GetPosition()
+none Player.SetPosition(number PosX, number PosY)
 none Player.SetSpeed(number NewValue)
 none Player.SetGroundedSpeed(number NewValue)
 none Player.SetMaxSpeed(number NewValue)
@@ -143,6 +148,7 @@ home is basicly what posison it would like to be in. its what the springs try to
 Vec2 Platform.GetHome()
 number Platform.GetHomeRot()
 number Platform.GetScale()
+setting scale outside of the normal scale range will set it to the minimum/maximum allowed scale
 none Platform.SetScale(number scale)
 none Platform.SetHome(number posX, number posY)
 none Platform.SetHomeRot(number NewRot)
@@ -181,6 +187,7 @@ number BoplBody.GetMass()
 Vec2 BoplBody.GetVelocity()
 none BoplBody.SetPos(number PosX, number PosY)
 none BoplBody.SetRot(number Rot)
+setting scale outside of the normal scale range will set it to the minimum/maximum allowed scale
 none BoplBody.SetScale(number Scale)
 none BoplBody.SetVelocity(number VelX, number VelY)
 none BoplBody.SetMass(number Mass)
