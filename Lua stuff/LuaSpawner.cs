@@ -140,21 +140,24 @@ namespace MapMaker.Lua_stuff
             // Vector (0, 1)
             Fix refX = Fix.Zero;
             Fix refY = Fix.One;
+            if (vec2.y != 0)
+            {
+                // Dot product
+                Fix dotProduct = vec2.x * refX + vec2.y * refY;
 
-            // Dot product
-            Fix dotProduct = vec2.x * refX + vec2.y * refY;
+                // Magnitudes
+                Fix magnitudeA = Fix.Sqrt(vec2.x * vec2.x + vec2.y * vec2.y);
+                Fix magnitudeB = Fix.Sqrt(refX * refX + refY * refY);
 
-            // Magnitudes
-            Fix magnitudeA = Fix.Sqrt(vec2.x * vec2.x + vec2.y * vec2.y);
-            Fix magnitudeB = Fix.Sqrt(refX * refX + refY * refY);
+                // Angle in radians
+                Fix angleRadians = Fix.Acos(dotProduct / (magnitudeA * magnitudeB));
 
-            // Angle in radians
-            Fix angleRadians = Fix.Acos(dotProduct / (magnitudeA * magnitudeB));
+                // Convert to degrees
+                Fix angleDegrees = angleRadians * ((Fix)180.0 / (Fix)Fix.PI);
 
-            // Convert to degrees
-            Fix angleDegrees = angleRadians * ((Fix)180.0 / (Fix)Fix.PI);
-
-            return angleDegrees;
+                return angleDegrees;
+            }
+            return Fix.Zero;
         }
         public static BoplBody SpawnGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
         {

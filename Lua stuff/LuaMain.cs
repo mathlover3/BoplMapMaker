@@ -137,16 +137,16 @@ namespace MapMaker.Lua_stuff
             }
             catch (InternalErrorException e)
             {
-                Console.WriteLine($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
-                Plugin.logger.LogError($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
+                Console.WriteLine($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");              
                 UnityEngine.Debug.LogError($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
+                Plugin.logger.LogError($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
                 return DynValue.Nil;
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
-                Plugin.logger.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
                 UnityEngine.Debug.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
+                Plugin.logger.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
                 return DynValue.Nil;
             }
             /*foreach (var Key in script.Globals.Keys)

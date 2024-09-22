@@ -145,6 +145,7 @@ namespace MapMaker
             instance = this;
             NetworkingStuff.Awake();
             Logger.LogInfo("MapLoader Has been loaded");
+            logger = Logger;
             Harmony harmony = new Harmony("com.MLT.MapLoader");
 
             Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
