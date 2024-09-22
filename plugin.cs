@@ -111,6 +111,9 @@ namespace MapMaker
         internal static PipeStuff.PipeResponder pipeResponder;
         //if true it doesnt automaticly reset the map data when entering the singleplayer area. instead it does it when someone joins you.
         public static bool IsInTestMode = false;
+        //menu button stuff
+        private static UnityAction MapMakerButtonAction;
+        private static UnityAction WebsiteButtonAction;
         //used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
         public static Fix Camera_XMin = (Fix)(-97.27f);
 
@@ -1135,6 +1138,34 @@ first = true");*/
                 signalSystem.SetUpDicts();
                 Debug.Log("signal stuff is done!");
             }
+            if (scene.name == "MainMenu")
+            {
+
+                var TutorialButton = GameObject.Find("Tutorial");
+                var MapEditorButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/mapmaker button.prefab");
+                var MapEditorButtonObject = Instantiate<GameObject>(MapEditorButtonPrefab, TutorialButton.transform);
+                MapEditorButtonObject.transform.localPosition = new Vector3(1000, 35);
+                MapEditorButtonObject.transform.localScale = new Vector3(3.5f, 3.5f);
+                var MapEditorButton = MapEditorButtonObject.GetComponent<Button>();
+                MapMakerButtonAction += OnClickMapEditor;
+                MapEditorButton.onClick.AddListener(MapMakerButtonAction);
+                var GetMapsButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/website button.prefab");
+                var GetMapsButtonObject = Instantiate<GameObject>(GetMapsButtonPrefab, TutorialButton.transform);
+                GetMapsButtonObject.transform.localPosition = new Vector3(-1000, 35);
+                GetMapsButtonObject.transform.localScale = new Vector3(3.5f, 3.5f);
+                var GetMapsButton = GetMapsButtonObject.GetComponent<Button>();
+                WebsiteButtonAction += OnClickGetMaps;
+                GetMapsButton.onClick.AddListener(WebsiteButtonAction);
+            }
+
+        }
+        public static void OnClickMapEditor()
+        {
+            System.Diagnostics.Process.Start("https://example.com/");
+        }
+        public static void OnClickGetMaps()
+        {
+            System.Diagnostics.Process.Start("https://example.com/");
         }
         public static bool IsLevelName(String input)
         {
