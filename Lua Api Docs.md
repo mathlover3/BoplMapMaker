@@ -23,7 +23,7 @@ BoplBody SpawnSmokeGrenade(number posX, number posY, number scale, number StartV
 
 none SpawnExplosion(number posX, number posY, number scale)
 
-type can be the following: "grass", "snow", "ice", "space", "slime" if it isnt one of those it will throw a error.
+type can be the following: "grass", "snow", "ice", "space", "slime", "robot" if it isnt one of those it will throw a error.
 only if the type is slime does R, G, B and A mater
 R, G, B and A are numbers between 0 and 1.
 Platform SpawnBoulder(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity, string type, number R, number G, number B, number A)
@@ -154,6 +154,15 @@ none Platform.SetHome(number posX, number posY)
 none Platform.SetHomeRot(number NewRot)
 none Platform.ShakePlatform(number Duratson, number ShakeAmount)
 none Platform.DropAllPlayers(number DropForce)
+
+gets the scale that the platform will automaticly strink too when it hasnt been grown in a while. this is normaly its starting scale.
+number GetBaseScaleForPlatform()
+
+sets the scale that the platform will automaticly strink too when it hasnt been grown in a while. this is normaly its starting scale.
+none SetBaseScaleForPlatform(number scale)
+
+gets the platform type. can return "grass", "snow", "ice", "space", "robot", "slime". "custom"
+string GetPlatformType()
 
 may be nil.
 BoplBody Platform.GetBoplBody()

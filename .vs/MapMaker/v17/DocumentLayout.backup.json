@@ -11,16 +11,16 @@
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:pipestuff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\patches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:patches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\lua stuff\\luaspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:lua stuff\\luaspawner.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\patches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:patches.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\lua stuff\\luamain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -134,9 +134,9 @@
               "Title": "PipeStuff.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\PipeStuff.cs",
               "RelativeDocumentMoniker": "PipeStuff.cs",
-              "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\PipeStuff.cs",
-              "RelativeToolTip": "PipeStuff.cs",
-              "ViewState": "AgIAADIAAAAAAAAAAAAwwDIAAAApAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\PipeStuff.cs*",
+              "RelativeToolTip": "PipeStuff.cs*",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABUAAABKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-16T18:55:05.06Z",
               "EditorCaption": ""
@@ -167,7 +167,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "Patches.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Patches.cs",
               "RelativeDocumentMoniker": "Patches.cs",
@@ -175,7 +175,8 @@
               "RelativeToolTip": "Patches.cs",
               "ViewState": "AgIAAJIDAAAAAAAAAAAawEYEAACCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-08T00:35:35.918Z"
+              "WhenOpened": "2024-08-08T00:35:35.918Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -185,7 +186,7 @@
               "RelativeDocumentMoniker": "plugin.cs",
               "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\plugin.cs*",
               "RelativeToolTip": "plugin.cs*",
-              "ViewState": "AgIAAIoDAAAAAAAAAAAkwHoEAABUAAAAAAAAAA==",
+              "ViewState": "AgIAAKIAAAAAAAAAAAAiwC4BAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-10T02:50:24.562Z",
               "EditorCaption": ""
@@ -228,7 +229,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "README.md",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\README.md",
               "RelativeDocumentMoniker": "README.md",
@@ -397,7 +398,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "LuaSpawner.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Lua stuff\\LuaSpawner.cs",
               "RelativeDocumentMoniker": "Lua stuff\\LuaSpawner.cs",

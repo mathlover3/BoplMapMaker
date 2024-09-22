@@ -1,4 +1,5 @@
-﻿using AsmResolver.PE.DotNet.ReadyToRun;
+﻿using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.ReadyToRun;
 using BoplFixedMath;
 using MonoMod.Utils;
 using MoonSharp.Interpreter;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -209,6 +211,9 @@ namespace MapMaker.Lua_stuff
                 case "slime":
                     platformType = PlatformType.slime;
                     color = new Color(R, G, B, A);
+                    break;
+                case "robot":
+                    platformType = PlatformType.robot;
                     break;
                 default:
                     throw new ScriptRuntimeException($"{type} is not a valid platform type.");
@@ -890,6 +895,35 @@ namespace MapMaker.Lua_stuff
         public void SetScale(double scale)
         {
             PlatformApi.PlatformApi.SetScale(target.gameObject, (Fix)scale);
+        }
+        public double GetBaseScaleForPlatform()
+        {
+            return (double)target.baseScaleForPlatform;
+        }
+        public void SetBaseScaleForPlatform(double scale)
+        {
+            target.baseScaleForPlatform = (Fix)scale;
+        }
+        public string GetPlatformType()
+        {
+            switch (target.platformType)
+            {
+                case PlatformType.grass:
+                    return "grass";
+                case PlatformType.snow:
+                    return "snow";
+                case PlatformType.ice:
+                    return "ice";
+                case PlatformType.space:
+                    return "space";
+                case PlatformType.robot:
+                    return "robot";
+                case PlatformType.slime:
+                    return "slime";
+                default:
+                    return "custom";
+
+            }
         }
         public void SetHome(double PosX, double PosY)
         {
