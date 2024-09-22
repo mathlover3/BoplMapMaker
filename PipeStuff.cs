@@ -7,6 +7,7 @@ using System.IO.Pipes;
 using System.IO;
 using UnityEngine;
 using System.IO.Compression;
+using System.Threading;
 
 namespace MapMaker
 {
@@ -18,13 +19,18 @@ namespace MapMaker
             public static int TotalLength = 0;
             public static int LengthCompleted = 0;
             public static List<byte> bytes = new();
-            public async void StartPipe()
+            public static CancellationTokenSource _cancellationTokenSource;
+            public void StartPipe()
             {
                 // Using Task.Run to avoid blocking the main thread
-                await Task.Run(() => StartPipeReal());
+                //thanks to chatgpt for telling me about the CancellationToken so it doesnt go on forever and keep the game from closing
+                _cancellationTokenSource = new CancellationTokenSource();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                Task.Run(() => StartPipeReal(_cancellationTokenSource.Token));
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
             //based on https://stackoverflow.com/questions/46793391/how-to-wait-for-response-from-namedpipeserver
-            private void StartPipeReal()
+            private async void StartPipeReal(CancellationToken cancellationToken)
             {
                 using (NamedPipeServerStream pipeServer = new NamedPipeServerStream(
     "testpipe",
@@ -33,14 +39,23 @@ namespace MapMaker
     PipeTransmissionMode.Byte))//Set TransmissionMode to Message
                 {
                     pipeServer.ReadMode = PipeTransmissionMode.Byte;
-                    // Wait for a client to connect
-                    Console.Write("Waiting for client connection...");
-                    pipeServer.WaitForConnection();
+                    //part chatgpt
+                    // Wait for a client to connect asynchronously, with cancellation support
+                    Debug.Log("Waiting for client connection...");
+                    try
+                    {
+                        await pipeServer.WaitForConnectionAsync(cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        Debug.Log("Pipe connection was canceled.");
+                        return; // Exit if canceled
+                    }
 
                     Console.WriteLine("Client connected.");
 
                     //receive message from client
-                    while (pipeServer.IsConnected)
+                    while (pipeServer.IsConnected && !cancellationToken.IsCancellationRequested)
                     {
                         var messageBytes = ReadMessage(pipeServer);
                         if (messageBytes != null)
@@ -51,10 +66,13 @@ namespace MapMaker
                             TestMap(zip);
                         }
                     }
-                    //start the pipe agien
-                    Debug.Log("restarting pipe");
-                    //this is already on a difrent theread so no need to make a new thread.
-                    StartPipeReal();
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        //start the pipe agien
+                        Debug.Log("restarting pipe");
+                        //this is already on a difrent theread so no need to make a new thread.
+                        StartPipeReal(cancellationToken);
+                    }
                 }
             }
             public static void TestMap(ZipArchive zip)

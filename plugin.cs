@@ -35,6 +35,8 @@ using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using Entwined;
 using System.Collections;
 using MoonSharp.VsCodeDebugger;
+using System.Threading;
+using static MapMaker.PipeStuff;
 namespace MapMaker
 {
     [BepInDependency("com.entwinedteam.entwined")]
@@ -292,6 +294,14 @@ namespace MapMaker
                 }
             }
             NetworkingStuff.Update();
+        }
+        private void OnApplicationQuit()
+        {
+            // Cancel the pipe thread when the application is closing
+            if (PipeResponder._cancellationTokenSource != null)
+            {
+                PipeResponder._cancellationTokenSource.Cancel();
+            }
         }
         IEnumerator GetGrassMat()
         {
