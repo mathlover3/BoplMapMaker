@@ -126,16 +126,27 @@ namespace MapMaker.Lua_stuff
             catch (ScriptRuntimeException e)
             {
                 Console.WriteLine($"ERROR IN LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
+                Plugin.logger.LogError($"ERROR IN LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
                 return DynValue.Nil;
             }
             catch (MoonSharp.Interpreter.SyntaxErrorException e)
             {
                 Console.WriteLine($"ERROR PARSING LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
+                Plugin.logger.LogError($"ERROR PARSING LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
                 return DynValue.Nil;
             }
             catch (InternalErrorException e)
             {
-                Console.WriteLine($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e.DecoratedMessage} pls send me the map so i can report the bug.");
+                Console.WriteLine($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
+                Plugin.logger.LogError($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
+                UnityEngine.Debug.LogError($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
+                return DynValue.Nil;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
+                Plugin.logger.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
+                UnityEngine.Debug.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
                 return DynValue.Nil;
             }
             /*foreach (var Key in script.Globals.Keys)
