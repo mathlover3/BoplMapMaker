@@ -44,6 +44,7 @@ namespace MapMaker
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin instance;
+        public static Harmony harmony;
         public static GameObject PlatformAbility;
         public static Transform levelt;
         public static StickyRoundedRectangle platformPrefab;
@@ -146,11 +147,11 @@ namespace MapMaker
             NetworkingStuff.Awake();
             Logger.LogInfo("MapLoader Has been loaded");
             logger = Logger;
-            Harmony harmony = new Harmony("com.MLT.MapLoader");
+            harmony = new Harmony("com.MLT.MapLoader");
 
             Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
             harmony.PatchAll(); // Patch Harmony
-
+            Debugging.Awake();
             Logger.LogInfo("MapMaker Patch Compleate!");
 
             SceneManager.sceneLoaded += OnSceneLoaded;

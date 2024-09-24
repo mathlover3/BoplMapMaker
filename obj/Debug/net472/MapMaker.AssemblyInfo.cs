@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("My first plugin")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ab0655c63842a4fe842f5939a17d5c21bb50c0ee")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fdba9f6ace8588ea72cccc406f1144df7f343fc5")]
 [assembly: System.Reflection.AssemblyProductAttribute("MapMaker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MapMaker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

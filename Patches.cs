@@ -130,11 +130,11 @@ namespace MapMaker
                         //if we are effecting the same platform and the Disappear platform is going to make the platform disapear when we are done
                         //then dont have the reapearing animatson
                         //delay it by the time it takes to do the animatsons so we dont stop mid animatson
-                        float time = __instance.ScaleAnim.keys[__instance.ScaleAnim.keys.Length - 1].time;
-                        float time2 = __instance.OpacityAnim.keys[__instance.OpacityAnim.keys.Length - 1].time;
-                        var ExstraDelay = Mathf.Max(time, time2);
+                        Fix time = (Fix)__instance.ScaleAnim.keys[__instance.ScaleAnim.keys.Length - 1].time;
+                        Fix time2 = (Fix)__instance.OpacityAnim.keys[__instance.OpacityAnim.keys.Length - 1].time;
+                        var ExstraDelay = Fix.Max(time, time2);
                         //the __instance.IsInitialized is so that it works fine if delay is 0/less then ExstraDelay
-                        if (Disappear.TimeDelayed > Disappear.delay - (Fix)ExstraDelay && (__instance.IsInitialized || __instance.age > __instance.LifeSpan))
+                        if (Disappear.TimeDelayed > Disappear.delay - ExstraDelay && (__instance.IsInitialized || __instance.age > __instance.LifeSpan))
                         {
                             var spriteRen = __instance.GetComponent<SpriteRenderer>();
                             __instance.transform.localScale = new Vector3(__instance.originalScale.x, __instance.originalScale.y, __instance.originalScale.z);
