@@ -70,7 +70,7 @@ namespace MapMaker
             var gameobj = component.gameObject;
             if (gameobj.name == "Player(Clone)")
             {
-                UnityEngine.Debug.Log($"{UnityEngine.StackTraceUtility.ExtractStackTrace()} is changing player pos, old value: {newPos}, at time: {Updater.SimTimeSinceLevelLoaded}");
+                UnityEngine.Debug.Log($"{UnityEngine.StackTraceUtility.ExtractStackTrace()} is changing player pos, new value: {newPos}, at time: {Updater.SimTimeSinceLevelLoaded}");
             }
         }
     }

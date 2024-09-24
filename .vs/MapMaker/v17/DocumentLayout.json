@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\logic stuff\\shootblink.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:logic stuff\\shootblink.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -49,10 +53,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\pipestuff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:pipestuff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\nuget.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
@@ -130,24 +130,24 @@
       "DocumentGroups": [
         {
           "DockedHeight": 482,
-          "SelectedChildIndex": 27,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 0,
               "Title": "Debugging.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Debugging.cs",
               "RelativeDocumentMoniker": "Debugging.cs",
               "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Debugging.cs",
               "RelativeToolTip": "Debugging.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAewA0AAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAADMAAAAAAAAAAIAzwEgAAAB3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-24T01:40:00.812Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "PipeStuff.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\PipeStuff.cs",
               "RelativeDocumentMoniker": "PipeStuff.cs",
@@ -155,12 +155,11 @@
               "RelativeToolTip": "PipeStuff.cs",
               "ViewState": "AgIAACwAAAAAAAAAAAAwwBUAAABKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-16T18:55:05.06Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-16T18:55:05.06Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "NetworkingStuff.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\NetworkingStuff.cs",
               "RelativeDocumentMoniker": "NetworkingStuff.cs",
@@ -168,8 +167,7 @@
               "RelativeToolTip": "NetworkingStuff.cs",
               "ViewState": "AgIAAA4AAAAAAAAAAAAnwB4AAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-23T23:00:24.384Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-08-23T23:00:24.384Z"
             },
             {
               "$type": "Document",
@@ -181,25 +179,23 @@
               "RelativeToolTip": "NuGet.Config",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
-              "WhenOpened": "2024-09-11T18:18:29.414Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "Patches.cs",
-              "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Patches.cs",
-              "RelativeDocumentMoniker": "Patches.cs",
-              "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Patches.cs*",
-              "RelativeToolTip": "Patches.cs*",
-              "ViewState": "AgIAAKQFAAAAAAAAAAAvwLUFAAAVAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-08T00:35:35.918Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-11T18:18:29.414Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 10,
+              "Title": "Patches.cs",
+              "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Patches.cs",
+              "RelativeDocumentMoniker": "Patches.cs",
+              "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Patches.cs",
+              "RelativeToolTip": "Patches.cs",
+              "ViewState": "AgIAAKQFAAAAAAAAAAAvwLUFAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-08-08T00:35:35.918Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
               "Title": "plugin.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\plugin.cs",
               "RelativeDocumentMoniker": "plugin.cs",
@@ -207,8 +203,7 @@
               "RelativeToolTip": "plugin.cs",
               "ViewState": "AgIAAOMEAAAAAAAAAAAewBMFAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T02:50:24.562Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T02:50:24.562Z"
             },
             {
               "$type": "Document",
@@ -220,8 +215,7 @@
               "RelativeToolTip": "logic stuff\\LogicOutput.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T18:41:11.411Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T18:41:11.411Z"
             },
             {
               "$type": "Document",
@@ -233,8 +227,7 @@
               "RelativeToolTip": "logic stuff\\MovingPlatformSignalStuff.cs",
               "ViewState": "AgIAABcAAAAAAAAAAAAgwCUAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T18:56:06.894Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T18:56:06.894Z"
             },
             {
               "$type": "Document",
@@ -246,8 +239,7 @@
               "RelativeToolTip": "logic stuff\\LogicInput.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAqwAkAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T02:47:25.514Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T02:47:25.514Z"
             },
             {
               "$type": "Document",
@@ -259,12 +251,11 @@
               "RelativeToolTip": "README.md",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2024-06-11T17:18:57.543Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-11T17:18:57.543Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "LuaMain.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Lua stuff\\LuaMain.cs",
               "RelativeDocumentMoniker": "Lua stuff\\LuaMain.cs",
@@ -272,12 +263,11 @@
               "RelativeToolTip": "Lua stuff\\LuaMain.cs",
               "ViewState": "AgIAAIkEAAAAAAAAAIA4wJkEAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-26T18:25:32.881Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-26T18:25:32.881Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "DisappearPlatformsOnSignal.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\logic stuff\\DisappearPlatformsOnSignal.cs",
               "RelativeDocumentMoniker": "logic stuff\\DisappearPlatformsOnSignal.cs",
@@ -285,12 +275,11 @@
               "RelativeToolTip": "logic stuff\\DisappearPlatformsOnSignal.cs",
               "ViewState": "AgIAAGgAAAAAAAAAAAAAAHEAAAA7AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T18:46:00.387Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T18:46:00.387Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "MoreJsonParceing.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MoreJsonParceing.cs",
               "RelativeDocumentMoniker": "MoreJsonParceing.cs",
@@ -298,12 +287,11 @@
               "RelativeToolTip": "MoreJsonParceing.cs",
               "ViewState": "AgIAAIgAAAAAAAAAAAAqwJcAAAB3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-11T17:18:07.623Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-11T17:18:07.623Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "SignalSystem.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\logic stuff\\SignalSystem.cs",
               "RelativeDocumentMoniker": "logic stuff\\SignalSystem.cs",
@@ -311,8 +299,7 @@
               "RelativeToolTip": "logic stuff\\SignalSystem.cs",
               "ViewState": "AgIAALoBAAAAAAAAAAAvwMwBAABBAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T02:21:01.041Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T02:21:01.041Z"
             },
             {
               "$type": "Document",
@@ -324,8 +311,7 @@
               "RelativeToolTip": "logic stuff\\DropPlayers.cs",
               "ViewState": "AgIAADAAAAAAAAAAAAAwwDIAAABxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-24T18:45:12.145Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-24T18:45:12.145Z"
             },
             {
               "$type": "Document",
@@ -337,8 +323,7 @@
               "RelativeToolTip": "logic stuff\\AndGate.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T19:41:05.164Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T19:41:05.164Z"
             },
             {
               "$type": "Document",
@@ -350,8 +335,7 @@
               "RelativeToolTip": "logic stuff\\LogicGate.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T02:45:36.877Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T02:45:36.877Z"
             },
             {
               "$type": "Document",
@@ -363,12 +347,11 @@
               "RelativeToolTip": "logic stuff\\OrGate.cs",
               "ViewState": "AgIAABAAAAAAAAAAAAAgwCEAAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-11T21:32:00.347Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-11T21:32:00.347Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Trigger.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\logic stuff\\Trigger.cs",
               "RelativeDocumentMoniker": "logic stuff\\Trigger.cs",
@@ -376,8 +359,7 @@
               "RelativeToolTip": "logic stuff\\Trigger.cs",
               "ViewState": "AgIAALsAAAAAAAAAAAAAAM0AAAC8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T02:08:46.633Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T02:08:46.633Z"
             },
             {
               "$type": "Document",
@@ -389,8 +371,7 @@
               "RelativeToolTip": "logic stuff\\Spawner.cs",
               "ViewState": "AgIAAO0AAAAAAAAAAAAkwI8AAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T02:22:00.224Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T02:22:00.224Z"
             },
             {
               "$type": "Document",
@@ -402,12 +383,11 @@
               "RelativeToolTip": ".gitignore",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAF8SURBVDhPjVNLTgJBEG1lwpoFB3GNK9fieA48hD8iwT/ihwgSDAIHgAGXXsEV18CNzL/LquqZdsYM6kteXqcy3fWqpmpNRBgOhyABBEgpAFVKPIMUcYzUyOU\u002BXM/b2qtU3vkSfRjjZTCAMAw1A2LwzdFoBPP5HNqdzuL27n4juibWI\u002BUshBA1DIkhEx9iEorFotgslQqGYbxxAGFEqt1MxmPWJLbLZdZ\u002Bv89q5PMFPiTR6z2zdaxR0fXA0XTBcVywkb4fwHXjRteecIDNQ7UmExVYAdPcxYaqclN46na5WenMKjtlVnTYwcXlVYaDqImW9beD5N/TeGy32QHXm6hZ03ZgiSQHp2fnWQ4oBmJqWSqwAqZpZjt4aLXAD4J0VqyZsmoubfB8H2r1eoaD6NXZ9HcHO\u002BSA3f4AjifXl8rItOETM8ckB9WTWpYD9RdeZ1PWVWAHWXPQaDb59f/w8LiqHeh1pvGkCaP6qB8yXusoxmuNZ7XmII4O9vGuEF86osuDYRkpYQAAAABJRU5ErkJggg==",
-              "WhenOpened": "2024-06-10T18:50:01.216Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T18:50:01.216Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "MiniJSON.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\MiniJSON.cs",
               "RelativeDocumentMoniker": "MiniJSON.cs",
@@ -415,12 +395,11 @@
               "RelativeToolTip": "MiniJSON.cs",
               "ViewState": "AgIAACAAAAAAAAAAAAAvwDoAAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T02:27:53.375Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T02:27:53.375Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "FileToSprite.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\FileToSprite.cs",
               "RelativeDocumentMoniker": "FileToSprite.cs",
@@ -428,8 +407,7 @@
               "RelativeToolTip": "FileToSprite.cs",
               "ViewState": "AgIAABUAAAAAAAAAAAAqwBwAAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-10T17:26:15.239Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-10T17:26:15.239Z"
             },
             {
               "$type": "Document",
@@ -441,8 +419,7 @@
               "RelativeToolTip": "Lua stuff\\LuaSpawner.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAJ8AAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-28T17:41:03.369Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-28T17:41:03.369Z"
             },
             {
               "$type": "Document",
@@ -454,8 +431,7 @@
               "RelativeToolTip": "Graph.cs",
               "ViewState": "AgIAAJQAAAAAAAAAAIAwwKoAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-12T18:50:23.583Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-12T18:50:23.583Z"
             },
             {
               "$type": "Document",
@@ -467,8 +443,7 @@
               "RelativeToolTip": "logic stuff\\ShootRay.cs",
               "ViewState": "AgIAACMAAAAAAAAAAAAgwDAAAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-15T19:24:31.146Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-15T19:24:31.146Z"
             },
             {
               "$type": "Document",
@@ -480,18 +455,17 @@
               "RelativeToolTip": "logic stuff\\SignalDelay.cs",
               "ViewState": "AgIAABQAAAAAAAAAAAAiwCsAAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-11T16:27:32.519Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-11T16:27:32.519Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "ShootBlink.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\logic stuff\\ShootBlink.cs",
               "RelativeDocumentMoniker": "logic stuff\\ShootBlink.cs",
               "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\logic stuff\\ShootBlink.cs",
               "RelativeToolTip": "logic stuff\\ShootBlink.cs",
-              "ViewState": "AgIAAKAAAAAAAAAAAAAvwLEAAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAAM0AAAAAAAAAAAAvwLEAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-15T18:58:58.19Z",
               "EditorCaption": ""
@@ -506,8 +480,7 @@
               "RelativeToolTip": "logic stuff\\ShakePlatform.cs",
               "ViewState": "AgIAAB0AAAAAAAAAAAAQwDMAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-24T17:12:12.926Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-24T17:12:12.926Z"
             },
             {
               "$type": "Document",
@@ -519,8 +492,7 @@
               "RelativeToolTip": "logic stuff\\NotGate.cs",
               "ViewState": "AgIAAAEAAAAAAAAAAAAUwA4AAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-11T22:01:28.273Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-11T22:01:28.273Z"
             }
           ]
         },
