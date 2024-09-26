@@ -24,26 +24,9 @@ namespace MapMaker
             allTypesInGameAssembly = allTypes.ToArray();
             allTypesInGameAssembly = Array.FindAll(allTypesInGameAssembly, IsAllowed);
             allTypes = allTypesInGameAssembly.ToList();
-            UnityEngine.Debug.Log(allTypes.Count / 2);
-            var SecondHalf = allTypes.GetRange(allTypes.Count / 2-1, allTypes.Count/2);
-            var FirstForth = allTypes.GetRange(0, 45);
-            var ThirdEighth = allTypes.GetRange(45, 22);
-            var EighthSixteenth = allTypes.GetRange(80, 11);
-            SecondHalf.AddRange(FirstForth);
-            SecondHalf.AddRange(ThirdEighth);
-            SecondHalf.AddRange(EighthSixteenth);
-            SecondHalf.Add(typeof(Fix));
-            SecondHalf.Add(typeof(AABBXComparer));
-            SecondHalf.Add(typeof(AABBXComparer_roundedRectOnly));
             allTypes.Remove(typeof(Circle));
             allTypes.Remove(typeof(Box));
             allTypes.Remove(typeof(RoundedRect));
-            SecondHalf.Add(typeof(Circle));
-            SecondHalf.Add(typeof(Box));
-            SecondHalf.Add(typeof(RoundedRect));
-
-
-            LogDif(allTypes, SecondHalf);
             Type[] TypesToPatch = { typeof(Beam), typeof(BeamObject), typeof(BlackHoleClap), typeof(BoplBody), typeof(BowTransform), typeof(CastSpell), typeof(ControlPlatform), typeof(Dash), typeof(DestroyIfOutsideSceneBounds), typeof(DetPhysics), typeof(DPhysicsBox), typeof(DPhysicsCircle), typeof(DPhysicsRoundedRect), typeof(Drill), typeof(DuplicatePlatformEffect), typeof(GameSessionHandler), typeof(Gravity), typeof(GunTransform), typeof(HookshotInstant), typeof(InstantAbility), typeof(MeteorSmash), typeof(PlaceRocketEngine), typeof(PlaceSparkNode), typeof(PlatformTransform), typeof(PlayerBody), typeof(QuantumTunnel), typeof(ReviveParticle), typeof(Rope), typeof(RopeAttachment), typeof(Shake), typeof(SimpleSparkNode), typeof(TeleportedObjectEffect), typeof(TeleportIndicator), typeof(Updater), typeof(vibrate) };
 
             foreach (Type type in allTypes)
