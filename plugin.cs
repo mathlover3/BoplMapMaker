@@ -117,6 +117,7 @@ namespace MapMaker
         //menu button stuff
         private static UnityAction MapMakerButtonAction;
         private static UnityAction WebsiteButtonAction;
+        private static UnityAction DiscordButtonAction;
         //used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
         public static Fix Camera_XMin = (Fix)(-97.27f);
 
@@ -151,7 +152,7 @@ namespace MapMaker
 
             Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
             harmony.PatchAll(); // Patch Harmony
-            Debugging.Awake();
+            //Debugging.Awake();
             Logger.LogInfo("MapMaker Patch Compleate!");
 
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -1154,20 +1155,29 @@ first = true");*/
             {
 
                 var TutorialButton = GameObject.Find("Tutorial");
+                //discord-link
+                var DiscordButton = GameObject.Find("discord-link");
                 var MapEditorButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/mapmaker button.prefab");
                 var MapEditorButtonObject = Instantiate<GameObject>(MapEditorButtonPrefab, TutorialButton.transform);
-                MapEditorButtonObject.transform.localPosition = new Vector3(1000, 35);
+                MapEditorButtonObject.transform.localPosition = new Vector3(800, 35);
                 MapEditorButtonObject.transform.localScale = new Vector3(3.5f, 3.5f);
                 var MapEditorButton = MapEditorButtonObject.GetComponent<Button>();
                 MapMakerButtonAction += OnClickMapEditor;
                 MapEditorButton.onClick.AddListener(MapMakerButtonAction);
-                var GetMapsButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/website button.prefab");
+                var GetMapsButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/website button 1.prefab");
                 var GetMapsButtonObject = Instantiate<GameObject>(GetMapsButtonPrefab, TutorialButton.transform);
-                GetMapsButtonObject.transform.localPosition = new Vector3(-1000, 35);
+                GetMapsButtonObject.transform.localPosition = new Vector3(-800, 35);
                 GetMapsButtonObject.transform.localScale = new Vector3(3.5f, 3.5f);
                 var GetMapsButton = GetMapsButtonObject.GetComponent<Button>();
                 WebsiteButtonAction += OnClickGetMaps;
                 GetMapsButton.onClick.AddListener(WebsiteButtonAction);
+                var GetDiscordButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/discord button.prefab");
+                var GetDiscordButtonObject = Instantiate<GameObject>(GetDiscordButtonPrefab, DiscordButton.transform);
+                GetDiscordButtonObject.transform.localPosition = new Vector3(75, 25);
+                GetDiscordButtonObject.transform.localScale = new Vector3(0.20f, 0.20f);
+                var GetDiscordButton = GetDiscordButtonObject.GetComponent<Button>();
+                DiscordButtonAction += OnClickDiscord;
+                GetDiscordButton.onClick.AddListener(DiscordButtonAction);
             }
 
         }
@@ -1176,6 +1186,10 @@ first = true");*/
             System.Diagnostics.Process.Start("https://example.com/");
         }
         public static void OnClickGetMaps()
+        {
+            System.Diagnostics.Process.Start("https://example.com/");
+        }
+        public static void OnClickDiscord()
         {
             System.Diagnostics.Process.Start("https://example.com/");
         }

@@ -1769,58 +1769,6 @@ namespace MapMaker
                 LuaMain.players.Add(__instance.GetComponent<PlayerPhysics>());
             }
         }
-        [HarmonyPatch(typeof(DetPhysics))]
-        public class DetPhysicsPatches
-        {
-            [HarmonyPatch("SyncGameObject")]
-            [HarmonyPostfix]
-            private static void Awake_MapMaker_Plug(DetPhysics __instance, IShape shape, ref PhysicsParent pp, ref PhysicsBody body)
-            {
-                if (pp.fixTrans.gameObject.name == "Player(Clone)")
-                {
-                    //Debug.Log($"SyncGameObject set players pos to x: {pp.fixTrans.position.x} and y {pp.fixTrans.position.y} at time {Updater.SimTimeSinceLevelLoaded}");
-                }
-            }
-        }
-        [HarmonyPatch(typeof(DPhysicsBox))]
-        public class DPhysicsBoxPatches
-        {
-            [HarmonyPatch("position", MethodType.Setter)]
-            [HarmonyPostfix]
-            private static void Awake_MapMaker_Plug(Vec2 value, DPhysicsBox __instance)
-            {
-                if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
-                {
-                    //Debug.Log($"DPhysicsBox set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
-                }
-            }
-        }
-        [HarmonyPatch(typeof(DPhysicsCircle))]
-        public class DPhysicsCirclePatches
-        {
-            [HarmonyPatch("position", MethodType.Setter)]
-            [HarmonyPostfix]
-            private static void Awake_MapMaker_Plug(Vec2 value, DPhysicsCircle __instance)
-            {
-                if (__instance.pp.fixTrans.gameObject.name == "Player(Clone)")
-                {
-                    //Debug.Log($"DPhysicsCircle set players pos to x: {__instance.pp.fixTrans.position.x} and y {__instance.pp.fixTrans.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
-                }
-            }
-        }
-        [HarmonyPatch(typeof(PlayerBody))]
-        public class PlayerBodyPatches
-        {
-            [HarmonyPatch("position", MethodType.Setter)]
-            [HarmonyPostfix]
-            private static void Awake_MapMaker_Plug(Vec2 value, PlayerBody __instance)
-            {
-                if (__instance.fixTransform.gameObject.name == "Player(Clone)")
-                {
-                    //Debug.Log($"PlayerBody set players pos to x: {__instance.fixTransform.position.x} and y {__instance.fixTransform.position.y} stack trace: {UnityEngine.StackTraceUtility.ExtractStackTrace()} at time {Updater.SimTimeSinceLevelLoaded}");
-                }
-            }
-        }
         [HarmonyPatch(typeof(NetworkTools))]
         public class NetworkToolsPatches
         {
