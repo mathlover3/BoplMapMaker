@@ -144,9 +144,9 @@ namespace MapMaker.Lua_stuff
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
-                UnityEngine.Debug.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
-                Plugin.logger.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. or just the error is fine, err: {e} ");
+                Console.WriteLine($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
+                UnityEngine.Debug.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
+                Plugin.logger.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
                 return DynValue.Nil;
             }
             /*foreach (var Key in script.Globals.Keys)
@@ -681,7 +681,7 @@ namespace MapMaker.Lua_stuff
         }
         public DynValue GetPlatform()
         {
-            if (target.attachedGround != null)
+            if (target.attachedGround != null && target.isGrounded)
             {
                 return UserData.Create(target.attachedGround);
             }
@@ -714,7 +714,7 @@ namespace MapMaker.Lua_stuff
                     return Ability.Grow;
                 case "Rock":
                     return Ability.Rock;
-                case "Missle":
+                case "Missile":
                     return Ability.Missle;
                 case "Spike":
                     return Ability.Spike;
@@ -780,7 +780,7 @@ namespace MapMaker.Lua_stuff
                 case Ability.Rock:
                     return "Rock";
                 case Ability.Missle:
-                    return "Missle";
+                    return "Missile";
                 case Ability.Spike:
                     return "Spike";
                 case Ability.TimeStop:
@@ -1042,7 +1042,7 @@ namespace MapMaker.Lua_stuff
             if (target.GetComponent<Arrow>() != null) { type = "Arrow"; }
             if (target.GetComponent<RocketEngine>() != null) { type = "RocketEngine"; }
             if (target.GetComponent<Mine>() != null) { type = "Mine"; }
-            if (target.GetComponent<SimpleSparkNode>() != null) { type = "Telsa"; }
+            if (target.GetComponent<SimpleSparkNode>() != null) { type = "Tesla"; }
             if (target.GetComponent<DynamicAbilityPickup>() != null) { type = "AbilityPickup"; }
             if (target.GetComponent<Missile>() != null) { type = "Missile"; }
             if (target.GetComponent<Boulder>() != null) { type = "MatchoBoulder"; }
