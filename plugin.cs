@@ -1162,14 +1162,14 @@ first = true");*/
                 MapEditorButtonObject.transform.localPosition = new Vector3(800, 35);
                 MapEditorButtonObject.transform.localScale = new Vector3(3.5f, 3.5f);
                 var MapEditorButton = MapEditorButtonObject.GetComponent<Button>();
-                MapMakerButtonAction += OnClickMapEditor;
+                MapMakerButtonAction += OnClickDocs;
                 MapEditorButton.onClick.AddListener(MapMakerButtonAction);
                 var GetMapsButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/website button 1.prefab");
                 var GetMapsButtonObject = Instantiate<GameObject>(GetMapsButtonPrefab, TutorialButton.transform);
                 GetMapsButtonObject.transform.localPosition = new Vector3(-800, 35);
                 GetMapsButtonObject.transform.localScale = new Vector3(3.5f, 3.5f);
                 var GetMapsButton = GetMapsButtonObject.GetComponent<Button>();
-                WebsiteButtonAction += OnClickGetMaps;
+                WebsiteButtonAction += OnClickMap;
                 GetMapsButton.onClick.AddListener(WebsiteButtonAction);
                 var GetDiscordButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/discord button.prefab");
                 var GetDiscordButtonObject = Instantiate<GameObject>(GetDiscordButtonPrefab, DiscordButton.transform);
@@ -1181,17 +1181,17 @@ first = true");*/
             }
 
         }
-        public static void OnClickMapEditor()
+        public static void OnClickMap()
         {
-            System.Diagnostics.Process.Start("https://example.com/");
+            System.Diagnostics.Process.Start("https://map-maker.abstractmelon.net/");
         }
-        public static void OnClickGetMaps()
+        public static void OnClickDocs()
         {
-            System.Diagnostics.Process.Start("https://example.com/");
+            System.Diagnostics.Process.Start("https://map-maker.abstractmelon.net/docs/");
         }
         public static void OnClickDiscord()
         {
-            System.Diagnostics.Process.Start("https://example.com/");
+            System.Diagnostics.Process.Start("https://discord.gg/kjhePG5rnq");
         }
         public static bool IsLevelName(String input)
         {
