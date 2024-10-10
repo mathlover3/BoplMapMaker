@@ -303,7 +303,7 @@ namespace MapMaker
             // Cancel the pipe thread when the application is closing
             if (PipeResponder._cancellationTokenSource != null)
             {
-                PipeResponder._cancellationTokenSource.Cancel();
+                //PipeResponder._cancellationTokenSource.Cancel();
             }
         }
         IEnumerator GetGrassMat()
