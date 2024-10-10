@@ -156,10 +156,10 @@ none Platform.ShakePlatform(number Duratson, number ShakeAmount)
 none Platform.DropAllPlayers(number DropForce)
 
 gets the scale that the platform will automaticly strink too when it hasnt been grown in a while. this is normaly its starting scale.
-number GetBaseScaleForPlatform()
+number GetBaseScale()
 
 sets the scale that the platform will automaticly strink too when it hasnt been grown in a while. this is normaly its starting scale.
-none SetBaseScaleForPlatform(number scale)
+none SetBaseScale(number scale)
 
 gets the platform type. can return "grass", "snow", "ice", "space", "robot", "slime". "custom"
 string GetPlatformType()

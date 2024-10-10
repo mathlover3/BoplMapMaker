@@ -907,11 +907,11 @@ namespace MapMaker.Lua_stuff
         {
             PlatformApi.PlatformApi.SetScale(target.gameObject, (Fix)scale);
         }
-        public double GetBaseScaleForPlatform()
+        public double GetBaseScale()
         {
             return (double)target.baseScaleForPlatform;
         }
-        public void SetBaseScaleForPlatform(double scale)
+        public void SetBaseScale(double scale)
         {
             target.baseScaleForPlatform = (Fix)scale;
         }
