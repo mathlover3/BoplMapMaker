@@ -20,25 +20,23 @@ namespace MapMaker
             public static int LengthCompleted = 0;
             public static List<byte> bytes = new();
             public static CancellationTokenSource _cancellationTokenSource;
-            public void StartPipe()
+            public async void StartPipe()
             {
                 // Using Task.Run to avoid blocking the main thread
                 Plugin.logger.LogWarning("creating token");
                 //thanks to chatgpt for telling me about the CancellationToken so it doesnt go on forever and keep the game from closing
                 _cancellationTokenSource = new CancellationTokenSource();
                 Plugin.logger.LogWarning("starting pipe");
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                Task.Run(() => StartPipeReal(_cancellationTokenSource.Token));
+                await Task.Run(() => StartPipeReal(_cancellationTokenSource.Token));
                 Debug.LogWarning("Pipe Started");
                 Plugin.logger.LogWarning("Pipe Started");
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
             //based on https://stackoverflow.com/questions/46793391/how-to-wait-for-response-from-namedpipeserver
-            private async void StartPipeReal(CancellationToken cancellationToken)
+            private void StartPipeReal(CancellationToken cancellationToken)
             {
                 Plugin.logger.LogWarning("Log from pipe");
                 using (NamedPipeServerStream pipeServer = new NamedPipeServerStream(
-    "MapMakerPipe",
+    "testpipe",
     PipeDirection.InOut,
     1,
     PipeTransmissionMode.Byte))//Set TransmissionMode to Message
@@ -49,22 +47,18 @@ namespace MapMaker
                     // Wait for a client to connect asynchronously, with cancellation support
                     Debug.Log("Waiting for client connection...");
                     Plugin.logger.LogWarning("Waiting for client connection...");
-                    try
-                    {
-                        await pipeServer.WaitForConnectionAsync(cancellationToken);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        Debug.Log("Pipe connection was canceled.");
-                        Plugin.logger.LogWarning("Pipe connection was canceled.");
-                        return; // Exit if canceled
-                    }
+                    pipeServer.WaitForConnection();
 
                     Console.WriteLine("Client connected.");
                     Plugin.logger.LogWarning("Client connected.");
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        //if we need to cansule it then return
 
+                        return;
+                    }
                     //receive message from client
-                    while (pipeServer.IsConnected && !cancellationToken.IsCancellationRequested)
+                    while (pipeServer.IsConnected)
                     {
                         var messageBytes = ReadMessage(pipeServer);
                         if (messageBytes != null)
@@ -75,14 +69,11 @@ namespace MapMaker
                             TestMap(zip);
                         }
                     }
-                    if (!cancellationToken.IsCancellationRequested)
-                    {
-                        //start the pipe agien
-                        Debug.Log("restarting pipe");
-                        Plugin.logger.LogWarning("restarting pipe");
-                        //this is already on a difrent theread so no need to make a new thread.
-                        StartPipeReal(cancellationToken);
-                    }
+                    //start the pipe agien
+                    Debug.Log("restarting pipe");
+                    Plugin.logger.LogWarning("restarting pipe");
+                    //this is already on a difrent theread so no need to make a new thread.
+                    StartPipeReal(cancellationToken);
                 }
             }
             public static void TestMap(ZipArchive zip)
