@@ -100,7 +100,7 @@ namespace MapMaker
         public static List<PlayerInput> playerInputs = new();
         public static bool FirstUpdate = true;
         //used to chose a map from the random bag
-        public static List<int> MapIndexsUsed = new();
+        public static List<int> MapIndexsLeft = new();
         //map ids
         public static readonly int GrassMapId = 0;
         public static readonly int SnowMapId = 21;
@@ -1343,38 +1343,19 @@ first = true");*/
         }
         public static int RandomBagLevel()
         {
-            var TimesToGoForwords = UnityEngine.Random.Range(0, Plugin.MapJsons.Length - MapIndexsUsed.Count);
-            //if we used all of them reset it.
-            if (Plugin.MapJsons.Length == MapIndexsUsed.Count)
+            if (MapIndexsLeft.Count == 0)
             {
-                MapIndexsUsed = new();
-            }
-            byte Index = 0;
-            if (Plugin.MapJsons.Length == 0)
-            {
-                throw new Exception("Random Bag called with no maps!");
-            }
-            //we start at index 0
-            while ((int)Index < Plugin.MapJsons.Length)
-            {
-                //if we havent used the id Index yet
-                if (!MapIndexsUsed.Contains(Index))
+                var i = 0;
+                foreach (var _ in zipArchives)
                 {
-                    //if we have finished going forwords
-                    if (TimesToGoForwords == 0)
-                    {
-                        //we add the index and return the new map id
-                        MapIndexsUsed.Add(Index);
-                        return Index;
-                    }
-                    //if we havent finished going forwords then we go back 1
-                    TimesToGoForwords -= 1;
+                    MapIndexsLeft.Add(i);
+                    i++;
                 }
-                //incress the index by 1 so its not a infanent loop
-                Index += 1;
             }
-            //this will never happen
-            throw new Exception("random bag broke");
+            var NewMapIndexIndex = UnityEngine.Random.Range(0, MapIndexsLeft.Count);
+            var NewMapIndex = MapIndexsLeft[NewMapIndexIndex];
+            MapIndexsLeft.Remove(NewMapIndex);
+            return NewMapIndex;
         }
         public static Spawner CreateSpawner(Vec2 Pos, Fix SimTimeBetweenSpawns, Vec2 SpawningVelocity, Fix angularVelocity, UnityEngine.Color color, Spawner.ObjectSpawnType spawnType = Spawner.ObjectSpawnType.None, PlatformType BoulderType = PlatformType.grass, bool UseSignal = false, int Signal = 0, bool IsTriggerSignal = false)
         {

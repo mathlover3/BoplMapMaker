@@ -119,8 +119,8 @@
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:logic stuff\\notgate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -129,7 +129,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedHeight": 457,
+          "DockedHeight": 416,
           "SelectedChildIndex": 5,
           "Children": [
             {
@@ -154,8 +154,7 @@
               "RelativeToolTip": "PipeStuff.cs",
               "ViewState": "AgIAABgAAAAAAAAAAAArwCYAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-16T18:55:05.06Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-09-16T18:55:05.06Z"
             },
             {
               "$type": "Document",
@@ -199,9 +198,9 @@
               "Title": "plugin.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\plugin.cs",
               "RelativeDocumentMoniker": "plugin.cs",
-              "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\plugin.cs*",
-              "RelativeToolTip": "plugin.cs*",
-              "ViewState": "AgIAAKsAAAAAAAAAAAAowDYBAAAMAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\plugin.cs",
+              "RelativeToolTip": "plugin.cs",
+              "ViewState": "AgIAAKsEAAAAAAAAAAAvwEIAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-10T02:50:24.562Z",
               "EditorCaption": ""
@@ -497,7 +496,7 @@
           ]
         },
         {
-          "DockedHeight": 73,
+          "DockedHeight": 114,
           "SelectedChildIndex": -1,
           "Children": [
             {
@@ -507,6 +506,16 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        },
+        {
+          "DockedHeight": 109,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{a80febb4-e7e0-4147-b476-21aaf2453969}"
             }
           ]
         }
