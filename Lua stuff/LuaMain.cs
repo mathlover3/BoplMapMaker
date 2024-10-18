@@ -78,7 +78,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["ShootGrow"] = (object)ShootGrow;
             script.Globals["ShootShrink"] = (object)ShootShrink;
             script.Globals["GetDeltaTime"] = (object)GetDeltaTime;
-            script.Globals["GetTimeSenceLevelLoad"] = (object)GetTimeSinceLevelLoad;
+            script.Globals["GetTimeSinceLevelLoad"] = (object)GetTimeSinceLevelLoad;
             script.Globals["IsTimeStopped"] = (object)IsTimeStopped;
             script.Globals["GetInputValueWithId"] = (object)GetInputValueWithId;
             script.Globals["SetOutputWithId"] = (object)SetOutputWithId;
@@ -980,7 +980,7 @@ namespace MapMaker.Lua_stuff
         }
         public bool IsBoulder()
         {
-            return target.gameObject.GetComponent<Boulder>() != null;
+            return target.GetComponent<Boulder>() != null;
         }
         public bool IsResizable()
         {
