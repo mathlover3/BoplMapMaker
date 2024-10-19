@@ -1653,7 +1653,7 @@ namespace MapMaker
         public class InputUpdaterPatches
         {
             [HarmonyPatch("Awake")]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static void Awake_MapMaker_Plug(InputUpdater __instance)
             {
                 Plugin.playerInputs.Add(__instance.gameObject.GetComponent<PlayerInput>());

@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using BoplFixedMath;
+using System.IO.Compression;
+using System.IO;
 
 namespace MapMaker
 {
@@ -106,7 +108,7 @@ namespace MapMaker
                     yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldarg_0);
                     yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Call, m_LoggingPosFunc);
                 }
-                if (instruction.StoresField(f_ExternalVel_Field))
+                /*if (instruction.StoresField(f_ExternalVel_Field))
                 {
                     //if it stores something to the fixtrasforms posison then insert our code
                     yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Dup);
@@ -119,7 +121,7 @@ namespace MapMaker
                     yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Dup);
                     yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldarg_0);
                     yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Call, m_LoggingselfImposedVelocityFunc);
-                }
+                }*/
                 yield return instruction;
             }
 
@@ -147,6 +149,17 @@ namespace MapMaker
             {
                 UnityEngine.Debug.Log($"{UnityEngine.StackTraceUtility.ExtractStackTrace()} is changing player selfImposedVelocity, new value: {newselfImposedVelocity}, at time: {Updater.SimTimeSinceLevelLoaded}");
             }
+        }
+    }
+    [HarmonyPatch(typeof(SlimeController))]
+    public class SlimeControllerPatches
+    {
+        [HarmonyPatch("UpdateSim")]
+        [HarmonyPrefix]
+        private static void UpdateSim(SlimeController __instance, Fix simDeltaTime)
+        {
+            Player player = PlayerHandler.Get().GetPlayer(__instance.playerNumber);
+            UnityEngine.Debug.Log($"jump: {player.jumpButton_PressedThisFrame()}, abilitys 1, 2 and 3: {player.AbilityButtonIsDown(0)},{player.AbilityButtonIsDown(1)}, {player.AbilityButtonIsDown(2)}, input vector: {__instance.inputVector}, at time: {Updater.SimTimeSinceLevelLoaded}");
         }
     }
 }

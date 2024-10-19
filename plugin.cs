@@ -152,7 +152,7 @@ namespace MapMaker
 
             Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
             harmony.PatchAll(); // Patch Harmony
-            //Debugging.Awake();
+            Debugging.Awake();
             Logger.LogInfo("MapMaker Patch Compleate!");
 
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -830,7 +830,7 @@ namespace MapMaker
                         }
                         //spawn object
                         //Debug.Log($"pos is {pos}");
-                        Platform = UnityEngine.Object.Instantiate<GameObject>(Platform, pos, Quaternion.identity);
+                        Platform = FixTransform.InstantiateFixed(Platform, (Vec2)pos);
                         PlatformApi.PlatformApi.SetPos(Platform, (Vec2)pos);
                         //rotate object
                         StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();

@@ -901,11 +901,11 @@ namespace MapMaker.Lua_stuff
         }
         public double GetScale()
         {
-            return (double)PlatformApi.PlatformApi.GetScale(target.gameObject);
+            return (double)target.GetComponent<BoplBody>().Scale;
         }
         public void SetScale(double scale)
         {
-            PlatformApi.PlatformApi.SetScale(target.gameObject, (Fix)scale);
+            target.GetComponent<BoplBody>().Scale = (Fix)scale;
         }
         public double GetBaseScale()
         {
