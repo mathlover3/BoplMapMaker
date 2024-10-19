@@ -152,7 +152,7 @@ namespace MapMaker
 
             Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
             harmony.PatchAll(); // Patch Harmony
-            Debugging.Awake();
+            //Debugging.Awake();
             Logger.LogInfo("MapMaker Patch Compleate!");
 
             SceneManager.sceneLoaded += OnSceneLoaded;

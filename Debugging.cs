@@ -151,7 +151,7 @@ namespace MapMaker
             }
         }
     }
-    [HarmonyPatch(typeof(SlimeController))]
+    /*[HarmonyPatch(typeof(SlimeController))]
     public class SlimeControllerPatches
     {
         [HarmonyPatch("UpdateSim")]
@@ -161,5 +161,5 @@ namespace MapMaker
             Player player = PlayerHandler.Get().GetPlayer(__instance.playerNumber);
             UnityEngine.Debug.Log($"jump: {player.jumpButton_PressedThisFrame()}, abilitys 1, 2 and 3: {player.AbilityButtonIsDown(0)},{player.AbilityButtonIsDown(1)}, {player.AbilityButtonIsDown(2)}, input vector: {__instance.inputVector}, at time: {Updater.SimTimeSinceLevelLoaded}");
         }
-    }
+    }*/
 }

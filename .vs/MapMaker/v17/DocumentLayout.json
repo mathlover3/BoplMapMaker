@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\plugin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:plugin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\lua stuff\\luamain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:lua stuff\\luamain.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -15,16 +23,8 @@
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:pipestuff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\plugin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:plugin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\networkingstuff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:networkingstuff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|solutionrelative:debugging.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{F019CC0C-38F2-4900-839E-591E8FE641F7}|MapMaker.csproj|c:\\users\\djhlo\\bopl mods\\mapmaker\\boplmapmaker\\minijson.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -130,7 +130,7 @@
       "DocumentGroups": [
         {
           "DockedHeight": 415,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -138,19 +138,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 1,
               "Title": "Debugging.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Debugging.cs",
               "RelativeDocumentMoniker": "Debugging.cs",
               "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Debugging.cs",
               "RelativeToolTip": "Debugging.cs",
-              "ViewState": "AgIAAKMAAAAAAAAAAAAkwJ4AAABSAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAKMAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-09-24T01:40:00.812Z"
+              "WhenOpened": "2024-09-24T01:40:00.812Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "PipeStuff.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\PipeStuff.cs",
               "RelativeDocumentMoniker": "PipeStuff.cs",
@@ -163,7 +164,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "NetworkingStuff.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\NetworkingStuff.cs",
               "RelativeDocumentMoniker": "NetworkingStuff.cs",
@@ -187,7 +188,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Patches.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Patches.cs",
               "RelativeDocumentMoniker": "Patches.cs",
@@ -200,13 +201,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "plugin.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\plugin.cs",
               "RelativeDocumentMoniker": "plugin.cs",
               "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\plugin.cs",
               "RelativeToolTip": "plugin.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAI8DAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAIkAAAAAAAAAAAAQwJoAAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-10T02:50:24.562Z",
               "EditorCaption": ""
@@ -261,12 +262,12 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "LuaMain.cs",
               "DocumentMoniker": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Lua stuff\\LuaMain.cs",
               "RelativeDocumentMoniker": "Lua stuff\\LuaMain.cs",
-              "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Lua stuff\\LuaMain.cs*",
-              "RelativeToolTip": "Lua stuff\\LuaMain.cs*",
+              "ToolTip": "C:\\Users\\djhlo\\bopl mods\\MapMaker\\BoplMapMaker\\Lua stuff\\LuaMain.cs",
+              "RelativeToolTip": "Lua stuff\\LuaMain.cs",
               "ViewState": "AgIAAHwDAAAAAAAAAAAswIsDAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-26T18:25:32.881Z",
