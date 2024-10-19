@@ -696,6 +696,8 @@ namespace MapMaker.Lua_stuff
         {
             switch (str)
             {
+                case "Random":
+                    return Ability.Random;
                 case "Roll":
                     return Ability.Roll;
                 case "Dash":
@@ -761,6 +763,8 @@ namespace MapMaker.Lua_stuff
         {
             switch (ability)
             {
+                case Ability.Random:
+                    return "Random";
                 case Ability.Roll:
                     return "Roll";
                 case Ability.Dash:
@@ -824,7 +828,7 @@ namespace MapMaker.Lua_stuff
         public enum Ability
         {
             None = 0,
-            Roll = 1,
+            Random = 1,
             Dash = 2,
             Grenade = 3,
             Bow = 4,
@@ -839,6 +843,7 @@ namespace MapMaker.Lua_stuff
             SmokeGrenade = 13,
             Platform = 14,
             Revive = 15,
+            Roll = 16,
             Shrink = 17,
             BlackHole = 18,
             Invisibility = 19,
