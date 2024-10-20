@@ -212,6 +212,7 @@ namespace MapMaker.Lua_stuff
         }
         public static void SpawnNormalExplosion(Vec2 pos, Fix scale)
         {
+            AudioManager.Get().Play("explosion");
             FixTransform.InstantiateFixed<Explosion>(MissleExplosion, pos).GetComponent<IPhysicsCollider>().Scale = scale;
         }
     }
