@@ -145,6 +145,7 @@ namespace MapMaker
         private void Awake()
         {
             instance = this;
+            //idk random comment for pizza to pull
             NetworkingStuff.Awake();
             Logger.LogInfo("MapLoader Has been loaded");
             logger = Logger;
