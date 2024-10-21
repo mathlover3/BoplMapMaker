@@ -16,6 +16,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem.Composites;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.UIElements;
 using static MapMaker.Lua_stuff.LuaPlayerPhysicsProxy;
@@ -64,6 +65,7 @@ namespace MapMaker.Lua_stuff
             Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Metatables);
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
             script.Globals["SpawnGrenade"] = (object)SpawnGrenadeDouble;
+            script.Globals["SpawnBlackHole"] = (object)SpawnBlackHoleDouble;
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
             script.Globals["SpawnSmokeGrenade"] = (object)SpawnSmokeGrenadeDouble;
             script.Globals["SpawnExplosion"] = (object)SpawnExplosionDouble;
@@ -74,6 +76,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["GetAllPlatforms"] = (object)GetAllPlatforms;
             script.Globals["GetAllPlayers"] = (object)GetAllPlayers;
             script.Globals["GetAllBoplBodys"] = (object)GetAllBoplBodys;
+            script.Globals["GetAllBlackHoles"] = (object)GetAllBlackHoles;
             script.Globals["ShootBlink"] = (object)ShootBlink;
             script.Globals["ShootGrow"] = (object)ShootGrow;
             script.Globals["ShootShrink"] = (object)ShootShrink;
@@ -88,6 +91,7 @@ namespace MapMaker.Lua_stuff
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
             UserData.RegisterProxyType<PlatformProxy, StickyRoundedRectangle>(r => new PlatformProxy(r));
             UserData.RegisterProxyType<BoplBodyProxy, BoplBody>(r => new BoplBodyProxy(r));
+            UserData.RegisterProxyType<BlackHoleProxy, BlackHole>(r => new BlackHoleProxy(r));
             return script;
         }
         public void Register()
@@ -176,6 +180,14 @@ namespace MapMaker.Lua_stuff
         public static BoplBody SpawnGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
         {
             return LuaSpawner.SpawnGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
+        }
+        public static BlackHole SpawnBlackHoleDouble(double posX, double posY)
+        {
+            return SpawnBlackHole((Fix)posX, (Fix)posY);
+        }
+        public static BlackHole SpawnBlackHole(Fix posX, Fix posY)
+        {
+            return LuaSpawner.SpawnBlackHole(new Vec2(posX, posY));
         }
         public static void SpawnAbilityPickupDouble(double posX, double posY, double scale, double StartVelX, double StartVelY)
         {
@@ -355,6 +367,24 @@ namespace MapMaker.Lua_stuff
                 DynValue.FromObject(script, result)
             );
         }
+
+        public static DynValue GetAllBlackHoles(Script script)
+        {
+            BlackHole[] allHoles = Resources.FindObjectsOfTypeAll(typeof(BlackHole)) as BlackHole[];
+            List<BlackHole> result = new();
+            foreach (var hole in allHoles)
+            {
+                if (hole.gameObject.scene.name != null && hole.dCircle.initHasBeenCalled && !hole.GetComponent<FixTransform>().IsDestroyed)
+                {
+                    result.Add(hole);
+                }
+            }
+            return DynValue.NewTuple(
+                DynValue.NewNumber(result.Count),
+                DynValue.FromObject(script, result)
+            );
+        }
+
         public static void ShootBlink(double posX, double posY, double Angle, double minPlayerDuration, double WallDuration, double WallDelay, double WallShake)
         {
             ShootBlinkObject.minPlayerDuration = (Fix)minPlayerDuration;
@@ -1035,6 +1065,7 @@ namespace MapMaker.Lua_stuff
 );
         }
     }
+
     public class BoplBodyProxy
     {
         public BoplBody target;
@@ -1187,6 +1218,131 @@ namespace MapMaker.Lua_stuff
             {
                 render.color = new Color(R, G, B, A);
             }
+        }
+        public bool IsDisappeared()
+        {
+            return !target.gameObject.activeInHierarchy;
+        }
+    }
+
+    public class BlackHoleProxy
+    {
+        public BlackHole target;
+
+        [MoonSharpHidden]
+        public BlackHoleProxy(BlackHole p)
+        {
+            target = p;
+
+        }
+        public string GetClassType()
+        {
+            return "BlackHole";
+        }
+        public string GetObjectType()
+        {
+            return "BlackHole";
+        }
+        public bool HasBeenInitialized()
+        {
+            return target.dCircle.initHasBeenCalled;
+        }
+        public bool IsBeingDestroyed()
+        {
+            return target.dCircle.fixTrans.IsDestroyed || target.gameObject == null;
+        }
+        public DynValue GetPos()
+        {
+            if (!HasBeenInitialized())
+            {
+                throw new ScriptRuntimeException("called GetPos on a BlackHole before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetPos on a BlackHole when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            return LuaMain.Vec2ToTuple(target.GetComponent<FixTransform>().position);
+        }
+
+
+        public double GetMass() 
+        {
+            if (!HasBeenInitialized())
+            {
+                throw new ScriptRuntimeException("called GetMass on a BlackHole before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetMass on a BlackHole when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            return (double)(Fix.One/target.GetMass());
+        }
+        public void SetPos(double x, double y)
+        {
+            if (!HasBeenInitialized())
+            {
+                throw new ScriptRuntimeException("called SetPos on a BlackHole before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetPos on a BlackHole when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+
+            target.GetComponent<FixTransform>().position = new Vec2((Fix)x, (Fix)y);
+        }
+        
+        public void Grow(double amount)
+        {
+            if (!HasBeenInitialized())
+            {
+                throw new ScriptRuntimeException("called SetScale on a BlackHole before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetScale on a BlackHole when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.GrowIncrementally((Fix)amount);
+        }
+        
+        public void SetVelocity(double VelX, double VelY)
+        {
+            if (!HasBeenInitialized())
+            {
+                throw new ScriptRuntimeException("called SetVelocity on a BlackHole before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetVelocity on a BlackHole when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.velocity = new Vec2((Fix)VelX, (Fix)VelY);
+        }
+        public void SetMass(double Mass) 
+        {
+            if (!HasBeenInitialized())
+            {
+                throw new ScriptRuntimeException("called SetMass on a BlackHole before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetMass on a BlackHole when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.SetMass((Fix)(1/Mass)); 
+        }
+        public void AddForce(double ForceX, double ForceY)
+        {
+            if (!HasBeenInitialized())
+            {
+                throw new ScriptRuntimeException("called AddForce on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called AddForce on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.AddForce(new Vec2((Fix)ForceX, (Fix)ForceY));
+        }
+        public void Destroy()
+        {
+            Updater.DestroyFix(target.gameObject);
         }
         public bool IsDisappeared()
         {

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using static UnityEngine.UIElements.UIRAtlasAllocator;
 using UnityEngine.UIElements;
 using UnityEngine;
+using System.Net.Configuration;
 
 namespace MapMaker.Lua_stuff
 {
@@ -16,6 +17,8 @@ namespace MapMaker.Lua_stuff
         private static GameObject BowObject;
         private static BoplBody arrow;
         private static BoplBody grenade;
+
+        private static BlackHole blackHole;
         private static DynamicAbilityPickup AbilityPickup;
         private static BoplBody SmokeGrenade;
         private static Explosion MissleExplosion;
@@ -24,14 +27,14 @@ namespace MapMaker.Lua_stuff
         {
             UnityEngine.Debug.Log("LuaSpawner Awake");
             //only do all of this if it hasnt already been done.
-            if (BowObject == null || arrow == null || grenade == null || AbilityPickup == null)
+            if (BowObject == null || arrow == null || grenade == null || AbilityPickup == null || blackHole == null)
             {
 
 
                 GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
-                UnityEngine.Debug.Log("getting Bow object");
+                UnityEngine.Debug.Log("Getting Game Objects");
                 var objectsFound = 0;
-                var ObjectsToFind = 4;
+                var ObjectsToFind = 5;
                 foreach (GameObject obj in allObjects)
                 {
                     if (obj.name == "Bow")
@@ -39,6 +42,18 @@ namespace MapMaker.Lua_stuff
                         // Found the object with the desired name
                         // You can now store its reference or perform any other actions
                         BowObject = obj;
+                        UnityEngine.Debug.Log("Found the object: " + obj.name);
+                        objectsFound++;
+                        if (objectsFound == ObjectsToFind)
+                        {
+                            break;
+                        }
+                    }
+                    if (obj.name == "BlackHole2")
+                    {
+                        // Found the object with the desired name
+                        // You can now store its reference or perform any other actions
+                        blackHole = obj.GetComponent<BlackHole>();
                         UnityEngine.Debug.Log("Found the object: " + obj.name);
                         objectsFound++;
                         if (objectsFound == ObjectsToFind)
@@ -122,7 +137,8 @@ namespace MapMaker.Lua_stuff
             Grenade,
             AbilityOrb,
             SmokeGrenade,
-            Explosion
+            Explosion,
+            BlackHole
         }
         public static BoplBody SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
         {
@@ -133,6 +149,19 @@ namespace MapMaker.Lua_stuff
             boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
             boplBody.GetComponent<SpriteRenderer>().color = color;
             return boplBody;
+        }
+/*
+        public static BlackHole SpawnBlackHole(Vec2 pos, Fix scale)
+        {
+            BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
+            blackHole2.Grow(Fix.One/(scale-blackHole2.growth), Fix.Zero);
+            return blackHole2;
+        }
+        */
+        public static BlackHole SpawnBlackHole(Vec2 pos)
+        {
+            BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
+            return blackHole2;
         }
         //modifyed chatgpt code
         public static Fix CalculateAngle(Vec2 vec2)

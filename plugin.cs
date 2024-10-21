@@ -1304,7 +1304,7 @@ first = true");*/
                 zipArchives = zipArchives.Append(UnzipFile(zipFile)).ToArray();
                 if (Path.GetFileName(zipFile) == "TESTING.zip")
                 {
-                    zipArchives = [zipArchives[zipArchives.Length-1]];
+                    zipArchives = new[] {zipArchives[zipArchives.Length-1]};
                     break;
                 }
             }
