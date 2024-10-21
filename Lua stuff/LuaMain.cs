@@ -543,6 +543,8 @@ namespace MapMaker.Lua_stuff
             target.UnGround();
             body.position = new Vec2((Fix)PosX, (Fix)PosY);
         }
+        public double GetScale() { return (double)body.fixtrans.Scale; }
+        public void SetScale(double scale) { PlayerHandler.Get().GetPlayer(body.idHolder.GetPlayerId()).Scale = (Fix)scale; }
         public void GetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
         public double GetMass() { return (double)(Fix.One / target.inverseMass01); }
         public void SetSpeed(double NewValue) {target.Speed = (Fix)NewValue; }
