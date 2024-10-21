@@ -296,7 +296,7 @@ namespace MapMaker
             //make it use Fix math instead of floating point math.
             private static void asin(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
-                Debug.Log("asin");
+                //Debug.Log("asin");
                 //Fix doesnt have a asin so thanks to chatgpt i use Acon and sqrt and exsponents to get Asin
                 __result = Plugin.exec1(args, "asin", d => (double)Fix.Acos(Fix.Sqrt(Fix.One - Fix.Pow2((Fix)d))), __instance);
             }
@@ -333,7 +333,7 @@ namespace MapMaker
             //make it use Fix math instead of floating point math.
             private static void cosh(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
-                Debug.Log("cosh");
+                //Debug.Log("cosh");
                 //i sure hope this works...
                 __result = Plugin.exec1(args, "cosh", d => (double)((Fix.Pow((Fix)2.718281828459045, (Fix)(d)) + Fix.Pow((Fix)2.718281828459045, (Fix)(-d))) / (Fix)2), __instance);
             }
@@ -349,7 +349,7 @@ namespace MapMaker
             //make it use Fix math instead of floating point math.
             private static void exp(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
-                Debug.Log("exp");
+                //Debug.Log("exp");
                 //i sure hope this works...
                 __result = Plugin.exec1(args, "exp", d => (double)Fix.Pow((Fix)2.718281828459045, (Fix)d), __instance);
             }
@@ -372,7 +372,7 @@ namespace MapMaker
             //make it use Fix math instead of floating point math.
             private static void ldexp(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
-                Debug.Log("ldexp");
+                //Debug.Log("ldexp");
                 __result = Plugin.exec2(args, "ldexp", (d1, d2) => (double)((Fix)d1 * Fix.Pow((Fix)2, (Fix)d2)), __instance);
             }
             [HarmonyPatch("log")]
@@ -380,7 +380,7 @@ namespace MapMaker
             //make it use Fix math instead of floating point math.
             private static void log(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
-                Debug.Log("log");
+                //Debug.Log("log");
                 //i THINK Log2(n) is the same as ln(n)???
                 __result = Plugin.exec2n(args, "log", Math.E, (d1, d2) => (double)(Fix.Log2((Fix)d1) / Fix.Log2((Fix)d2)), __instance);
             }
@@ -403,7 +403,7 @@ namespace MapMaker
             //make it use Fix math instead of floating point math.
             private static void modf(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
-                Debug.Log("modf");
+                //Debug.Log("modf");
                 DynValue arg = args.AsType(0, "modf", DataType.Number, false);
                 __result = DynValue.NewTuple(DynValue.NewNumber((double)Fix.Floor((Fix)arg.Number)), DynValue.NewNumber((double)((Fix)arg.Number - Fix.Floor((Fix)arg.Number))));
             }
@@ -419,7 +419,7 @@ namespace MapMaker
             //make it use Fix math instead of floating point math.
             private static void rad(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
-                Debug.Log("rad");
+                //Debug.Log("rad");
                 __result = Plugin.exec1(args, "rad", d => (double)((Fix)d * (Fix)PhysTools.RadiansToDegrees), __instance);
             }
             [HarmonyPatch("random")]
@@ -451,7 +451,7 @@ namespace MapMaker
             //make it use Fix math instead of floating point math.
             private static void sinh(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
-                Debug.Log("sinh");
+                //Debug.Log("sinh");
                 __result = Plugin.exec1(args, "sinh", d => (double)((Fix.Pow((Fix)2.718281828459045, (Fix)d) - Fix.Pow((Fix)2.718281828459045, (Fix)(-d))) / (Fix)2), __instance);
             }
             [HarmonyPatch("sqrt")]
