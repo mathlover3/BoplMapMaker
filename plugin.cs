@@ -864,6 +864,7 @@ namespace MapMaker
                             VectorFieldPlatformComp.expandSpeed = FloorToThousandnths(expandSpeed);
                             VectorFieldPlatformComp.normalSpeedFriction = FloorToThousandnths(normalSpeedFriction);
                             VectorFieldPlatformComp.OrbitAccelerationMulitplier = FloorToThousandnths(OrbitAccelerationMulitplier);
+                            VectorFieldPlatformComp.targetRadius = FloorToThousandnths(targetRadius);
                             VectorFieldPlatformComp.orbitSpeed = FloorToThousandnths(orbitSpeed);
                             VectorFieldPlatformComp.ovalness01 = FloorToThousandnths(ovalness01);
                         }
