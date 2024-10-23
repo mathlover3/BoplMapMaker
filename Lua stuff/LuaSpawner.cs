@@ -163,7 +163,7 @@ namespace MapMaker.Lua_stuff
             return boplBody;
         }
 
-        public static BoplBody SpawnMine(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
+        public static BoplBody SpawnMine(Vec2 pos, Fix scale, Vec2 StartVel, Color color, bool chase)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(mine, pos);
             boplBody.Scale = scale;
@@ -171,6 +171,7 @@ namespace MapMaker.Lua_stuff
             boplBody.rotation = CalculateAngle(StartVel);
             Mine mineObj = boplBody.GetComponent<Mine>();
             mineObj.item.OwnerId = 256;
+            if (!chase) mineObj.item.OwnerId = 255;
             mineObj.SetMaterial(WhiteSlimeMat);
             mineObj.ScansFor = 256;
             mineObj.Light.color = color;

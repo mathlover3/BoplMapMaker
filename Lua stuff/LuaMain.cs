@@ -174,13 +174,13 @@ namespace MapMaker.Lua_stuff
         {
             return LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B,A));
         }
-        public static BoplBody SpawnMineDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
+        public static BoplBody SpawnMineDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, bool chase, float R, float G, float B, float A)
         {
-            return SpawnMine((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, R, G, B, A);
+            return SpawnMine((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, chase, R, G, B, A);
         }
-        public static BoplBody SpawnMine(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, float R, float G, float B, float A)
+        public static BoplBody SpawnMine(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, bool chase, float R, float G, float B, float A)
         {
-            return LuaSpawner.SpawnMine(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B,A));
+            return LuaSpawner.SpawnMine(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B,A), chase);
         }
         public static BoplBody SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {

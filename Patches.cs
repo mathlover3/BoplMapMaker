@@ -1788,6 +1788,11 @@ namespace MapMaker
                 		Player player2 = PlayerHandler.Get().GetPlayer(__instance.item.OwnerId);
                         if (player2 == null) 
                         {
+                            if (__instance.item.OwnerId == 255 || player == null || player.isInvisible)
+                            {
+                                i++;
+                                continue;
+                            }
                             __result = __instance.scanHitsBuffer[i].fixTrans;
                             return false;
                         }
