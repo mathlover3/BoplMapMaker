@@ -15,6 +15,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System.Linq;
 using System.IO;
+using System.ComponentModel;
 
 namespace MapMaker
 {
@@ -1767,6 +1768,40 @@ namespace MapMaker
             private static void Awake_MapMaker_Plug(SlimeController __instance)
             {
                 LuaMain.players.Add(__instance.GetComponent<PlayerPhysics>());
+            }
+        }
+        [HarmonyPatch(typeof(Mine))]
+        public class MinePatches
+        {
+            [HarmonyPatch("ScanForPlayers")]
+            [HarmonyPrefix]
+            private static bool ScanForPlayers_MapMaker_Plug(Mine __instance, ref FixTransform __result)
+            {
+                int num = DetPhysics.Get().CircleCastAll(__instance.body.position, __instance.scanRadius * __instance.physicsCollider.Scale, __instance.ScansFor, ref __instance.scanHitsBuffer);
+                int i = 0;
+                while (i < num)
+                {
+                	IPlayerIdHolder component = __instance.scanHitsBuffer[i].fixTrans.GetComponent<IPlayerIdHolder>();
+                	if (component != null)
+                	{
+                		Player player = PlayerHandler.Get().GetPlayer(component.GetPlayerId());
+                		Player player2 = PlayerHandler.Get().GetPlayer(__instance.item.OwnerId);
+                        if (player2 == null) 
+                        {
+                            __result = __instance.scanHitsBuffer[i].fixTrans;
+                            return false;
+                        }
+                		if (player == null || player.isInvisible || component.GetPlayerId() == player2.Id || player2.Team == player.Team)
+                		{
+                			i++;
+                			continue;
+                		}
+                	}
+                	__result = __instance.scanHitsBuffer[i].fixTrans;
+                    return false;
+                }
+                __result = null;
+                return false;
             }
         }
         [HarmonyPatch(typeof(NetworkTools))]

@@ -17,7 +17,7 @@ namespace MapMaker.Lua_stuff
         private static GameObject BowObject;
         private static BoplBody arrow;
         private static BoplBody grenade;
-
+        private static BoplBody mine;
         private static BlackHole blackHole;
         private static DynamicAbilityPickup AbilityPickup;
         private static BoplBody SmokeGrenade;
@@ -34,7 +34,7 @@ namespace MapMaker.Lua_stuff
                 GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
                 UnityEngine.Debug.Log("Getting Game Objects");
                 var objectsFound = 0;
-                var ObjectsToFind = 5;
+                var ObjectsToFind = 6;
                 foreach (GameObject obj in allObjects)
                 {
                     if (obj.name == "Bow")
@@ -42,6 +42,18 @@ namespace MapMaker.Lua_stuff
                         // Found the object with the desired name
                         // You can now store its reference or perform any other actions
                         BowObject = obj;
+                        UnityEngine.Debug.Log("Found the object: " + obj.name);
+                        objectsFound++;
+                        if (objectsFound == ObjectsToFind)
+                        {
+                            break;
+                        }
+                    }
+                    if (obj.name == "Mine")
+                    {
+                        // Found the object with the desired name
+                        // You can now store its reference or perform any other actions
+                        mine = obj.GetComponent<BoplBody>();
                         UnityEngine.Debug.Log("Found the object: " + obj.name);
                         objectsFound++;
                         if (objectsFound == ObjectsToFind)
@@ -148,6 +160,21 @@ namespace MapMaker.Lua_stuff
             boplBody.rotation = CalculateAngle(StartVel);
             boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
             boplBody.GetComponent<SpriteRenderer>().color = color;
+            return boplBody;
+        }
+
+        public static BoplBody SpawnMine(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
+        {
+            BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(mine, pos);
+            boplBody.Scale = scale;
+            boplBody.StartVelocity = StartVel;
+            boplBody.rotation = CalculateAngle(StartVel);
+            Mine mineObj = boplBody.GetComponent<Mine>();
+            mineObj.item.OwnerId = 256;
+            mineObj.SetMaterial(WhiteSlimeMat);
+            mineObj.ScansFor = 256;
+            mineObj.Light.color = color;
+
             return boplBody;
         }
 /*
