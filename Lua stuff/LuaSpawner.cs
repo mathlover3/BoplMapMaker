@@ -202,9 +202,10 @@ namespace MapMaker.Lua_stuff
             return blackHole2;
         }
         */
-        public static BlackHole SpawnBlackHole(Vec2 pos)
+        public static BlackHole SpawnBlackHole(Vec2 pos, Fix size)
         {
             BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
+            blackHole2.GrowIncrementally(size - Fix.One);
             return blackHole2;
         }
         //modifyed chatgpt code

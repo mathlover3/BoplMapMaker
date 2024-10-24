@@ -200,13 +200,13 @@ namespace MapMaker.Lua_stuff
         {
             return LuaSpawner.SpawnGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
         }
-        public static BlackHole SpawnBlackHoleDouble(double posX, double posY)
+        public static BlackHole SpawnBlackHoleDouble(double posX, double posY, double size)
         {
-            return SpawnBlackHole((Fix)posX, (Fix)posY);
+            return SpawnBlackHole((Fix)posX, (Fix)posY, (Fix)size);
         }
-        public static BlackHole SpawnBlackHole(Fix posX, Fix posY)
+        public static BlackHole SpawnBlackHole(Fix posX, Fix posY, Fix size)
         {
-            return LuaSpawner.SpawnBlackHole(new Vec2(posX, posY));
+            return LuaSpawner.SpawnBlackHole(new Vec2(posX, posY), size);
         }
         public static void SpawnAbilityPickupDouble(double posX, double posY, double scale, double StartVelX, double StartVelY)
         {
@@ -1126,7 +1126,7 @@ namespace MapMaker.Lua_stuff
         {
             return target.physicsCollider.IsDestroyed || target.gameObject == null;
         }
-        public bool IsTriggerable()
+        public bool CanTrigger()
         {
             return type == "Grenade" || type == "RocketEngine" || type == "Mine" || type == "AbilityPickup" || type == "Missile" || type == "Smoke Grenade" || type == "Smoke";
         }
@@ -1242,9 +1242,9 @@ namespace MapMaker.Lua_stuff
             {
                 throw new ScriptRuntimeException("called Trigger on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
-            if (!IsTriggerable())
+            if (!CanTrigger())
             {
-                throw new ScriptRuntimeException("called Trigger on a BoplBody that isn't triggerable. make sure its triggerable before calling by calling IsTriggerable()");
+                throw new ScriptRuntimeException("called Trigger on a BoplBody that isn't triggerable. make sure its triggerable before calling by calling CanTrigger()");
             }
             if (type == "Grenade")
             {
