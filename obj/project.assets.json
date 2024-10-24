@@ -943,7 +943,7 @@
     "version": "1.0.0",
     "restore": {
       "projectUniqueName": "E:\\bopl modding and version archives\\local boplMapMaker git repo\\BoplMapMaker.csproj",
-      "projectName": "BoplMapMaker",
+      "projectName": "MapMaker",
       "projectPath": "E:\\bopl modding and version archives\\local boplMapMaker git repo\\BoplMapMaker.csproj",
       "packagesPath": "C:\\Users\\jubej\\.nuget\\packages\\",
       "outputPath": "E:\\bopl modding and version archives\\local boplMapMaker git repo\\obj\\",

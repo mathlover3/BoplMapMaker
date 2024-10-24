@@ -17,6 +17,7 @@ namespace MapMaker.Lua_stuff
         private static GameObject BowObject;
         private static BoplBody arrow;
         private static BoplBody grenade;
+        private static SpikeAttack spikePrefab;
 
         private static BlackHole blackHole;
         private static DynamicAbilityPickup AbilityPickup;
@@ -27,7 +28,7 @@ namespace MapMaker.Lua_stuff
         {
             UnityEngine.Debug.Log("LuaSpawner Awake");
             //only do all of this if it hasnt already been done.
-            if (BowObject == null || arrow == null || grenade == null || AbilityPickup == null || blackHole == null)
+            if (BowObject == null || arrow == null || grenade == null || AbilityPickup == null || blackHole == null || spikePrefab == null)
             {
 
 
@@ -97,7 +98,18 @@ namespace MapMaker.Lua_stuff
                             break;
                         }
                     }
-                    //Smoke
+                    if (obj.name == "SpikeAttack")
+                    {
+                        // Found the object with the desired name
+                        // You can now store its reference or perform any other actions
+                        UnityEngine.Debug.Log("Found the object: " + obj.name);
+                        spikePrefab = obj.GetComponent<SpikeAttack>();
+                        objectsFound++;
+                        if (objectsFound == ObjectsToFind)
+                        {
+                            break;
+                        }
+                    }
                 }
                 UnityEngine.Debug.Log("getting Grenade");
                 ThrowItem2[] allThrowItem2 = Resources.FindObjectsOfTypeAll(typeof(ThrowItem2)) as ThrowItem2[];
@@ -150,14 +162,27 @@ namespace MapMaker.Lua_stuff
             boplBody.GetComponent<SpriteRenderer>().color = color;
             return boplBody;
         }
-/*
-        public static BlackHole SpawnBlackHole(Vec2 pos, Fix scale)
+        public static BoplBody SpawnSpike(Fix surfacePosX, Fix surfacePosY, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
         {
-            BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
-            blackHole2.Grow(Fix.One/(scale-blackHole2.growth), Fix.Zero);
-            return blackHole2;
+            var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(surfacePosX, surfacePosY));
+            spikeObj.Initialize(new Vec2(surfacePosX, surfacePosY), offset, attachedGround, scale);
+            return spikeObj.hitbox.body;
         }
-        */
+        public static BoplBody SpawnSpikeFromPercentAroundSurface(Fix percentAroundSurface, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
+        {
+            var spikePos = attachedGround.PositionFromLocalPlayerPos(percentAroundSurface, (Fix)1);
+            var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(spikePos.x, spikePos.y));
+            spikeObj.Initialize(new Vec2(spikePos.x, spikePos.y), offset, attachedGround, scale);
+            return spikeObj.hitbox.body;
+        }
+        /*
+                public static BlackHole SpawnBlackHole(Vec2 pos, Fix scale)
+                {
+                    BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
+                    blackHole2.Grow(Fix.One/(scale-blackHole2.growth), Fix.Zero);
+                    return blackHole2;
+                }
+                */
         public static BlackHole SpawnBlackHole(Vec2 pos)
         {
             BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);

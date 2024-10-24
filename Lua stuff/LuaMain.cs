@@ -1,5 +1,5 @@
-﻿using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using AsmResolver.PE.DotNet.ReadyToRun;
+﻿//using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+//using AsmResolver.PE.DotNet.ReadyToRun;
 using BoplFixedMath;
 using MonoMod.Utils;
 using MoonSharp.Interpreter;
@@ -63,7 +63,9 @@ namespace MapMaker.Lua_stuff
         {
             //dont want to let people use librays that would give them acsess outside of the game like os and io now do we? also no time package eather as thats just asking for desinks.
             Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Metatables);
+
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
+            script.Globals["SpawnSpike"] = (object)SpawnSpikeAttack;
             script.Globals["SpawnGrenade"] = (object)SpawnGrenadeDouble;
             script.Globals["SpawnBlackHole"] = (object)SpawnBlackHoleDouble;
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
@@ -165,6 +167,17 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
+
+        public static BoplBody SpawnSpikeAttackFromPercentAroundSurface(double surfacePosX, double surfacePosY, double offset, StickyRoundedRectangle attachedGround, double scale)
+        {
+            return LuaSpawner.SpawnSpike((Fix)surfacePosX, (Fix)surfacePosY, (Fix)offset, attachedGround, (Fix)scale);
+        }
+
+        public static BoplBody SpawnSpikeAttack(double surfacePosX, double surfacePosY, double offset, StickyRoundedRectangle attachedGround, double scale)
+        {
+            return LuaSpawner.SpawnSpike((Fix)surfacePosX, (Fix)surfacePosY, (Fix)offset, attachedGround, (Fix)scale);
+        }
+
         public static BoplBody SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
         {
             return SpawnArrow((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, R, G, B, A);
