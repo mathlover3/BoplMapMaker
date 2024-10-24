@@ -18,6 +18,7 @@ namespace MapMaker.Lua_stuff
         private static BoplBody arrow;
         private static BoplBody grenade;
         private static BoplBody mine;
+        private static BoplBody missile;
         private static BlackHole blackHole;
         private static DynamicAbilityPickup AbilityPickup;
         private static BoplBody SmokeGrenade;
@@ -34,7 +35,7 @@ namespace MapMaker.Lua_stuff
                 GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
                 UnityEngine.Debug.Log("Getting Game Objects");
                 var objectsFound = 0;
-                var ObjectsToFind = 6;
+                var ObjectsToFind = 7;
                 foreach (GameObject obj in allObjects)
                 {
                     if (obj.name == "Bow")
@@ -103,7 +104,8 @@ namespace MapMaker.Lua_stuff
                         // You can now store its reference or perform any other actions
                         UnityEngine.Debug.Log("Found the object: " + obj.name);
                         MissleExplosion = obj.GetComponent<Missile>().onHitExplosionPrefab;
-                        objectsFound++;
+                        missile = obj.GetComponent<BoplBody>();
+                        objectsFound+=2;
                         if (objectsFound == ObjectsToFind)
                         {
                             break;
@@ -150,7 +152,9 @@ namespace MapMaker.Lua_stuff
             AbilityOrb,
             SmokeGrenade,
             Explosion,
-            BlackHole
+            BlackHole,
+            Mine,
+            Missile
         }
         public static BoplBody SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
         {
@@ -168,13 +172,25 @@ namespace MapMaker.Lua_stuff
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(mine, pos);
             boplBody.Scale = scale;
             boplBody.StartVelocity = StartVel;
-            boplBody.rotation = CalculateAngle(StartVel);
             Mine mineObj = boplBody.GetComponent<Mine>();
             mineObj.item.OwnerId = 256;
             if (!chase) mineObj.item.OwnerId = 255;
             mineObj.SetMaterial(WhiteSlimeMat);
             mineObj.ScansFor = 256;
             mineObj.scanRadius = chaseRadius;
+
+            return boplBody;
+        }
+
+        public static BoplBody SpawnMissile(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
+        {
+            BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(missile, pos);
+            boplBody.Scale = scale;
+            boplBody.StartVelocity = StartVel;
+            boplBody.fixTrans.rotation = -CalculateAngle(StartVel);
+            boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
+            boplBody.GetComponent<SpriteRenderer>().color = color;
+            //boplBody.rotation = CalculateAngle(StartVel);
 
             return boplBody;
         }
@@ -209,10 +225,7 @@ namespace MapMaker.Lua_stuff
                 // Angle in radians
                 Fix angleRadians = Fix.Acos(dotProduct / (magnitudeA * magnitudeB));
 
-                // Convert to degrees
-                Fix angleDegrees = angleRadians * ((Fix)180.0 / (Fix)Fix.PI);
-
-                return angleDegrees;
+                return angleRadians;
             }
             return Fix.Zero;
         }

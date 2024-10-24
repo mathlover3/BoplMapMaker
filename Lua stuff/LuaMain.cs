@@ -67,6 +67,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
             script.Globals["SpawnGrenade"] = (object)SpawnGrenadeDouble;
             script.Globals["SpawnMine"] = (object)SpawnMineDouble;
+            script.Globals["SpawnMissile"] = (object)SpawnMissileDouble;
             script.Globals["SpawnBlackHole"] = (object)SpawnBlackHoleDouble;
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
             script.Globals["SpawnSmokeGrenade"] = (object)SpawnSmokeGrenadeDouble;
@@ -174,6 +175,14 @@ namespace MapMaker.Lua_stuff
         public static BoplBody SpawnArrow(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, float R, float G, float B, float A)
         {
             return LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B,A));
+        }
+        public static BoplBody SpawnMissileDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
+        {
+            return SpawnMissile((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, R, G, B, A);
+        }
+        public static BoplBody SpawnMissile(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, float R, float G, float B, float A)
+        {
+            return LuaSpawner.SpawnMissile(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R, G, B, A));
         }
         public static BoplBody SpawnMineDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double chaseRadius, bool chase)
         {
