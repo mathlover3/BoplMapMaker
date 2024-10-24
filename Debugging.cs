@@ -151,15 +151,47 @@ namespace MapMaker
             }
         }
     }
-    /*[HarmonyPatch(typeof(SlimeController))]
-    public class SlimeControllerPatches
+    /*
+    [HarmonyPatch(typeof(SlimeController))]
+    public class SlimeControllerDebugPatches
     {
         [HarmonyPatch("UpdateSim")]
         [HarmonyPrefix]
         private static void UpdateSim(SlimeController __instance, Fix simDeltaTime)
         {
             Player player = PlayerHandler.Get().GetPlayer(__instance.playerNumber);
-            UnityEngine.Debug.Log($"jump: {player.jumpButton_PressedThisFrame()}, abilitys 1, 2 and 3: {player.AbilityButtonIsDown(0)},{player.AbilityButtonIsDown(1)}, {player.AbilityButtonIsDown(2)}, input vector: {__instance.inputVector}, at time: {Updater.SimTimeSinceLevelLoaded}");
+            InputPacketQuad Quad = Host.host.previousInputQuad;
+            InputPacket MyInput;
+            switch (__instance.playerNumber)
+            {
+                case 1:
+                    MyInput = Quad.p1;
+                    break;
+                case 2:
+                    MyInput = Quad.p2;
+                    break;
+                case 3:
+                    MyInput = Quad.p3;
+                    break;
+                case 4:
+                    MyInput = Quad.p4;
+                    break;
+                default:
+                    throw new Exception("AHHHHHH THERES MORE THEN 4 PLAYERS AND I HAVE A ID OF OVER 4!!!! AHHHHH!! I WANT MY MOMMY!");
+            }
+            UnityEngine.Debug.Log($"jump: {player.jumpButton_PressedThisFrame()}, abilitys 1, 2 and 3: {player.AbilityButtonIsDown(0)},{player.AbilityButtonIsDown(1)}, {player.AbilityButtonIsDown(2)}, input vector: {__instance.inputVector}, player id: {__instance.playerNumber}, seqNumber: {MyInput.seqNumber} at time: {Updater.SimTimeSinceLevelLoaded}");
         }
-    }*/
+    }
+    [HarmonyPatch(typeof(Host))]
+    public class HostDebugPatches
+    {
+        [HarmonyPatch("UpdateLocalInputHistory")]
+        [HarmonyPrefix]
+        private static void UpdateSim(Host __instance)
+        {
+            InputPacket inputPacket = Host.CurrentInputAsPacket(__instance.localPlayerId, __instance.inputPacketsSent, __instance.inputHistory);
+            UnityEngine.Debug.Log($"sent input packet with seqNumber: {inputPacket.seqNumber}, player id: {__instance.localPlayerId}, joystick angle: {inputPacket.joystickAngle}, jump: {inputPacket.jump}");
+        }
+    }
+    */
 }
