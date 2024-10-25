@@ -186,6 +186,13 @@ namespace MapMaker.Lua_stuff
         {
             var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(surfacePosX, surfacePosY));
             spikeObj.Initialize(new Vec2(surfacePosX, surfacePosY), offset, attachedGround, scale, false);
+
+            attachedGround.alignRotation(spikeObj.hitbox.body);
+            spikeObj.UpdateRelativeOrientation();
+
+            spikeObj.groundOrientationAtCastTime = spikeObj.groundOrientationAtCastTime + spikeObj.hitbox.GetBody().relativeOrientation + Fix.Pi;
+            spikeObj.UpdateRelativeOrientation();
+
             return spikeObj.hitbox.body;
         }
         public static BoplBody SpawnSpike(Fix percentAroundSurface, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
@@ -206,8 +213,6 @@ namespace MapMaker.Lua_stuff
             var spikePos = attachedGround.PositionFromLocalPlayerPos(percentAroundSurface, (Fix)1);
             var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(spikePos.x, spikePos.y));
             spikeObj.Initialize(new Vec2(spikePos.x, spikePos.y), offset, attachedGround, scale, false);
-
-            var platformBodyPos = attachedGround.GetGroundBody().position;
 
             attachedGround.alignRotation(spikeObj.hitbox.body);
             spikeObj.UpdateRelativeOrientation();
