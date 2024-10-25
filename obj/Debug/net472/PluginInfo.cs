@@ -1,4 +1,4 @@
-namespace MapMaker
+namespace BoplMapMaker
 {
     public static class PluginInfo
     {

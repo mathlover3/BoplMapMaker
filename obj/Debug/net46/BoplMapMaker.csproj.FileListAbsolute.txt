@@ -1,0 +1,6 @@
+E:\bopl modding and version archives\local boplMapMaker git repo\obj\Debug\net46\BoplMapMaker.csproj.AssemblyReference.cache
+E:\bopl modding and version archives\local boplMapMaker git repo\obj\Debug\net46\PluginInfo.cs
+E:\bopl modding and version archives\local boplMapMaker git repo\obj\Debug\net46\BoplMapMaker.GeneratedMSBuildEditorConfig.editorconfig
+E:\bopl modding and version archives\local boplMapMaker git repo\obj\Debug\net46\BoplMapMaker.AssemblyInfoInputs.cache
+E:\bopl modding and version archives\local boplMapMaker git repo\obj\Debug\net46\BoplMapMaker.AssemblyInfo.cs
+E:\bopl modding and version archives\local boplMapMaker git repo\obj\Debug\net46\BoplMapMaker.csproj.CoreCompileInputs.cache

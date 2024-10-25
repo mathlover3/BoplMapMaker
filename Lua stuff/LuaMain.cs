@@ -1,5 +1,5 @@
-﻿using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-using AsmResolver.PE.DotNet.ReadyToRun;
+﻿//using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+//using AsmResolver.PE.DotNet.ReadyToRun;
 using BoplFixedMath;
 using MonoMod.Utils;
 using MoonSharp.Interpreter;
@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization.Configuration;
 using System.Text;
@@ -65,6 +66,8 @@ namespace MapMaker.Lua_stuff
             //dont want to let people use librays that would give them acsess outside of the game like os and io now do we? also no time package eather as thats just asking for desinks.
             Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Metatables);
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
+            script.Globals["SpawnSpike"] = (object)SpawnSpike;
+            script.Globals["SpawnSpikeAtPosition"] = (object)SpawnSpikeAtPosition;
             script.Globals["SpawnGrenade"] = (object)SpawnGrenadeDouble;
             script.Globals["SpawnMine"] = (object)SpawnMineDouble;
             script.Globals["SpawnMissile"] = (object)SpawnMissileDouble;
@@ -167,6 +170,24 @@ namespace MapMaker.Lua_stuff
                 }
             }*/
 
+        }
+        public static BoplBody SpawnSpike(StickyRoundedRectangle attachedGround, double percentAroundSurface, double scale, double offset)
+        {
+            if (attachedGround == null)
+            {
+                throw new ScriptRuntimeException("attachedGround can't be nil when spawning a spike.");
+            }
+            // for some reason negative offset values push the spike forward and vice versa, so I reverse the sign here to make it more intuitive in the API
+            return LuaSpawner.SpawnSpike((Fix)percentAroundSurface, (Fix)(offset*-1), attachedGround, (Fix)scale);
+        }
+
+        public static BoplBody SpawnSpikeAtPosition(StickyRoundedRectangle attachedGround, double surfacePosX, double surfacePosY, double scale, double offset)
+        {
+            if (attachedGround == null)
+            {
+                throw new ScriptRuntimeException("attachedGround can't be nil when spawning a spike.");
+            }
+            return LuaSpawner.SpawnSpikeAtPosition((Fix)surfacePosX, (Fix)surfacePosY, (Fix)(offset*-1), attachedGround, (Fix)scale);
         }
         public static BoplBody SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
         {
