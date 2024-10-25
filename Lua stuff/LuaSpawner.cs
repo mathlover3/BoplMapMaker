@@ -203,19 +203,22 @@ namespace MapMaker.Lua_stuff
         }
         public static BoplBody SpawnSpike(Fix percentAroundSurface, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
         {
-
             // for some reason a value of 1 doesn't loop back to 0 and instead just goes in the middle of the wrong side
             // similar thing for 0 not going to the correct place,
             // so percentAroundSurface has to be manually clamped to the range of (val above 0 but low as possible) to (val below 1 but high as possible)
+            // there's also some weird positioning going on with 0.5. I guess this is a bopl bug with platform zones.
+            // So I guess I'll just add 
             if (percentAroundSurface >= 1)
             {
                 percentAroundSurface = (Fix)(1 - Fix.Precision);
             }
-            if (percentAroundSurface <= 0)
+            else
             {
-                // Fix.Precision for some reason isn't low enough.
-                percentAroundSurface = (Fix)(Fix.Precision * 2);
+                // Fix.Precision for some reason isn't low enough, at least for 0
+                percentAroundSurface += (Fix)(Fix.Precision * 2);
             }
+
+
             var spikePos = attachedGround.PositionFromLocalPlayerPos(percentAroundSurface, (Fix)1);
             var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(spikePos.x, spikePos.y));
 
