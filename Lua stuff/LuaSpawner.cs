@@ -185,6 +185,12 @@ namespace MapMaker.Lua_stuff
         public static BoplBody SpawnSpikeAtPosition(Fix surfacePosX, Fix surfacePosY, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
         {
             var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(surfacePosX, surfacePosY));
+
+            // looking at the game's `Spike` script, in the CastSpike() function.
+            DPhysicsRoundedRect groundRect = attachedGround.GetComponent<DPhysicsRoundedRect>();
+            FixTransform SpikeFixTrans = spikeObj.GetComponent<FixTransform>();
+            SpikeFixTrans.transform.SetParent(groundRect.transform);
+
             spikeObj.Initialize(new Vec2(surfacePosX, surfacePosY), offset, attachedGround, scale, false);
 
             attachedGround.alignRotation(spikeObj.hitbox.body);
@@ -212,6 +218,12 @@ namespace MapMaker.Lua_stuff
             }
             var spikePos = attachedGround.PositionFromLocalPlayerPos(percentAroundSurface, (Fix)1);
             var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(spikePos.x, spikePos.y));
+
+            // looking at the game's `Spike` script, in the CastSpike() function.
+            DPhysicsRoundedRect groundRect = attachedGround.GetComponent<DPhysicsRoundedRect>();
+            FixTransform SpikeFixTrans = spikeObj.GetComponent<FixTransform>();
+            SpikeFixTrans.transform.SetParent(groundRect.transform);
+
             spikeObj.Initialize(new Vec2(spikePos.x, spikePos.y), offset, attachedGround, scale, false);
 
             attachedGround.alignRotation(spikeObj.hitbox.body);
