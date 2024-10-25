@@ -1,5 +1,5 @@
-﻿//using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
-//using AsmResolver.PE.DotNet.ReadyToRun;
+﻿using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
+using AsmResolver.PE.DotNet.ReadyToRun;
 using BoplFixedMath;
 using MonoMod.Utils;
 using MoonSharp.Interpreter;
@@ -13,6 +13,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.Serialization.Configuration;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -63,12 +64,10 @@ namespace MapMaker.Lua_stuff
         {
             //dont want to let people use librays that would give them acsess outside of the game like os and io now do we? also no time package eather as thats just asking for desinks.
             Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Metatables);
-
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
-            script.Globals["SpawnSpikeFromPercentAroundSurface"] = (object)SpawnSpikeAttackFromPercentAroundSurface;
-            script.Globals["SpawnSpike"] = (object)SpawnSpikeAttack;
             script.Globals["SpawnGrenade"] = (object)SpawnGrenadeDouble;
             script.Globals["SpawnMine"] = (object)SpawnMineDouble;
+            script.Globals["SpawnMissile"] = (object)SpawnMissileDouble;
             script.Globals["SpawnBlackHole"] = (object)SpawnBlackHoleDouble;
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
             script.Globals["SpawnSmokeGrenade"] = (object)SpawnSmokeGrenadeDouble;
@@ -169,17 +168,6 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
-
-        public static BoplBody SpawnSpikeAttackFromPercentAroundSurface(double percentAroundSurface, double offset, StickyRoundedRectangle attachedGround, double scale)
-        {
-            return LuaSpawner.SpawnSpikeFromPercentAroundSurface((Fix)percentAroundSurface, (Fix)offset, attachedGround, (Fix)scale);
-        }
-
-        public static BoplBody SpawnSpikeAttack(double surfacePosX, double surfacePosY, double offset, StickyRoundedRectangle attachedGround, double scale)
-        {
-            return LuaSpawner.SpawnSpike((Fix)surfacePosX, (Fix)surfacePosY, (Fix)offset, attachedGround, (Fix)scale);
-        }
-
         public static BoplBody SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
         {
             return SpawnArrow((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, R, G, B, A);
@@ -188,22 +176,22 @@ namespace MapMaker.Lua_stuff
         {
             return LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B,A));
         }
-
-        public static BoplBody SpawnMineDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, bool chase, float R, float G, float B, float A)
-
+        public static BoplBody SpawnMissileDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
         {
-            return SpawnMine((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, chase, R, G, B, A);
-
+            return SpawnMissile((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, R, G, B, A);
         }
-
-
-        public static BoplBody SpawnMine(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, bool chase, float R, float G, float B, float A)
-
+        public static BoplBody SpawnMissile(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, float R, float G, float B, float A)
         {
-            return LuaSpawner.SpawnMine(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R, G, B, A), chase);
+            return LuaSpawner.SpawnMissile(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R, G, B, A));
         }
-
-
+        public static BoplBody SpawnMineDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double chaseRadius, bool chase)
+        {
+            return SpawnMine((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)chaseRadius, chase);
+        }
+        public static BoplBody SpawnMine(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix chaseRadius, bool chase)
+        {
+            return LuaSpawner.SpawnMine(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), chaseRadius, chase);
+        }
         public static BoplBody SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {
             return SpawnGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
@@ -212,13 +200,13 @@ namespace MapMaker.Lua_stuff
         {
             return LuaSpawner.SpawnGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
         }
-        public static BlackHole SpawnBlackHoleDouble(double posX, double posY)
+        public static BlackHole SpawnBlackHoleDouble(double posX, double posY, double size)
         {
-            return SpawnBlackHole((Fix)posX, (Fix)posY);
+            return SpawnBlackHole((Fix)posX, (Fix)posY, (Fix)size);
         }
-        public static BlackHole SpawnBlackHole(Fix posX, Fix posY)
+        public static BlackHole SpawnBlackHole(Fix posX, Fix posY, Fix size)
         {
-            return LuaSpawner.SpawnBlackHole(new Vec2(posX, posY));
+            return LuaSpawner.SpawnBlackHole(new Vec2(posX, posY), size);
         }
         public static void SpawnAbilityPickupDouble(double posX, double posY, double scale, double StartVelX, double StartVelY)
         {
@@ -1138,6 +1126,10 @@ namespace MapMaker.Lua_stuff
         {
             return target.physicsCollider.IsDestroyed || target.gameObject == null;
         }
+        public bool CanTrigger()
+        {
+            return type == "Grenade" || type == "RocketEngine" || type == "Mine" || type == "AbilityPickup" || type == "Missile" || type == "Smoke Grenade" || type == "Smoke";
+        }
         public DynValue GetPos()
         {
             return LuaMain.Vec2ToTuple(target.position);
@@ -1240,6 +1232,56 @@ namespace MapMaker.Lua_stuff
             }
             target.AddForce(new Vec2((Fix)ForceX, (Fix)ForceY));
         }
+        public void Trigger()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called Trigger on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called Trigger on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            if (!CanTrigger())
+            {
+                throw new ScriptRuntimeException("called Trigger on a BoplBody that isn't triggerable. make sure its triggerable before calling by calling CanTrigger()");
+            }
+            if (type == "Grenade")
+            {
+                target.GetComponent<Grenade>().Detonate();
+            }
+            else if (type == "Mine")
+            {
+                target.GetComponent<Mine>().Detonate();
+            }
+            else if (type == "Missile")
+            {
+                Missile missile = target.GetComponent<Missile>();
+                FixTransform.InstantiateFixed<Explosion>(missile.onHitExplosionPrefab, missile.body.position).GetComponent<IPhysicsCollider>().Scale = missile.fixTrans.Scale;
+	            if (!string.IsNullOrEmpty(missile.soundEffectOnCol))
+	            {
+	            	AudioManager.Get().Play(missile.soundEffectOnCol);
+	            }
+	            Updater.DestroyFix(missile.gameObject);
+            }
+            else if (type == "Smoke Grenade")
+            {
+                target.GetComponent<SmokeGrenadeExplode2>().Detonate();
+            }
+            else if (type == "RocketEngine")
+            {
+                target.GetComponent<RocketEngine>().StartEngine();
+            }
+            else if (type == "AbilityPickup")
+            {
+                target.GetComponent<DynamicAbilityPickup>().SwapToRandomAbility();
+            }
+            else if (type == "Smoke")
+            {
+                target.GetComponent<FlammableSmoke>().Ignite();
+            }
+
+        }
         public void Destroy()
         {
             Updater.DestroyFix(target.gameObject);
@@ -1247,6 +1289,10 @@ namespace MapMaker.Lua_stuff
         public void SetColor(float R, float G, float B, float A)
         {
             var render = target.GetComponent<SpriteRenderer>();
+            if (type == "Mine")
+            {
+                target.GetComponent<Mine>().Light.color = new Color(R, G, B, A);
+            }
             if (render != null)
             {
                 render.color = new Color(R, G, B, A);

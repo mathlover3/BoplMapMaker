@@ -180,10 +180,7 @@ namespace MapMaker
             // Angle in radians
             Fix angleRadians = Fix.Acos(dotProduct / (magnitudeA * magnitudeB));
 
-            // Convert to degrees
-            Fix angleDegrees = angleRadians * ((Fix)180.0 / (Fix)Fix.PI);
-
-            return angleDegrees;
+            return angleRadians;
         }
         public void SpawnGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
         {

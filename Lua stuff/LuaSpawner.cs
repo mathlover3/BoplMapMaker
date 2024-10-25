@@ -1,6 +1,14 @@
 ﻿using BoplFixedMath;
 using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static UnityEngine.UIElements.UIRAtlasAllocator;
+using UnityEngine.UIElements;
 using UnityEngine;
+using System.Net.Configuration;
 
 namespace MapMaker.Lua_stuff
 {
@@ -9,9 +17,8 @@ namespace MapMaker.Lua_stuff
         private static GameObject BowObject;
         private static BoplBody arrow;
         private static BoplBody grenade;
-        private static SpikeAttack spikePrefab;
-
         private static BoplBody mine;
+        private static BoplBody missile;
         private static BlackHole blackHole;
         private static DynamicAbilityPickup AbilityPickup;
         private static BoplBody SmokeGrenade;
@@ -21,14 +28,14 @@ namespace MapMaker.Lua_stuff
         {
             UnityEngine.Debug.Log("LuaSpawner Awake");
             //only do all of this if it hasnt already been done.
-            if (BowObject == null || arrow == null || grenade == null || AbilityPickup == null || blackHole == null || spikePrefab == null)
+            if (BowObject == null || arrow == null || grenade == null || AbilityPickup == null || blackHole == null)
             {
 
 
                 GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
                 UnityEngine.Debug.Log("Getting Game Objects");
                 var objectsFound = 0;
-                var ObjectsToFind = 6;
+                var ObjectsToFind = 7;
                 foreach (GameObject obj in allObjects)
                 {
                     if (obj.name == "Bow")
@@ -97,24 +104,14 @@ namespace MapMaker.Lua_stuff
                         // You can now store its reference or perform any other actions
                         UnityEngine.Debug.Log("Found the object: " + obj.name);
                         MissleExplosion = obj.GetComponent<Missile>().onHitExplosionPrefab;
-                        objectsFound++;
+                        missile = obj.GetComponent<BoplBody>();
+                        objectsFound+=2;
                         if (objectsFound == ObjectsToFind)
                         {
                             break;
                         }
                     }
-                    if (obj.name == "SpikeAttack")
-                    {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        spikePrefab = obj.GetComponent<SpikeAttack>();
-                        objectsFound++;
-                        if (objectsFound == ObjectsToFind)
-                        {
-                            break;
-                        }
-                    }
+                    //Smoke
                 }
                 UnityEngine.Debug.Log("getting Grenade");
                 ThrowItem2[] allThrowItem2 = Resources.FindObjectsOfTypeAll(typeof(ThrowItem2)) as ThrowItem2[];
@@ -155,79 +152,60 @@ namespace MapMaker.Lua_stuff
             AbilityOrb,
             SmokeGrenade,
             Explosion,
-            BlackHole
+            BlackHole,
+            Mine,
+            Missile
         }
         public static BoplBody SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(arrow, pos);
             boplBody.Scale = scale;
             boplBody.StartVelocity = StartVel;
+            boplBody.rotation = CalculateAngle(StartVel);
             boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
             boplBody.GetComponent<SpriteRenderer>().color = color;
             return boplBody;
         }
-        public static BoplBody SpawnMine(Vec2 pos, Fix scale, Vec2 StartVel, Color color, bool chase)
+
+        public static BoplBody SpawnMine(Vec2 pos, Fix scale, Vec2 StartVel, Fix chaseRadius, bool chase)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(mine, pos);
             boplBody.Scale = scale;
             boplBody.StartVelocity = StartVel;
-            boplBody.rotation = CalculateAngle(StartVel);
             Mine mineObj = boplBody.GetComponent<Mine>();
-            if (!chase) mineObj.item.OwnerId = 255;
             mineObj.item.OwnerId = 256;
+            if (!chase) mineObj.item.OwnerId = 255;
             mineObj.SetMaterial(WhiteSlimeMat);
             mineObj.ScansFor = 256;
-            mineObj.Light.color = color;
+            mineObj.scanRadius = chaseRadius;
 
             return boplBody;
         }
-        public static BoplBody SpawnSpike(Fix surfacePosX, Fix surfacePosY, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
+
+        public static BoplBody SpawnMissile(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
         {
-            var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(surfacePosX, surfacePosY));
-            spikeObj.Initialize(new Vec2(surfacePosX, surfacePosY), offset, attachedGround, scale);
-            return spikeObj.hitbox.body;
+            BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(missile, pos);
+            boplBody.Scale = scale;
+            boplBody.StartVelocity = StartVel;
+            boplBody.fixTrans.rotation = -CalculateAngle(StartVel);
+            boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
+            boplBody.GetComponent<SpriteRenderer>().color = color;
+            //boplBody.rotation = CalculateAngle(StartVel);
+
+            return boplBody;
         }
-        public static BoplBody SpawnSpikeFromPercentAroundSurface(Fix percentAroundSurface, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
-        {
-
-            // for some reason a value of 1 doesn't loop back to 0 and instead just goes in the middle of the wrong side
-            // similar thing for 0 not going to the correct place,
-            // so percentAroundSurface has to be manually clamped to the range of (val above 0 but low as possible) to (val below 1 but high as possible)
-            if (percentAroundSurface >= 1)
-            {
-                percentAroundSurface = (Fix)(1 - Fix.Precision);
-            }
-            if (percentAroundSurface <= 0)
-            {
-                // Fix.Precision for some reason isn't low enough.
-                percentAroundSurface = (Fix)(Fix.Precision*2);
-            }
-            var spikePos = attachedGround.PositionFromLocalPlayerPos(percentAroundSurface, (Fix)1);
-            var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(spikePos.x, spikePos.y));
-            spikeObj.Initialize(new Vec2(spikePos.x, spikePos.y), offset, attachedGround, scale, false);
-
-            var platformBodyPos = attachedGround.GetGroundBody().position;
-
-            attachedGround.alignRotation(spikeObj.hitbox.body);
-            spikeObj.UpdateRelativeOrientation();
-
-            spikeObj.groundOrientationAtCastTime = spikeObj.groundOrientationAtCastTime + spikeObj.hitbox.GetBody().relativeOrientation + Fix.Pi;
-            spikeObj.UpdateRelativeOrientation();
-
-
-            return spikeObj.hitbox.body;
-        }
-        /*
-                public static BlackHole SpawnBlackHole(Vec2 pos, Fix scale)
-                {
-                    BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
-                    blackHole2.Grow(Fix.One/(scale-blackHole2.growth), Fix.Zero);
-                    return blackHole2;
-                }
-                */
-        public static BlackHole SpawnBlackHole(Vec2 pos)
+/*
+        public static BlackHole SpawnBlackHole(Vec2 pos, Fix scale)
         {
             BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
+            blackHole2.Grow(Fix.One/(scale-blackHole2.growth), Fix.Zero);
+            return blackHole2;
+        }
+        */
+        public static BlackHole SpawnBlackHole(Vec2 pos, Fix size)
+        {
+            BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
+            blackHole2.GrowIncrementally(size - Fix.One);
             return blackHole2;
         }
         //modifyed chatgpt code
