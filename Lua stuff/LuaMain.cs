@@ -65,8 +65,10 @@ namespace MapMaker.Lua_stuff
             Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Metatables);
 
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
+            script.Globals["SpawnSpikeFromPercentAroundSurface"] = (object)SpawnSpikeAttackFromPercentAroundSurface;
             script.Globals["SpawnSpike"] = (object)SpawnSpikeAttack;
             script.Globals["SpawnGrenade"] = (object)SpawnGrenadeDouble;
+            script.Globals["SpawnMine"] = (object)SpawnMineDouble;
             script.Globals["SpawnBlackHole"] = (object)SpawnBlackHoleDouble;
             script.Globals["SpawnAbilityPickup"] = (object)SpawnAbilityPickupDouble;
             script.Globals["SpawnSmokeGrenade"] = (object)SpawnSmokeGrenadeDouble;
@@ -168,9 +170,9 @@ namespace MapMaker.Lua_stuff
 
         }
 
-        public static BoplBody SpawnSpikeAttackFromPercentAroundSurface(double surfacePosX, double surfacePosY, double offset, StickyRoundedRectangle attachedGround, double scale)
+        public static BoplBody SpawnSpikeAttackFromPercentAroundSurface(double percentAroundSurface, double offset, StickyRoundedRectangle attachedGround, double scale)
         {
-            return LuaSpawner.SpawnSpike((Fix)surfacePosX, (Fix)surfacePosY, (Fix)offset, attachedGround, (Fix)scale);
+            return LuaSpawner.SpawnSpikeFromPercentAroundSurface((Fix)percentAroundSurface, (Fix)offset, attachedGround, (Fix)scale);
         }
 
         public static BoplBody SpawnSpikeAttack(double surfacePosX, double surfacePosY, double offset, StickyRoundedRectangle attachedGround, double scale)
@@ -186,6 +188,22 @@ namespace MapMaker.Lua_stuff
         {
             return LuaSpawner.SpawnArrow(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R,G,B,A));
         }
+
+        public static BoplBody SpawnMineDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, bool chase, float R, float G, float B, float A)
+
+        {
+            return SpawnMine((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, chase, R, G, B, A);
+
+        }
+
+
+        public static BoplBody SpawnMine(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, bool chase, float R, float G, float B, float A)
+
+        {
+            return LuaSpawner.SpawnMine(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), new Color(R, G, B, A), chase);
+        }
+
+
         public static BoplBody SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
         {
             return SpawnGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
