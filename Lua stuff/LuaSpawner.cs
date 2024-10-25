@@ -189,12 +189,13 @@ namespace MapMaker.Lua_stuff
         }
         public static BoplBody SpawnSpikeFromPercentAroundSurface(Fix percentAroundSurface, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
         {
+
             // for some reason a value of 1 doesn't loop back to 0 and instead just goes in the middle of the wrong side
             // similar thing for 0 not going to the correct place,
             // so percentAroundSurface has to be manually clamped to the range of (val above 0 but low as possible) to (val below 1 but high as possible)
             if (percentAroundSurface >= 1)
             {
-                percentAroundSurface = (Fix)(1-Fix.Precision);
+                percentAroundSurface = (Fix)(1 - Fix.Precision);
             }
             if (percentAroundSurface <= 0)
             {
