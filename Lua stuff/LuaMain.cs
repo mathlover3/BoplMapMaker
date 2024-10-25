@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization.Configuration;
 using System.Text;
@@ -172,12 +173,20 @@ namespace MapMaker.Lua_stuff
         }
         public static BoplBody SpawnSpike(StickyRoundedRectangle attachedGround, double percentAroundSurface, double scale, double offset)
         {
+            if (attachedGround == null)
+            {
+                throw new ScriptRuntimeException("attachedGround can't be nil when spawning a spike.");
+            }
             // for some reason negative offset values push the spike forward and vice versa, so I reverse the sign here to make it more intuitive in the API
             return LuaSpawner.SpawnSpike((Fix)percentAroundSurface, (Fix)(offset*-1), attachedGround, (Fix)scale);
         }
 
         public static BoplBody SpawnSpikeAtPosition(StickyRoundedRectangle attachedGround, double surfacePosX, double surfacePosY, double scale, double offset)
         {
+            if (attachedGround == null)
+            {
+                throw new ScriptRuntimeException("attachedGround can't be nil when spawning a spike.");
+            }
             return LuaSpawner.SpawnSpikeAtPosition((Fix)surfacePosX, (Fix)surfacePosY, (Fix)(offset*-1), attachedGround, (Fix)scale);
         }
         public static BoplBody SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
