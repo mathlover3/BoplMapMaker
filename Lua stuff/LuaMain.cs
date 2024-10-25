@@ -170,14 +170,15 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
-        public static BoplBody SpawnSpike(double percentAroundSurface, double offset, StickyRoundedRectangle attachedGround, double scale)
+        public static BoplBody SpawnSpike(StickyRoundedRectangle attachedGround, double percentAroundSurface, double scale, double offset)
         {
-            return LuaSpawner.SpawnSpike((Fix)percentAroundSurface, (Fix)offset, attachedGround, (Fix)scale);
+            // for some reason negative offset values push the spike forward and vice versa, so I reverse the sign here to make it more intuitive in the API
+            return LuaSpawner.SpawnSpike((Fix)percentAroundSurface, (Fix)(offset*-1), attachedGround, (Fix)scale);
         }
 
-        public static BoplBody SpawnSpikeAtPosition(double surfacePosX, double surfacePosY, double offset, StickyRoundedRectangle attachedGround, double scale)
+        public static BoplBody SpawnSpikeAtPosition(StickyRoundedRectangle attachedGround, double surfacePosX, double surfacePosY, double scale, double offset)
         {
-            return LuaSpawner.SpawnSpikeAtPosition((Fix)surfacePosX, (Fix)surfacePosY, (Fix)offset, attachedGround, (Fix)scale);
+            return LuaSpawner.SpawnSpikeAtPosition((Fix)surfacePosX, (Fix)surfacePosY, (Fix)(offset*-1), attachedGround, (Fix)scale);
         }
         public static BoplBody SpawnArrowDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, float R, float G, float B, float A)
         {
