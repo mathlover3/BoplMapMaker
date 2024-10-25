@@ -191,7 +191,7 @@ namespace MapMaker.Lua_stuff
             FixTransform SpikeFixTrans = spikeObj.GetComponent<FixTransform>();
             SpikeFixTrans.transform.SetParent(groundRect.transform);
 
-            spikeObj.Initialize(new Vec2(surfacePosX, surfacePosY), offset, attachedGround, scale, false);
+            spikeObj.Initialize(new Vec2(surfacePosX, surfacePosY), offset, attachedGround, scale, true);
 
             attachedGround.alignRotation(spikeObj.hitbox.body);
             spikeObj.UpdateRelativeOrientation();
@@ -227,7 +227,7 @@ namespace MapMaker.Lua_stuff
             FixTransform SpikeFixTrans = spikeObj.GetComponent<FixTransform>();
             SpikeFixTrans.transform.SetParent(groundRect.transform);
 
-            spikeObj.Initialize(new Vec2(spikePos.x, spikePos.y), offset, attachedGround, scale, false);
+            spikeObj.Initialize(new Vec2(spikePos.x, spikePos.y), offset, attachedGround, scale, true);
 
             attachedGround.alignRotation(spikeObj.hitbox.body);
             spikeObj.UpdateRelativeOrientation();
