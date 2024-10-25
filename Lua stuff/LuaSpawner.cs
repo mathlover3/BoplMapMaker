@@ -24,6 +24,9 @@ namespace MapMaker.Lua_stuff
         private static BoplBody SmokeGrenade;
         private static Explosion MissleExplosion;
         public static Material WhiteSlimeMat;
+
+        private static SpikeAttack spikePrefab;
+
         public void Awake()
         {
             UnityEngine.Debug.Log("LuaSpawner Awake");
@@ -35,7 +38,7 @@ namespace MapMaker.Lua_stuff
                 GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
                 UnityEngine.Debug.Log("Getting Game Objects");
                 var objectsFound = 0;
-                var ObjectsToFind = 7;
+                var ObjectsToFind = 8;
                 foreach (GameObject obj in allObjects)
                 {
                     if (obj.name == "Bow")
@@ -111,7 +114,18 @@ namespace MapMaker.Lua_stuff
                             break;
                         }
                     }
-                    //Smoke
+                    if (obj.name == "SpikeAttack")
+                    {
+                        // Found the object with the desired name
+                        // You can now store its reference or perform any other actions
+                        UnityEngine.Debug.Log("Found the object: " + obj.name);
+                        spikePrefab = obj.GetComponent<SpikeAttack>();
+                        objectsFound++;
+                        if (objectsFound == ObjectsToFind)
+                        {
+                            break;
+                        }
+                    }
                 }
                 UnityEngine.Debug.Log("getting Grenade");
                 ThrowItem2[] allThrowItem2 = Resources.FindObjectsOfTypeAll(typeof(ThrowItem2)) as ThrowItem2[];
@@ -165,6 +179,44 @@ namespace MapMaker.Lua_stuff
             boplBody.GetComponent<SpriteRenderer>().material = WhiteSlimeMat;
             boplBody.GetComponent<SpriteRenderer>().color = color;
             return boplBody;
+        }
+        // NOT TO BE CONFUSED WITH SpawnSpike(percentAroundSurface)! SpawnSpikeAtPosition(x, y) is a much more "advanced" function.
+        // I don't want to just delete it from the API completely because I think it could be useful to somebody, but I imagine it's less useful in most cases.
+        public static BoplBody SpawnSpikeAtPosition(Fix surfacePosX, Fix surfacePosY, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
+        {
+            var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(surfacePosX, surfacePosY));
+            spikeObj.Initialize(new Vec2(surfacePosX, surfacePosY), offset, attachedGround, scale, false);
+            return spikeObj.hitbox.body;
+        }
+        public static BoplBody SpawnSpike(Fix percentAroundSurface, Fix offset, StickyRoundedRectangle attachedGround, Fix scale)
+        {
+
+            // for some reason a value of 1 doesn't loop back to 0 and instead just goes in the middle of the wrong side
+            // similar thing for 0 not going to the correct place,
+            // so percentAroundSurface has to be manually clamped to the range of (val above 0 but low as possible) to (val below 1 but high as possible)
+            if (percentAroundSurface >= 1)
+            {
+                percentAroundSurface = (Fix)(1 - Fix.Precision);
+            }
+            if (percentAroundSurface <= 0)
+            {
+                // Fix.Precision for some reason isn't low enough.
+                percentAroundSurface = (Fix)(Fix.Precision * 2);
+            }
+            var spikePos = attachedGround.PositionFromLocalPlayerPos(percentAroundSurface, (Fix)1);
+            var spikeObj = FixTransform.InstantiateFixed<SpikeAttack>(spikePrefab, new Vec2(spikePos.x, spikePos.y));
+            spikeObj.Initialize(new Vec2(spikePos.x, spikePos.y), offset, attachedGround, scale, false);
+
+            var platformBodyPos = attachedGround.GetGroundBody().position;
+
+            attachedGround.alignRotation(spikeObj.hitbox.body);
+            spikeObj.UpdateRelativeOrientation();
+
+            spikeObj.groundOrientationAtCastTime = spikeObj.groundOrientationAtCastTime + spikeObj.hitbox.GetBody().relativeOrientation + Fix.Pi;
+            spikeObj.UpdateRelativeOrientation();
+
+
+            return spikeObj.hitbox.body;
         }
 
         public static BoplBody SpawnMine(Vec2 pos, Fix scale, Vec2 StartVel, Fix chaseRadius, bool chase)
