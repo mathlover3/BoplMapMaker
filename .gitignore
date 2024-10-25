@@ -14,3 +14,6 @@ MapMaker.csproj
 *.pdb
 *.vsidx
 *.vsidx
+
+obj\Debug\net472\MapMaker.dll
+obj\Debug\net472\MapMaker.pdb
