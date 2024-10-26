@@ -217,6 +217,7 @@ namespace MapMaker
             NetworkTools.EncodeStartRequest(ref buff, startRequest);
             List<byte> packet = buff.ToList();
             packet.AddRange(BitConverter.GetBytes(BetterStartRequest.MapIndex));
+            packet.Add(BetterStartRequest.MapIdForInputStuff);
             return packet.ToArray();
         }
         public static BetterStartRequestPacket ByteArrayToBetterStartRequestPacket(byte[] bytes)
@@ -227,17 +228,19 @@ namespace MapMaker
             var ulongConversionArray = new byte[8];
             var ushortConversionArray = new byte[8];
             StartRequestPacket startRequest = NetworkTools.ReadStartRequest(bytes2.ToArray(), ref uintConversionArray, ref ulongConversionArray, ref ushortConversionArray);
-            byte[] bytes3 = { bytes[bytes.Length - 4], bytes[bytes.Length - 3], bytes[bytes.Length - 2], bytes[bytes.Length - 1] };
+            byte[] bytes3 = { bytes[bytes.Length - 5], bytes[bytes.Length - 4], bytes[bytes.Length - 3], bytes[bytes.Length - 2] };
             if (!BitConverter.IsLittleEndian)
             {
                 Array.Reverse(bytes3);
             }
             var MapIndex = BitConverter.ToInt32(bytes3, 0);
+            var MapIdForInputStuff = bytes[bytes.Length - 1];
             UnityEngine.Debug.Log($"MapIndex is {MapIndex}");
             var betterStartRequestPacket = new BetterStartRequestPacket
             {
                 startRequest = startRequest,
-                MapIndex = MapIndex
+                MapIndex = MapIndex,
+                MapIdForInputStuff = MapIdForInputStuff
             };
             return betterStartRequestPacket;
         }
@@ -247,6 +250,7 @@ namespace MapMaker
             {
                 SteamManager.startParameters = payload.startRequest;
                 Plugin.CurrentMapIndex = payload.MapIndex;
+                Plugin.CurrentLevelIdForInputsOnlineThingy = payload.MapIdForInputStuff;
                 //its max exsclusive min inclusinve
                 if (Plugin.MapJsons.Length != 0)
                 {
@@ -325,5 +329,6 @@ namespace MapMaker
     {
         public StartRequestPacket startRequest;
         public int MapIndex;
+        public byte MapIdForInputStuff;
     }
 }

@@ -17,3 +17,4 @@ MapMaker.csproj
 
 obj/Debug/net472/MapMaker.dll
 obj/Debug/net472/MapMaker.pdb
+global.json
