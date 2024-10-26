@@ -1,9 +1,0 @@
-namespace BoplMapMaker
-{
-    public static class PluginInfo
-    {
-        public const string PLUGIN_GUID = "BoplMapMaker";
-        public const string PLUGIN_NAME = "BoplMapMaker";
-        public const string PLUGIN_VERSION = "1.0.0";
-    }
-}
