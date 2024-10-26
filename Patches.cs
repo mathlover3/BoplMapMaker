@@ -1229,10 +1229,12 @@ namespace MapMaker
                 }
                 SteamManager.startParameters.isDemoMask = b;
                 SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);
+                Plugin.CurrentLevelIdForInputsOnlineThingy++;
                 var betterStartRequestPacket = new BetterStartRequestPacket
                 {
                     startRequest = SteamManager.startParameters,
-                    MapIndex = Plugin.CurrentMapIndex
+                    MapIndex = Plugin.CurrentMapIndex,
+                    MapIdForInputStuff = Plugin.CurrentLevelIdForInputsOnlineThingy
                 };
                 NetworkingStuff.StartChannel.SendMessage(betterStartRequestPacket);
                 return false;
@@ -1315,10 +1317,12 @@ namespace MapMaker
                     SteamManager.startParameters.p4_ability3 = __instance.connectedPlayers[2].lobby_ability3;
                 }
                 SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);
+                Plugin.CurrentLevelIdForInputsOnlineThingy++;
                 var betterStartRequestPacket = new BetterStartRequestPacket
                 {
                     startRequest = SteamManager.startParameters,
-                    MapIndex = Plugin.CurrentMapIndex
+                    MapIndex = Plugin.CurrentMapIndex,
+                    MapIdForInputStuff = Plugin.CurrentLevelIdForInputsOnlineThingy
                 };
                 NetworkingStuff.StartChannel.SendMessage(betterStartRequestPacket); 
                 return false;
@@ -1539,7 +1543,100 @@ namespace MapMaker
                 __instance.inputRecording.Clear();
                 return false;
             }
-
+            [HarmonyPatch("BroadcastInputPacket")]
+            [HarmonyPrefix]
+            private static bool BroadcastInputPacket_MapMaker_Plug(Host __instance)
+            {
+                bool usesKeyboardAndMouse = PlayerHandler.Get().GetPlayer(__instance.localPlayerId).UsesKeyboardAndMouse;
+                if (__instance.allClientsSynced)
+                {
+                    __instance.inputPacketsSent += 1U;
+                    __instance.UpdateLocalInputHistory();
+                }
+                byte[] data = usesKeyboardAndMouse ? __instance.dataBufferWASD : __instance.dataBufferNoWASD;
+                NetworkTools.EncodeInputForNetwork(ref data, Plugin.CurrentLevelIdForInputsOnlineThingy, __instance.inputHistory, usesKeyboardAndMouse, (byte)__instance.localPlayerId, __instance.timePassed);
+                //Debug.Log($"sending packet with level {Plugin.CurrentLevelIdForInputsOnlineThingy}");
+                for (int i = 0; i < __instance.clients.Count; i++)
+                {
+                    if (__instance.packetLoss == 0f || UnityEngine.Random.value > __instance.packetLoss)
+                    {
+                        __instance.clients[i].SendPacket(data, __instance.ExtraInputDelayMillis, __instance.ExtraInputDelayVariation, SendType.NoNagle);
+                    }
+                }
+                __instance.lastSentPacketData = data;
+                return false;
+            }
+            [HarmonyPatch("ReadPacket")]
+            [HarmonyPrefix]
+            //TODO: this doesnt need to be a full on replacement. turn it into a transpiler.
+            //all it does is change "if (NetworkTools.ReadInputPacketUpdateLevel(bytes) != Host.level)"
+            //to "if (NetworkTools.ReadInputPacketUpdateLevel(bytes) != Plugin.CurrentLevelIdForInputsOnlineThingy)"
+            //classic transpiler usecase
+            private static bool ReadPacket_MapMaker_Plug(byte[] bytes, int size, Host __instance)
+            {
+                int num = 0;
+                if (bytes != null && size >= 1)
+                {
+                    byte b = bytes[0];
+                    for (int i = 0; i < __instance.clients.Count; i++)
+                    {
+                        if ((byte)__instance.clients[i].PlayerId == b)
+                        {
+                            num = i;
+                            break;
+                        }
+                    }
+                    if (num < 0 || num >= __instance.clients.Count)
+                    {
+                        return false;
+                    }
+                }
+                if (size == 6)
+                {
+                    Ack ack = NetworkTools.ReadAck(bytes, ref __instance.uintConversionArray);
+                    long ticks = DateTime.UtcNow.Ticks;
+                    __instance.clients[num].receivedAckQueue.Enqueue(new TimedAck
+                    {
+                        seqNumber = ack.seqNumber,
+                        TimeOfArrivalTicks = ticks,
+                        level = ack.level
+                    });
+                    return false;
+                }
+                if (size != 83 && size != 67)
+                {
+                    if (size == 14)
+                    {
+                        ChecksumPacket item = NetworkTools.ReadChecksum(ref bytes, ref __instance.ulongConversionArray, ref __instance.uintConversionArray);
+                        __instance.clients[num].checksumPacketQueue.Enqueue(item);
+                    }
+                    return false;
+                }
+                if (NetworkTools.ReadInputPacketUpdateLevel(bytes) != Plugin.CurrentLevelIdForInputsOnlineThingy)
+                {
+                    Debug.Log($"input from difrent level rejected, level from packet = {NetworkTools.ReadInputPacketUpdateLevel(bytes)}, my level = {Plugin.CurrentLevelIdForInputsOnlineThingy} ");
+                    return false;
+                }
+                uint num2 = NetworkTools.ReadInputPacketUpdateSeqNum(bytes, ref __instance.uintConversionArray);
+                if ((ulong)num2 % (ulong)((long)Host.PingMeasurmentsRate) == 1UL && num2 > __instance.clients[num].InputPacketsReceived)
+                {
+                    NetworkTools.EncodeAckForNetwork(ref __instance.dataBufferAck, new Ack
+                    {
+                        seqNumber = num2,
+                        playerId = (byte)__instance.localPlayerId,
+                        level = Host.level
+                    });
+                    __instance.clients[num].SendPacket(__instance.dataBufferAck, __instance.ExtraInputDelayMillis, __instance.ExtraInputDelayVariation, SendType.NoNagle);
+                }
+                bool usesKeyboardAndMouse = size == 83;
+                InputPacketUpdate item2 = NetworkTools.ReadInputPacketUpdate(bytes, size, ref __instance.uintConversionArray);
+                if (PlayerHandler.Get() != null)
+                {
+                    PlayerHandler.Get().GetPlayer(__instance.clients[num].PlayerId).UsesKeyboardAndMouse = usesKeyboardAndMouse;
+                }
+                __instance.clients[num].receivedPackets.Enqueue(item2);
+                return false;
+            }
         }
         [HarmonyPatch(typeof(ShakableCamera))]
         public class ShakableCameraPatches

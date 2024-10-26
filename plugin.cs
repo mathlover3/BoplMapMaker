@@ -136,6 +136,8 @@ namespace MapMaker
         public static Fix BlastZone_XMax = (Fix)105L;
 
         public static Fix BlastZone_YMax = (Fix)58L;
+        //used to keep the inputs from one level from incorectly being used for a difrent level.
+        public static byte CurrentLevelIdForInputsOnlineThingy = 0;
         public enum MapIdCheckerThing
         {
             MapFoundWithId,
@@ -392,6 +394,8 @@ namespace MapMaker
         //CALL ONLY ON LEVEL LOAD!
         public static void LoadMapsFromFolder()
         {
+            //increment it when a new level is loaded.
+            Debug.Log($"new level loaded. level id is now {CurrentLevelIdForInputsOnlineThingy}");
             if (MapJsons.Length != 0)
             {
                 var i = CurrentMapIndex;
