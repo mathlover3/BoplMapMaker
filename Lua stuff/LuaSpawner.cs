@@ -302,7 +302,7 @@ namespace MapMaker.Lua_stuff
             }
             return Fix.Zero;
         }
-        public static BoplBody SpawnGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity)
+        public static BoplBody SpawnGrenade(Vec2 pos, Fix angle, Fix scale, Vec2 StartVel, Fix StartAngularVelocity, Fix FuseSeconds)
         {
             BoplBody boplBody = FixTransform.InstantiateFixed<BoplBody>(grenade, pos, angle);
             boplBody.Scale = scale;
@@ -312,6 +312,13 @@ namespace MapMaker.Lua_stuff
             Item component = boplBody.GetComponent<Item>();
             component.OwnerId = 255;
             var Grenade = component.GetComponent<Grenade>();
+
+            if (FuseSeconds != (Fix)(-1))
+            {
+                Grenade.timedExplosion = true;
+                Grenade.selfDestructDelay = FuseSeconds;
+                Grenade.detonationTime = FuseSeconds;
+            }
 
             Grenade.hasBeenThrown = true;
             DPhysicsCircle dphysicsCircle = (boplBody != null) ? boplBody.GetComponent<DPhysicsCircle>() : null;
