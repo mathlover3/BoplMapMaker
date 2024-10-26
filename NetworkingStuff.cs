@@ -250,7 +250,10 @@ namespace MapMaker
             {
                 SteamManager.startParameters = payload.startRequest;
                 Plugin.CurrentMapIndex = payload.MapIndex;
+
                 Plugin.CurrentLevelIdForInputsOnlineThingy = payload.MapIdForInputStuff;
+                //UnityEngine.Debug.Log($"receved start requst packet. set map id for input stuff to {Plugin.CurrentLevelIdForInputsOnlineThingy}");
+                
                 //its max exsclusive min inclusinve
                 if (Plugin.MapJsons.Length != 0)
                 {

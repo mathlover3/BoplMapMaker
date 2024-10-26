@@ -395,7 +395,7 @@ namespace MapMaker
         public static void LoadMapsFromFolder()
         {
             //increment it when a new level is loaded.
-            CurrentLevelIdForInputsOnlineThingy++;
+            Debug.Log($"new level loaded. level id is now {CurrentLevelIdForInputsOnlineThingy}");
             if (MapJsons.Length != 0)
             {
                 var i = CurrentMapIndex;
