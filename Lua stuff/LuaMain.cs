@@ -490,6 +490,17 @@ namespace MapMaker.Lua_stuff
                 DynValue.FromObject(script, result)
             );
         }
+        // copied from GetAllPlatforms()
+        public static DynValue GetAllPlatformsTouching(Script script, StickyRoundedRectangle platform)
+        {
+            StickyRoundedRectangle[] allObjects = platform;
+            List<StickyRoundedRectangle> result = new List<StickyRoundedRectangle>(allObjects);
+            return DynValue.NewTuple(
+                DynValue.NewNumber(result.Count),
+                DynValue.FromObject(script, result)
+            );
+        }
+
         public static double GetDeltaTime()
         {
             return (double)deltaTime;
