@@ -213,13 +213,13 @@ namespace MapMaker.Lua_stuff
         {
             return LuaSpawner.SpawnMine(new Vec2(posX, posY), scale, new Vec2(StartVelX, StartVelY), chaseRadius, chase);
         }
-        public static BoplBody SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity)
+        public static BoplBody SpawnGrenadeDouble(double posX, double posY, double scale, double StartVelX, double StartVelY, double StartAngularVelocity, double FuseSeconds = -1)
         {
-            return SpawnGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity);
+            return SpawnGrenade((Fix)posX, (Fix)posY, (Fix)scale, (Fix)StartVelX, (Fix)StartVelY, (Fix)StartAngularVelocity, (Fix)FuseSeconds);
         }
-        public static BoplBody SpawnGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity)
+        public static BoplBody SpawnGrenade(Fix posX, Fix posY, Fix scale, Fix StartVelX, Fix StartVelY, Fix StartAngularVelocity, Fix FuseSeconds)
         {
-            return LuaSpawner.SpawnGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity);
+            return LuaSpawner.SpawnGrenade(new Vec2(posX, posY), Fix.Zero, scale, new Vec2(StartVelX, StartVelY), StartAngularVelocity, FuseSeconds);
         }
         public static BlackHole SpawnBlackHoleDouble(double posX, double posY, double size)
         {
