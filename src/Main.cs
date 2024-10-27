@@ -1155,23 +1155,23 @@ first = true");*/
             }
             if (scene.name == "MainMenu")
             {
-                var menu = GameObject.Find("MainMenu").transform;
+                var menu = GameObject.Find("Tutorial").transform;
                 var buttonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/mapmaker button.prefab");
                 var discordPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/discord button.prefab");
                 var websitePrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/website button 1.prefab");
 
-                GameObject CreateButton(string name, Transform parent, Vector3 localPosition, Vector3 localScale, UnityAction onClick)
+                GameObject CreateButton(string name, GameObject prefab, Transform parent, Vector3 localPosition, Vector3 localScale, UnityAction onClick)
                 {
-                    var buttonObject = Instantiate(buttonPrefab, parent);
+                    var buttonObject = Instantiate(prefab, parent);
                     buttonObject.transform.localPosition = localPosition;
                     buttonObject.transform.localScale = localScale;
                     buttonObject.GetComponent<Button>().onClick.AddListener(onClick);
                     return buttonObject;
                 }
 
-                CreateButton("MapMaker", menu, new Vector3(800, 35), new Vector3(3.5f, 3.5f), OnClickDocs);
-                CreateButton("Get Maps", menu, new Vector3(-800, 35), new Vector3(3.5f, 3.5f), OnClickMap);
-                CreateButton("Discord", GameObject.Find("discord-link").transform, new Vector3(75, 25), new Vector3(0.20f, 0.20f), OnClickDiscord);
+                CreateButton("MapMaker", buttonPrefab, menu, new Vector3(800, 35), new Vector3(3.5f, 3.5f), OnClickDocs);
+                CreateButton("Get Maps", websitePrefab, menu, new Vector3(-800, 35), new Vector3(3.5f, 3.5f), OnClickMap);
+                CreateButton("Discord", discordPrefab, GameObject.Find("discord-link").transform, new Vector3(75, 25), new Vector3(0.20f, 0.20f), OnClickDiscord);
             }
 
         }
