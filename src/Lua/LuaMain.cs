@@ -491,15 +491,74 @@ namespace MapMaker.Lua_stuff
             );
         }
 
-        // copied from GetAllPlatforms()
-        public static DynValue GetAllPlatformsTouching(Script script, StickyRoundedRectangle platform)
+        // because of the ordering of MonoUpdatable.updateSim(), DetPhys.Simulate(), and MonoUpdatable.lateUpdate(), These'll be the collisions from last frame/last tick.
+        // that's why I put it in past tense
+        public static DynValue GetAllPlatformsThatTouched(Script script, StickyRoundedRectangle platform)
         {
-            StickyRoundedRectangle[] allObjects = platform;
-            List<StickyRoundedRectangle> result = new List<StickyRoundedRectangle>(allObjects);
+            DetPhysics DetPhys = DetPhysics.Get();
+            List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
+            IPhysicsCollider physColliderBeingSearchedFor = platform.DPhysicsShape().GetPhysicsParent().monobehaviourCollider;
+            List<StickyRoundedRectangle> collidingRects = [];
+
+            // potentially reallllly slow. unfortunate.
+            for (int i = 0; i < collisionData.Count; i++)
+            {
+                var collider = collisionData[i].colliderPP.monobehaviourCollider;
+                var collidee = collisionData[i].pp.monobehaviourCollider;
+
+                if (collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect)
+                {
+                }
+                else if (collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect)
+                {
+                }
+                else
+                {
+                    continue;
+                }
+
+
+            }
+
+
             return DynValue.NewTuple(
-                DynValue.NewNumber(result.Count),
-                DynValue.FromObject(script, result)
+                DynValue.NewNumber(collidingRects.Count),
+                DynValue.FromObject(script, collidingRects)
             );
+        }
+
+        // based on the game's CollisionInformation struct. Modified for the lua API
+        public struct LuaCollisionInfo
+        {
+            public int layer;
+            public Fix penetration;
+            public Vec2 impactVelocity;
+            public Vec2 normalVector;
+            public Vec2 contactPoint;
+            public IPhysicsCollider collider;
+            public IPhysicsCollider collidee;
+        }
+
+
+        public class LuaCollisionInfoPlatformsProxy
+        {
+            LuaCollisionInfo target;
+
+
+            [MoonSharpHidden]
+            public LuaCollisionInfoPlatformsProxy(LuaCollisionInfo LuaCollision)
+            {
+                target = LuaCollision;
+            }
+
+            public 
+            public int layer;
+            public Fix penetration;
+            public Vec2 impactVelocity;
+            public Vec2 normalVector;
+            public Vec2 contactPoint;
+            public PhysicsParent collider;
+            public PhysicsParent collidee;
         }
 
         public static double GetDeltaTime()
