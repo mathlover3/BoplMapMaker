@@ -21,3 +21,4 @@ obj/
 # Ignore project-specific files
 # MapMaker.csproj
 global.json
+MapMaker.csproj
