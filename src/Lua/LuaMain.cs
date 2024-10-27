@@ -551,7 +551,31 @@ namespace MapMaker.Lua_stuff
                 target = LuaCollision;
             }
 
-            public 
+            public int GetLayerInt()
+            {
+                return target.layer;
+            }
+
+            public Fix GetPenetration()
+            {
+                return target.penetration;
+            }
+            public Vec2 GetImpactVelocity()
+            {
+                return target.impactVelocity;
+            }
+
+            public Vec2 GetContactPoint()
+            {
+                return target.contactPoint;
+            }
+            public int GetImpactVelocity()
+            {
+                return target.impactVelocity;
+            }
+
+
+
             public int layer;
             public Fix penetration;
             public Vec2 impactVelocity;
