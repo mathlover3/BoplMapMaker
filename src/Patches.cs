@@ -1229,6 +1229,7 @@ namespace MapMaker
                 }
                 SteamManager.startParameters.isDemoMask = b;
                 SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);
+                Debug.Log($"Hosting next level. new level id for inputs: {Plugin.CurrentLevelIdForInputsOnlineThingy}");
                 Plugin.CurrentLevelIdForInputsOnlineThingy++;
                 var betterStartRequestPacket = new BetterStartRequestPacket
                 {
@@ -1317,7 +1318,9 @@ namespace MapMaker
                     SteamManager.startParameters.p4_ability3 = __instance.connectedPlayers[2].lobby_ability3;
                 }
                 SteamManager.instance.EncodeCurrentStartParameters_forReplay(ref SteamManager.instance.networkClient.EncodedStartRequest, SteamManager.startParameters, false);
+
                 Plugin.CurrentLevelIdForInputsOnlineThingy++;
+                Debug.Log($"Hosting first level. new level id for inputs: {Plugin.CurrentLevelIdForInputsOnlineThingy}");
                 var betterStartRequestPacket = new BetterStartRequestPacket
                 {
                     startRequest = SteamManager.startParameters,
@@ -2060,7 +2063,27 @@ namespace MapMaker
                 __result = queue;
             }
         }
-
+        [HarmonyPatch(typeof(CharacterStatsList))]
+        public class CharacterStatsListPatches
+        {
+            [HarmonyPatch("OnNextLevelWasSuggested")]
+            [HarmonyPrefix]
+            private static bool Awake_MapMaker_Plug(int hostPlayerId, NamedSpriteList AbilityIcons, CharacterStatsList __instance)
+            {
+                if (CharacterStatsList.isLoading)
+                {
+                    return false;
+                }
+                if (GameSessionHandler.GameIsPaused)
+                {
+                    CharacterStatsList.someoneSuggestedNextLevel = true;
+                    return false;
+                }
+                SteamManager.instance.HostNextLevel(PlayerHandler.Get().GetPlayer(hostPlayerId), AbilityIcons);
+                CharacterStatsList.ForceNextLevelImmediately();
+                return false;
+            }
+        }
 
     }
 }
