@@ -379,7 +379,7 @@ namespace MapMaker.Lua_stuff
                         Players.Remove(player);
                     }
                 }
-                catch (Exception e)
+                catch
                 {
                     Players.Remove(player);
                 }
@@ -954,7 +954,7 @@ namespace MapMaker.Lua_stuff
             {
                 shakable = p.gameObject.GetComponent<ShakablePlatform>();
             }
-            catch (Exception ex)
+            catch
             {
                 //do nothing. the reson we have to do it like this is that if a component doesnt have a gameobject just the act of doing...
                 //p.gameObject causes a null ref error.
@@ -1045,6 +1045,17 @@ namespace MapMaker.Lua_stuff
             {
                 throw new ScriptRuntimeException("Can't call SetHomeRot on a Platform object that is a boulder. check IsBoulder before calling!");
             }
+        }
+        public void MakeVectorField(double centerX, double centerY, double delaySeconds, double orbitSpeed, double expandSpeed, double normalSpeedFriction, double DeadZoneDist, double OrbitAccelerationMulitplier, double targetRadius, double ovalness01)
+        {
+            if (IsBoulder())
+            {
+                throw new ScriptRuntimeException("Can't call MakeVectorField on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
+            GameObject platformObject = target.gameObject;
+            PlatformApi.PlatformApi.AddVectorFieldPlatform(platformObject, (Fix)delaySeconds, (Fix)orbitSpeed, (Fix)expandSpeed, new Vec2((Fix)centerX, (Fix)centerY), (Fix)normalSpeedFriction, (Fix)DeadZoneDist, (Fix)OrbitAccelerationMulitplier, (Fix)targetRadius, (Fix)ovalness01);
+            Vec2 pos = PlatformApi.PlatformApi.GetHome(platformObject);
+            PlatformApi.PlatformApi.SetHome(platformObject, pos + new Vec2((Fix)1, (Fix)0));
         }
         public void ShakePlatform(double Duratson, double ShakeAmount)
         {
