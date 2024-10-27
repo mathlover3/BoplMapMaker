@@ -5,7 +5,7 @@
       "label": "Build Mod",
       "type": "shell",
       "command": "dotnet",
-      "args": ["build"],
+      "args": ["build", "./src"],
       "group": {
         "kind": "build",
         "isDefault": true

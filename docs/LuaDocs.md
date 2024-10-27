@@ -1,13 +1,17 @@
 ## Sequence
+
 in case you are new to lua...
 the term sequence is used to denote a table where the set of all positive numeric keys is equal to {1..n} for some integer n, which is called the length of the sequence.
 
 ## Notes
+
 the camra has a Xmin of -97.27, a XMax of 97.6, a YMax of 40, a Ymin of -26, and waterHeight is at -11.3
 
 IF YOU BREAK THE GAME OR FREEZE THE GAME WITH LUA BY DOING SOMTHING ABSURD LIKE PUTTING A PLATFORM 1,000,000 UNITS UP ITS NOT MY FAULT!
 if the game errors do to a call that involves lua then it is infact a bug and should be reported. also dont worry you cant effect anything outside of bopl. so you cant get a virus from custom bopl maps lol.
+
 ## Global Funcsons
+
 the following are global funcsons.
 for the following angle is in degrees.
 the type before the funcson are its return type.
@@ -28,7 +32,7 @@ only if the type is slime does R, G, B and A mater
 R, G, B and A are numbers between 0 and 1.
 Platform SpawnBoulder(number posX, number posY, number scale, number StartVelX, number StartVelY, number StartAngularVelocity, string type, number R, number G, number B, number A)
 
-Width and Height are distances from a edge to the center - Radius. To calculate the true Width/Height in bopl units you do (Width + Radius)*2. same for Height but with Height instead of Width.
+Width and Height are distances from a edge to the center - Radius. To calculate the true Width/Height in bopl units you do (Width + Radius)\*2. same for Height but with Height instead of Width.
 R, G, B and A are numbers between 0 and 1.
 Rot is in degress as normal.
 Platform SpawnPlatform(number posX, number posY, number Width, number Height, number Radius, number Rot, number R, number G, number B, number A)
@@ -79,10 +83,13 @@ none SetOutputWithId(number id, bool value)
 
 gets a file from inside the map file with the given name including the exstencon. exsample name is "File.dat". it cant acsess files inside founders inside the map (maps are just zips in descise). returns a Sequence of bytes or a error if the file doesnt exsit.
 Sequence (of bytes) GetFileFromMapFile(string FileName)
+
 ## Vec2
+
 the type before the funcson are its return type. Vec2 is just a shorthand for outputing 2 numbers x, y
 
 ## Player
+
 the following are funcsons of the Player type (returned by some funcsons) (tecnicly its a userData type but it acts like its its own type so we can think of it like it is)
 number Player.GetSpeed()
 number Player.GetGroundedSpeed()
@@ -139,6 +146,7 @@ returns "Player"
 string Player.GetClassType()
 
 ## Platform
+
 the following are the funcsons of the Platform type.
 note that Platform is for both Platforms and Boulders.
 returns "Platform"
@@ -169,10 +177,10 @@ BoplBody Platform.GetBoplBody()
 
 bool Platform.IsBoulder()
 
-this is true for custom shaped platforms,  platforms created by the platform ability and platforms created with lua.
+this is true for custom shaped platforms, platforms created by the platform ability and platforms created with lua.
 bool Platform.IsResizable()
 
-resizes the platform. only works if Platform.IsResizable() is true. Width and Height are distances from a edge to the center - Radius. To calculate the true Width/Height in bopl units you do (Width + Radius)*2. same for Height but with Height instead of Width.
+resizes the platform. only works if Platform.IsResizable() is true. Width and Height are distances from a edge to the center - Radius. To calculate the true Width/Height in bopl units you do (Width + Radius)\*2. same for Height but with Height instead of Width.
 none ResizePlatform(number Width, number Height, number Radius)
 
 gets the Width, Height and Radius of the platform in the same way as ResizePlatform takes in. this works on all platforms and boulders.
@@ -182,6 +190,7 @@ gets the True Width and Height taking into acount rotatsons. returns Width, Heig
 number, number GetTrueWidthAndHeight()
 
 # BoplBody
+
 this is the funcsons the BoplBody has.
 returns "BoplBody"
 string BoplBody.GetClassType()
@@ -214,11 +223,13 @@ can return "Arrow", "RocketEngine", "Mine", "Telsa", "AbilityPickup", "Missile",
 string BoplBody.GetObjectType()
 
 ## Errors
+
 When a script has a error/fails to parse it logs the error to the consule. for runtime errors it says where in the code the error happend, what script it happend in, and what the error is. for a parseing error it says aproxamently where the error is. print() also logs the first pramiter to the consule
 
 ## Defult Lua Apis
+
 you get the following built in lua apis:
-The global constants: "_G", "_VERSION" and "_MOONSHARP",
+The global constants: "\_G", "\_VERSION" and "\_MOONSHARP",
 The table iterators: "next", "ipairs" and "pairs",
 The metatable methods : "setmetatable", "getmetatable", "rawset", "rawget", "rawequal" and "rawlen",
 The string package,

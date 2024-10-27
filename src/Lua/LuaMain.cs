@@ -379,7 +379,7 @@ namespace MapMaker.Lua_stuff
                         Players.Remove(player);
                     }
                 }
-                catch (Exception e)
+                catch
                 {
                     Players.Remove(player);
                 }
@@ -943,7 +943,7 @@ namespace MapMaker.Lua_stuff
             {
                 shakable = p.gameObject.GetComponent<ShakablePlatform>();
             }
-            catch (Exception ex)
+            catch
             {
                 //do nothing. the reson we have to do it like this is that if a component doesnt have a gameobject just the act of doing...
                 //p.gameObject causes a null ref error.

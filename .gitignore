@@ -19,5 +19,5 @@ obj/
 *.vsidx
 
 # Ignore project-specific files
-MapMaker.csproj
+# MapMaker.csproj
 global.json
