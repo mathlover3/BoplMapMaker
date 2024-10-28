@@ -2,47 +2,31 @@ using BepInEx;
 using BepInEx.Logging;
 using BoplFixedMath;
 using HarmonyLib;
-using System.Reflection;
 using UnityEngine;
-using Steamworks;
-using Steamworks.Data;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System;
-using MonoMod.Utils;
 using System.IO;
 using System.IO.Pipes;
-using MiniJSON;
 using System.Text.RegularExpressions;
 using UnityEngine.InputSystem;
 using System.Linq;
-using System.Drawing;
-using BepInEx.Configuration;
 using System.IO.Compression;
-using System.Runtime.Remoting.Contexts;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine.UI;
-using System.Reflection.Emit;
-using PlatformApi;
-using static UnityEngine.ParticleSystem.PlaybackState;
-using System.Web;
 using MapMaker.Lua_stuff;
 using MoonSharp.Interpreter;
-using Mono.Cecil.Cil;
 using UnityEngine.Events;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
-using Entwined;
 using System.Collections;
-using MoonSharp.VsCodeDebugger;
-using System.Threading;
 using static MapMaker.PipeStuff;
 namespace MapMaker
 {
     [BepInDependency("com.entwinedteam.entwined")]
     [BepInPlugin("com.MLT.MapLoader", "MapLoader", "1.0.0")]
     public class Plugin : BaseUnityPlugin
-    {
+    {   
+        // Developer mode! PLEASE TURN OFF BEFORE BUILDING!
+        public static bool DeveloperMode = false;
+
         public static Plugin instance;
         public static Harmony harmony;
         public static GameObject PlatformAbility;
@@ -51,19 +35,19 @@ namespace MapMaker
         public static ParticleSystem WavePrefab;
         public static List<ResizablePlatform> Platforms;
         public static int t;
-        public static string mapsFolderPath; // Create blank folder path var
+        public static string mapsFolderPath; 
         public static int CurrentMapUUID;
         public static int CurrentMapIndex;
         public static Fix OneByOneBlockMass = Fix.One;
         public static string[] MapJsons;
         public static string[] MetaDataJsons;
-        // Define a static logger instance
+        // Define a static logger instance SOMEONE PLEASE MAKE A LOGGER LATER!
         public static ManualLogSource logger;
         public static bool UseCustomTexture = false;
         public static string CustomTextureName;
-        //all the zipArchives in the same order as the MapJsons
+        // All the zipArchives in the same order as the MapJsons
         public static ZipArchive[] zipArchives = { };
-        //my zip archives. not overiten when joining someone else.
+        // My zip archives. not overiten when joining someone else.
         public static ZipArchive[] MyZipArchives = { };
         public static Sprite sprite;
         public static Material PlatformMat;
@@ -75,11 +59,11 @@ namespace MapMaker
         public const int StartingNextPlatformTypeValue = 6;
         public static Sprite BoulderSprite;
         //used to make CustomBoulderSmokeColors start with a value.
-        public static UnityEngine.Color[] ignore = { new UnityEngine.Color(1, 1, 1, 1) };
-        public static List<UnityEngine.Color> CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
+        public static UnityEngine.Color[] ignore = { new(1, 1, 1, 1) };
+        public static List<UnityEngine.Color> CustomBoulderSmokeColors = new(ignore);
         public static AssetBundle MyAssetBundle;
         public static AssetBundle SpriteAssetBundle;
-        public static PlatformApi.PlatformApi platformApi = new PlatformApi.PlatformApi();
+        public static PlatformApi.PlatformApi platformApi = new();
         private static Trigger TriggerPrefab = null;
         private static Spawner SpawnerPrefab = null;
         private static DisappearPlatformsOnSignal DisappearPlatformsOnSignalPrefab = null;
@@ -94,31 +78,29 @@ namespace MapMaker
         public static SignalSystem signalSystem;
         public static int NextUUID = 0;
         public static string PluginPath;
-        //used to fix a unity bug
+        // Used to fix a unity bug
         public static PlayerAverageCamera averageCamera;
         public static ShakableCamera shakableCamera;
         public static List<PlayerInput> playerInputs = new();
         public static bool FirstUpdate = true;
         //used to chose a map from the random bag
         public static List<int> MapIndexsLeft = new();
-        //map ids
+
+        // Map Ids
         public static readonly int GrassMapId = 0;
         public static readonly int SnowMapId = 21;
         public static readonly int SpaceMapId = 33;
 
-        //used to make shakeable platform to know its being called by a blink gun.
+        // Used by shakeable platform
         public static bool CurrentlyBlinking;
-        //networking
+        // Networking
         public static int NextMapIndex;
-        //pipes and map testing stuff
+        // Pipes & Testing
         internal static PipeStuff.PipeResponder pipeResponder;
-        //if true it doesnt automaticly reset the map data when entering the singleplayer area. instead it does it when someone joins you.
+        // If true it doesnt automaticly reset the map data when entering the singleplayer area. instead it does it when someone joins you.
         public static bool IsInTestMode = false;
-        //menu button stuff
-        private static UnityAction MapMakerButtonAction;
-        private static UnityAction WebsiteButtonAction;
-        private static UnityAction DiscordButtonAction;
-        //used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
+
+        // Used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
         public static Fix Camera_XMin = (Fix)(-97.27f);
 
         public static Fix Camera_XMax = (Fix)97.6f;
@@ -136,7 +118,7 @@ namespace MapMaker
         public static Fix BlastZone_XMax = (Fix)105L;
 
         public static Fix BlastZone_YMax = (Fix)58L;
-        //used to keep the inputs from one level from incorectly being used for a difrent level.
+        // Used to keep the inputs from one level from incorectly being used for a difrent level.
         public static byte CurrentLevelIdForInputsOnlineThingy = 0;
         public enum MapIdCheckerThing
         {
@@ -145,21 +127,27 @@ namespace MapMaker
             MultipleMapsFoundWithId
         }
         private void Awake()
-        {
+        {   
+            // Define the instance
             instance = this;
-            //idk random comment for pizza to pull
+
+            // Load the plugin
             NetworkingStuff.Awake();
+
             Logger.LogInfo("MapLoader Has been loaded");
-            logger = Logger;
             harmony = new Harmony("com.MLT.MapLoader");
 
+            // Patch Harmony
             Logger.LogInfo("Harmony harmony = new Harmony -- Melon, 2024");
-            harmony.PatchAll(); // Patch Harmony
-            //Debugging.Awake();
+            logger = Logger;
+            harmony.PatchAll(); 
+
+            // Debugging.Awake();
             Logger.LogInfo("MapMaker Patch Compleate!");
 
             SceneManager.sceneLoaded += OnSceneLoaded;
 
+            // Create the maps directory if it doesn't exist
             mapsFolderPath = Path.Combine(Paths.PluginPath, "Maps");
 
             if (!Directory.Exists(mapsFolderPath))
@@ -168,17 +156,21 @@ namespace MapMaker
                 Debug.Log("Maps folder created.");
             }
             PluginPath = Info.Location;
-            //thanks almafa64 on discord for the path stuff.
+
+            // Load the asset bundle
+            // Thanks almafa64 on discord for help.
             MyAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakerassets");
             string[] assetNames = MyAssetBundle.GetAllAssetNames();
             SpriteAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakericons");
-            //MapUUIDChannel = new EntwinedPacketChannel<int>(this, new IntEntwiner());
-            //MapUUIDChannel.OnMessage += OnGetUUID; 
-            foreach (string name in assetNames)
-            {
-                Debug.Log("asset name is: " + name);
+            if (DeveloperMode) {
+                foreach (string name in assetNames)
+                {
+                    Debug.Log("Asset: " + name + " loaded!");
+                }
             }
-            pipeResponder = new PipeStuff.PipeResponder();
+
+            // Create the pipe responder
+            pipeResponder = new PipeResponder();
             pipeResponder.StartPipe();
         }
         public static bool IsReplay()
@@ -197,7 +189,7 @@ namespace MapMaker
         public void Start()
         {
             ZipArchive[] zipArchives2;
-            // if we are loading a replay the zip archive is already set
+            // If we are loading a replay the zip archive is already set
             if (!IsReplay())
             {
                 //fill the MapJsons array up
@@ -208,18 +200,19 @@ namespace MapMaker
                 zipArchives2 = zipArchives;
             }
             
-            //Create a List for the json for a bit
-            List<string> JsonList = new List<string>();
-            List<string> MetaDataList = new();
+            // Create a List for the json for a bit
+            List<string> JsonList = [];
+            List<string> MetaDataList = [];
             foreach (ZipArchive zipArchive in zipArchives2)
             {
-                //get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
+                // Get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
                 JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
                 MetaDataList.Add(GetFileFromZipArchive(zipArchive, IsMetaDataFile)[0]);
             }
-            MapJsons = JsonList.ToArray();
-            MetaDataJsons = MetaDataList.ToArray();
-            //find objects
+            MapJsons = [.. JsonList];
+            MetaDataJsons = [.. MetaDataList];
+
+            // Find the objects
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
             var objectsFound = 0;
             var ObjectsToFind = 4;
@@ -239,8 +232,6 @@ namespace MapMaker
                 }
                 if (obj.name == "Blink gun")
                 {
-                    // Found the object with the desired name
-                    // You can now store its reference or perform any other actions
                     DisappearPlatformsOnSignal.QuantumTunnelPrefab = obj.GetComponent<ShootQuantum>().QuantumTunnelPrefab;
                     DisappearPlatformsOnSignal.onHitResizableWallMaterail = obj.GetComponent<ShootQuantum>().onHitResizableWallMaterail;
                     DisappearPlatformsOnSignal.onHitWallMaterail = obj.GetComponent<ShootQuantum>().onHitWallMaterail;
@@ -265,8 +256,6 @@ namespace MapMaker
                 }
                 if (obj.name == "Growth ray")
                 {
-                    // Found the object with the desired name
-                    // You can now store its reference or perform any other actions
                     ShootRay.GrowGameObjectPrefab = obj;
                     UnityEngine.Debug.Log("Found the object: " + obj.name);
                     objectsFound++;
@@ -277,8 +266,6 @@ namespace MapMaker
                 }
                 if (obj.name == "Shrink ray")
                 {
-                    // Found the object with the desired name
-                    // You can now store its reference or perform any other actions
                     ShootRay.StrinkGameObjectPrefab = obj;
                     UnityEngine.Debug.Log("Found the object: " + obj.name);
                     objectsFound++;
@@ -304,64 +291,69 @@ namespace MapMaker
         private void OnApplicationQuit()
         {
             // Cancel the pipe thread when the application is closing
-            if (PipeResponder._cancellationTokenSource != null)
-            {
-                PipeResponder._cancellationTokenSource.Cancel();
-            }
-            //now connect to it so it cansules the thread
+            PipeResponder._cancellationTokenSource?.Cancel();
+
+            // Now connect to it so it cansules the thread
             var pipe = new NamedPipeClientStream(".", "testpipe", PipeDirection.InOut);
             pipe.Connect(250);
             pipe.Close();
         }
         IEnumerator GetGrassMat()
         {
-            //enter the tutorial to get the grass mat
+            // Enter the tutorial
             SceneManager.LoadScene("Tutorial", LoadSceneMode.Single);
-            //https://forum.unity.com/threads/how-to-wait-for-a-frame-in-c.24616/
-            //wait one frame (no clue how this works but it does)
+
+            // Wait for the scene to load
             yield return 0;
+
+            // Find the objects
             var grass = GameObject.Find("AnimatedGrass");
             GrassMat = grass.gameObject.GetComponent<SpriteRenderer>().material;
-            //exit the tutorial
+
+            // Exit the tutorial
             PlayerHandler.Get().PlayerList().Clear();
             TutorialGameHandler.isInTutorial = false;
             Updater.PreLevelLoad();
             SceneManager.LoadScene("MainMenu");
             Updater.PostLevelLoad();
-            Debug.Log("got mat!");
+            if (DeveloperMode)
+            {
+                Debug.Log("Touched Grass!");
+            }
+
         }
         public static bool IsBoplMap(string path)
         {
-            if (path.EndsWith("boplmap")) return true;
-            //will only be reached if its not a boplmap
-            return false;
+            return path.EndsWith("boplmap", StringComparison.OrdinalIgnoreCase);
         }
         public static bool IsMetaDataFile(string path)
         {
             return path.EndsWith("MetaData.json");
         }
-        //see if there is a custom map we should load (returns enum) (david) (this was annoying to make but at least i learned about predicits!)
+        
+        // Check if there is a custom map we should load (returns enum) (david) (this was annoying to make but at least i learned about predicits!)
         public static MapIdCheckerThing CheckIfWeHaveCustomMapWithMapId()
         {
-            int[] MapIds = { };
+            int[] MapIds = [];
             foreach (string MetaDataJson in MetaDataJsons)
             {
                 try
                 {
                     Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(MetaDataJson) as Dictionary<string, object>;
-                    //add it to a array to be checked
+                    // Add it to a array to be checked
                     int mapid = Convert.ToInt32(Dict["MapUUID"]);
                     Debug.Log("Map has MapUUID of " + mapid);
-                    MapIds = MapIds.Append(mapid).ToArray();
+                    MapIds = [.. MapIds, mapid];
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Failed to get MapId from Json: {MetaDataJson} with exseptson: {ex}");
+                    Debug.LogError($"Failed to get MapId from Json: {MetaDataJson} with exception: {ex}");
                 }
             }
-            //define a predicit (basicly a funcsion that checks if a value meets a critera. in this case being = to CurrentMapId)
+            // Define a predicit (basically a function that checks if a value meets a critera. in this case being = to CurrentMapId)
             Predicate<int> predicate = ValueEqualsCurrentMapId;
-            //get a list of map ids that match the current map
+
+            // Get a list of map ids that match the current map
             int[] ValidMapIds = Array.FindAll(MapIds, predicate);
             Debug.Log("MapIds: " + MapIds.Length + " ValidMapIds: " + ValidMapIds.Length);
             if (ValidMapIds.Length > 0)
@@ -379,7 +371,7 @@ namespace MapMaker
 
 
         }
-        //check if value = CurrentMapId. used for CheckIfWeHaveCustomMapWithMapId
+        // Check if value = CurrentMapId. used for CheckIfWeHaveCustomMapWithMapId
         public static bool ValueEqualsCurrentMapId(int ValueToCheck)
         {
             if (ValueToCheck == CurrentMapUUID)
@@ -391,11 +383,11 @@ namespace MapMaker
                 return false;
             }
         }
-        //CALL ONLY ON LEVEL LOAD!
+        // CALL ONLY ON LEVEL LOAD!
         public static void LoadMapsFromFolder()
         {
-            //increment it when a new level is loaded.
-            Debug.Log($"new level loaded. level id is now {CurrentLevelIdForInputsOnlineThingy}");
+            // Increment it when a new level is loaded.
+            Debug.Log($"New level loaded! level id is now {CurrentLevelIdForInputsOnlineThingy}");
             if (MapJsons.Length != 0)
             {
                 var i = CurrentMapIndex;
@@ -462,11 +454,12 @@ namespace MapMaker
             //spawn point stuff
             if (Dict.ContainsKey("teamSpawns"))
             {
-                //object time! (objects are so confusing)
-                //convert object to list of objects
+                // Object time! (objects are so confusing)
+                // Convert object to list of objects
                 List<System.Object> OrbitPathObjects = (List<System.Object>)Dict["teamSpawns"];
-                //now to convert eatch object in the list to a list of 2 objects
-                List<Vec2> Vecs1 = new List<Vec2>();
+
+                // Now to convert each object in the list to a list of 2 objects
+                List<Vec2> Vecs1 = [];
                 for (int i = 0; i < OrbitPathObjects.Count; i++)
                 {
                     var obj = (List<System.Object>)OrbitPathObjects[i];
@@ -474,22 +467,22 @@ namespace MapMaker
                     var floatVec = new Vec2((Fix)floatList[0], FloorToThousandnths(floatList[1]));
                     Vecs1.Add(floatVec);
                 }
-                Vec2[] Vecs = Vecs1.Count == 1 ? Enumerable.Repeat(Vecs1[0], 4).ToArray() : Vecs1.ToArray();
-                //get the PlayerList
-                //set it to null to avoid using unasigned local var error. it will be assigend when the code runs unless somthing goes very badly.
+                Vec2[] Vecs = Vecs1.Count == 1 ? Enumerable.Repeat(Vecs1[0], 4).ToArray() : [.. Vecs1];
+                
+                // Get the PlayerList
+                // Set it to null to avoid using unasigned local var error. it will be assigend when the code runs unless somthing goes very badly.
                 GameObject PlayerList = null;
-                //if this causes a crash ill have to refactor it TODO!
                 GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
                 foreach (GameObject obj in allObjects)
                 {
                     if (obj.name == "PlayerList")
                     {
-                        //store its reference
+                        // Store its reference
                         PlayerList = obj;
                         Debug.Log("Found the PlayerList");
                         break;
                     }
-                    //level 5 and likely some outers have it called this for some reson.
+                    // Level 5 and likely some others have it called this for some reson. (Melon, He probably copied in and accidentily pasted it twice.)
                     if (obj.name == "PlayerList (1)")
                     {
                         //store its reference
@@ -500,12 +493,12 @@ namespace MapMaker
                 }
                 GameSessionHandler handler = PlayerList.GetComponent(typeof(GameSessionHandler)) as GameSessionHandler;
                 handler.teamSpawns = Vecs;
-                //this is a static so i must set it from the type not a instance. also its not readonly like the name sugests.
                 GameSessionHandler.playerSpawns_readonly = Vecs;
             }
             List<object> platforms = (List<object>)Dict["platforms"];
-            //empty the list of Drill colors so the indexs start at 0 agien
-            CustomDrillColors = new List<Drill.PlatformColors>();
+
+            // Empty the list of Drill colors so the index start at 0 again
+            CustomDrillColors = [];
             NextPlatformTypeValue = StartingNextPlatformTypeValue;
             CustomBoulderSmokeColors = new List<UnityEngine.Color>(ignore);
             CustomMatchoManSprites = new List<NamedSprite>();
@@ -516,7 +509,7 @@ namespace MapMaker
 
                 try
                 {
-                    //set optsonal values to null/0/defults 
+                    // Set optional values to null/0/defults 
                     double OrbitForce = 0;
                     Vec2[] OrbitPath = null;
                     double DelaySeconds = 0;
@@ -529,22 +522,17 @@ namespace MapMaker
                     double targetRadius = 5;
                     double ovalness01 = 1;
                     Vec2[] teamSpawns = new Vec2[4];
-                    // Extract platform data (david)
                     Dictionary<string, object> transform = (Dictionary<string, object>)platform["transform"];
                     double x = Convert.ToDouble(transform["x"]);
                     double y = Convert.ToDouble(transform["y"]);
-                    //defult to 0 rotatson incase the json is missing it
                     Fix rotatson = Fix.Zero;
                     if (platform.ContainsKey("rotation"))
                     {
                         rotatson = ConvertToRadians(Convert.ToDouble(platform["rotation"]));
                     }
-                    //Debug.Log("getting IsPresetPatform");
                     bool IsPresetPatform = platform.ContainsKey("PresetPlatform");
-                    //Debug.Log("IsPresetPatform is: " + IsPresetPatform);
 
-                    //path stuff
-
+                    // Paths
                     PlatformApi.PlatformApi.PathType pathType = PlatformApi.PlatformApi.PathType.None;
                     if (platform.ContainsKey("AntiLockPlatform"))
                     {
@@ -554,16 +542,17 @@ namespace MapMaker
                     {
                         pathType = PlatformApi.PlatformApi.PathType.VectorFieldPlatform;
                     }
-                    //AntiLockPlatform
+                    // AntiLockPlatform (Moving platforms)
                     if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                     {
                         var AntiLockPlatform = (Dictionary<string, object>)platform["AntiLockPlatform"];
                         OrbitForce = Convert.ToDouble(AntiLockPlatform["OrbitForce"]);
-                        //object time! (objects are so confusing)
-                        //convert object to list of objects
+                        // Object time! (objects are so confusing) (Melon, Really david? A second time?)
+                        // Convert object to list of objects
                         List<System.Object> OrbitPathObjects = (List<System.Object>)AntiLockPlatform["OrbitPath"];
-                        //now to convert eatch object in the list to a list of 2 objects
-                        List<Vec2> Vecs1 = new List<Vec2>();
+
+                        // Now to convert each object in the list to a list of 2 objects
+                        List<Vec2> Vecs1 = [];
                         for (int i = 0; i < OrbitPathObjects.Count; i++)
                         {
                             var obj = (List<System.Object>)OrbitPathObjects[i];
@@ -571,53 +560,52 @@ namespace MapMaker
                             var floatVec = new Vec2(FloorToThousandnths(floatList[0]), FloorToThousandnths(floatList[1]));
                             Vecs1.Add(floatVec);
                         }
-                        Vec2[] Vecs = Vecs1.ToArray();
+                        Vec2[] Vecs = [.. Vecs1];
                         Debug.Log("orbit path decoded");
 
-                        //now we have a Vec2 array for orbit path
+                        // Now we have a Vec2 array of the path
                         OrbitPath = Vecs;
-                        //the rest is easy
                         DelaySeconds = Convert.ToDouble(AntiLockPlatform["DelaySeconds"]);
                     }
                     if (pathType == PlatformApi.PlatformApi.PathType.VectorFieldPlatform)
                     {
                         var VectorFieldPlatform = (Dictionary<string, object>)platform["VectorFieldPlatform"];
-                        if (VectorFieldPlatform.ContainsKey("expandSpeed"))
+                        if (VectorFieldPlatform.TryGetValue("expandSpeed", out object expandSpeedObj))
                         {
-                            expandSpeed = Convert.ToDouble(VectorFieldPlatform["expandSpeed"]);
+                            expandSpeed = Convert.ToDouble(expandSpeedObj);
                         }
-                        if (VectorFieldPlatform.ContainsKey("centerPoint"))
+                        if (VectorFieldPlatform.TryGetValue("centerPoint", out object centerPointObj))
                         {
-                            var floats = ListOfObjectsToListOfFloats((List<object>)VectorFieldPlatform["centerPoint"]);
+                            var floats = ListOfObjectsToListOfFloats((List<object>)centerPointObj);
                             centerPoint = new Vec2(FloorToThousandnths(floats[0]), FloorToThousandnths(floats[1]));
                         }
-                        if (VectorFieldPlatform.ContainsKey("normalSpeedFriction"))
+                        if (VectorFieldPlatform.TryGetValue("normalSpeedFriction", out object normalSpeedFrictionObj))
                         {
-                            normalSpeedFriction = Convert.ToDouble(VectorFieldPlatform["normalSpeedFriction"]);
+                            normalSpeedFriction = Convert.ToDouble(normalSpeedFrictionObj);
                         }
-                        if (VectorFieldPlatform.ContainsKey("DeadZoneDist"))
+                        if (VectorFieldPlatform.TryGetValue("DeadZoneDist", out object DeadZoneDistObj))
                         {
-                            DeadZoneDist = Convert.ToDouble(VectorFieldPlatform["DeadZoneDist"]);
+                            DeadZoneDist = Convert.ToDouble(DeadZoneDistObj);
                         }
-                        if (VectorFieldPlatform.ContainsKey("OrbitAccelerationMulitplier"))
+                        if (VectorFieldPlatform.TryGetValue("OrbitAccelerationMulitplier", out object OrbitAccelerationMulitplierObj))
                         {
-                            OrbitAccelerationMulitplier = Convert.ToDouble(VectorFieldPlatform["OrbitAccelerationMulitplier"]);
+                            OrbitAccelerationMulitplier = Convert.ToDouble(OrbitAccelerationMulitplierObj);
                         }
-                        if (VectorFieldPlatform.ContainsKey("targetRadius"))
+                        if (VectorFieldPlatform.TryGetValue("targetRadius", out object targetRadiusObj))
                         {
-                            targetRadius = Convert.ToDouble(VectorFieldPlatform["targetRadius"]);
+                            targetRadius = Convert.ToDouble(targetRadiusObj);
                         }
-                        if (VectorFieldPlatform.ContainsKey("ovalness01"))
+                        if (VectorFieldPlatform.TryGetValue("ovalness01", out object ovalness01Obj))
                         {
-                            ovalness01 = Convert.ToDouble(VectorFieldPlatform["ovalness01"]);
+                            ovalness01 = Convert.ToDouble(ovalness01Obj);
                         }
-                        if (VectorFieldPlatform.ContainsKey("DelaySeconds"))
+                        if (VectorFieldPlatform.TryGetValue("DelaySeconds", out object DelaySecondsObj))
                         {
-                            DelaySeconds = Convert.ToDouble(VectorFieldPlatform["DelaySeconds"]);
+                            DelaySeconds = Convert.ToDouble(DelaySecondsObj);
                         }
                     }
 
-                    //if its a preset platform dont do any of this.
+                    // If its a preset platform dont do any of this.
                     if (!IsPresetPatform)
                     {
                         Dictionary<string, object> size = (Dictionary<string, object>)platform["size"];
@@ -625,20 +613,14 @@ namespace MapMaker
                         double height = Convert.ToDouble(size["height"]);
                         double radius = Convert.ToDouble(platform["radius"]);
                         bool UseCustomMassScale = false;
-                        float Red = 1;
-                        float Green = 1;
-                        float Blue = 1;
-                        float Opacity = 1;
                         bool UseCustomDrillColorAndBolderTexture = false;
                         bool UseSlimeCam = false;
                         PlatformType platformType = PlatformType.slime;
                         Vector4 color;
-                        //reset UseCustomTexture so the value for 1 platform doesnt blead trough to anouter
                         UseCustomTexture = false;
                         double CustomMassScale = 0.05;
 
-
-                        //custom mass
+                        // Custom mass
                         if (platform.ContainsKey("UseCustomMassScale"))
                         {
                             UseCustomMassScale = (bool)platform["UseCustomMassScale"];
@@ -652,58 +634,44 @@ namespace MapMaker
                         {
                             CustomTexture = (Dictionary<string, object>)platform["CustomTexture"];
                         }
-                        //custom Texture 
-                        if (CustomTexture != null && CustomTexture.ContainsKey("CustomTextureName") && CustomTexture.ContainsKey("PixelsPerUnit"))
-                        {
-                            UseCustomTexture = true;
-                        }
-                        else
-                        {
-                            UseCustomTexture = false;
-                        }
+
+                        // Custom Texture 
+                        UseCustomTexture = CustomTexture != null && CustomTexture.ContainsKey("CustomTextureName") && CustomTexture.ContainsKey("PixelsPerUnit");
                         Debug.Log($"UseCustomTexture is {UseCustomTexture}");
                         if (UseCustomTexture)
                         {
                             float PixelsPerUnit = (float)Convert.ToDouble(CustomTexture["PixelsPerUnit"]);
                             CustomTextureName = (String)CustomTexture["CustomTextureName"];
                             Debug.Log(CustomTextureName);
-                            //doesnt work if there are multiple files ending with the file name
+
+                            // Doesnt work if there are multiple files ending with the file name
                             //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
                             Byte[] filedata;
                             Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
                             if (filedatas.Length > 0)
                             {
                                 filedata = filedatas[0];
-                                Debug.Log($"filedata is {filedata}");
+                                Debug.Log($"Filedata is {filedata}");
                                 sprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
                                 Debug.Log($"sprite is {sprite}");
                             }
                             else
                             {
-                                logger.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
-                                Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                                logger.LogError($"Error: no file named {CustomTextureName}");
+                                Debug.LogError($"Error: no file named {CustomTextureName}");
                                 return;
                             }
                         }
-                        //color
-                        if (platform.ContainsKey("Red"))
-                        {
-                            Red = (float)Convert.ToDouble(platform["Red"]);
-                        }
-                        if (platform.ContainsKey("Green"))
-                        {
-                            Green = (float)Convert.ToDouble(platform["Green"]);
-                        }
-                        if (platform.ContainsKey("Blue"))
-                        {
-                            Blue = (float)Convert.ToDouble(platform["Blue"]);
-                        }
-                        if (platform.ContainsKey("Opacity"))
-                        {
-                            Opacity = (float)Convert.ToDouble(platform["Opacity"]);
-                        }
-                        color = new Vector4(Red, Green, Blue, Opacity);
-                        //UseCustomDrillColorAndBolderTexture
+
+                        // Custom color
+                        color = new Vector4(
+                            platform.TryGetValue("Red", out object redVal) ? (float)Convert.ToDouble(redVal) : 1f,
+                            platform.TryGetValue("Green", out object greenVal) ? (float)Convert.ToDouble(greenVal) : 1f,
+                            platform.TryGetValue("Blue", out object blueVal) ? (float)Convert.ToDouble(blueVal) : 1f,
+                            platform.TryGetValue("Opacity", out object opacityVal) ? (float)Convert.ToDouble(opacityVal) : 1f
+                        );
+
+                        // UseCustomDrillColorAndBolderTexture
                         if (platform.ContainsKey("CustomDrillColorAndBolderTexture"))
                         {
                             UseCustomDrillColorAndBolderTexture = true;
@@ -711,21 +679,24 @@ namespace MapMaker
                         if (UseCustomDrillColorAndBolderTexture)
                         {
                             var CustomDrillColorAndBolderTexture = (Dictionary<string, object>)platform["CustomDrillColorAndBolderTexture"];
-                            //get drill colors dict to pass.
+
+                            // Get drill colors dict to pass.
                             var dict = (Dictionary<string, object>)CustomDrillColorAndBolderTexture["CustomDrillColors"];
-                            //if this platform fails to generate then the custom boulder texsters will get mixed up.
+
+                            // If this platform fails to generate then the custom boulder textures will get mixed up.
                             var MyPlatformId = NextPlatformTypeValue;
-                            NextPlatformTypeValue = NextPlatformTypeValue + 1;
-                            Debug.Log("creating drill colors");
+                            NextPlatformTypeValue++;
+                            Debug.Log("Creating drill colors");
                             var colors = DrillColors(MyPlatformId, dict);
-                            Debug.Log("drill colors created");
+                            Debug.Log("Drill colors created");
                             platformType = (PlatformType)MyPlatformId;
                             CustomDrillColors.Add(colors);
-                            //custom Boulder time
+
+                            // Custom Boulder time
                             float PixelsPerUnit = (float)Convert.ToDouble(CustomDrillColorAndBolderTexture["BoulderPixelsPerUnit"]);
                             CustomTextureName = (String)CustomDrillColorAndBolderTexture["CustomBoulderTexture"];
-                            //Debug.Log(CustomTextureName);
-                            //doesnt work if there are multiple files ending with the file name
+
+                            // Doesnt work if there are multiple files ending with the file name (Melon, I swear ive seen this before)
                             //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
                             Byte[] filedata;
                             Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
@@ -742,24 +713,26 @@ namespace MapMaker
                             }
                             else
                             {
-                                logger.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
-                                Debug.LogError($"ERROR NO FILE NAMED {CustomTextureName}");
+                                logger.LogError($"Error: no file named {CustomTextureName}");
+                                Debug.LogError($"Error: no file named {CustomTextureName}");
                                 return;
                             }
                             var BoulderSmokeColorList = ListOfObjectsToListOfFloats((List<object>)CustomDrillColorAndBolderTexture["BoulderSmokeColor"]);
-                            UnityEngine.Color BoulderSmokeColor = new UnityEngine.Color(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
+                            UnityEngine.Color BoulderSmokeColor = new(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
                             CustomBoulderSmokeColors.Add(BoulderSmokeColor);
                         }
                         if (CustomTexture != null && CustomTexture.ContainsKey("UseSlimeCam"))
                         {
                             UseSlimeCam = (bool)CustomTexture["UseSlimeCam"];
                         }
-                        Vector4[] color2 = { color };
-                        Vec2[] centerPoint2 = { centerPoint };
-                        //spawn platform
+                        Vector4[] color2 = [color];
+                        Vec2[] centerPoint2 = [centerPoint];
+                        
+                        // Spawn Platform
                         var PlatformObject = PlatformApi.PlatformApi.SpawnPlatform((Fix)x, (Fix)y, (Fix)width, (Fix)height, (Fix)radius, (Fix)rotatson, CustomMassScale, color2, platformType, UseSlimeCam, sprite, pathType, OrbitForce, OrbitPath, DelaySeconds, orbitSpeed, expandSpeed, centerPoint2, normalSpeedFriction, DeadZoneDist, OrbitAccelerationMulitplier, targetRadius, ovalness01);
                         PlatformObject.GetComponent<WaterWaves>().WavePrefab = WavePrefab;
-                        //signal time!
+
+                        // Add Moving Platform Signal Stuff
                         if (platform.ContainsKey("MovingPlatformSignalStuff"))
                         {
                             var movingPlatformSignalStuff = (Dictionary<string, object>)platform["MovingPlatformSignalStuff"];
@@ -791,35 +764,37 @@ namespace MapMaker
                             var DropForce = Convert.ToDouble(DropPlayers["DropForce"]);
                             CreateDropPlayers(PlatformObject, UUID, (Fix)DropForce, OnlyActivateOnRise);
                         }
-                        //Debug.Log("Platform spawned successfully");
                     }
 
-                    // if it is a preset platform then we do it difrently
+                    // Load Preset Platform
                     else
                     {
                         Dictionary<string, object> PresetPlatform = (Dictionary<string, object>)platform["PresetPlatform"];
                         string PresetPlatformName = Convert.ToString(PresetPlatform["PresetPlatformName"]);
                         var Platform = (GameObject)MyAssetBundle.LoadAsset("assets/assetbundleswanted/" + PresetPlatformName + ".prefab");
-                        //idk if this is gonna work to fix the posable desink as it is converted back to a float...
+
+                        // Set position
                         var x2 = FloorToThousandnths(x);
                         var y2 = FloorToThousandnths(y);
-                        Vector3 pos = new Vector3((float)x2, (float)y2, 0);
-                        //the rest of the FloorToThousandnths should work fine for fixing it though
-                        //fix shader
+                        Vector3 pos = new((float)x2, (float)y2, 0);
+
+                        // Fix shader
                         Platform.GetComponent<SpriteRenderer>().material = PlatformMat;
-                        //set home
+
+                        // Set home
                         PlatformApi.PlatformApi.SetHome(Platform, (Vec2)pos);
                         BoplBody body = Platform.GetComponent<BoplBody>();
-                        //make the space junk not start with rotatsonal velosity
+
+                        // Make the space junk not start with rotatsonal velosity
                         body.StartAngularVelocity = Fix.Zero;
                         Platform.GetComponent<WaterWaves>().WavePrefab = WavePrefab;
-                        //scale object
+
+                        // Scale object
                         var ScaleFactor = FloorToThousandnths(Convert.ToDouble(PresetPlatform["ScaleFactor"]));
                         if (Platform.GetComponent<GrowOnStart>() == null)
                         {
                             var GrowOnStartComp = Platform.AddComponent(typeof(GrowOnStart)) as GrowOnStart;
                             GrowOnStartComp.scaleUp = ScaleFactor;
-                            //Debug.Log("added GrowOnStart");
                         }
                         else
                         {
@@ -833,26 +808,28 @@ namespace MapMaker
                         {
                             Platform.GetComponent<DPhysicsRoundedRect>().MaxScale = ScaleFactor;
                         }
-                        //spawn object
-                        //Debug.Log($"pos is {pos}");
+
+                        // Spawn Object
                         Platform = FixTransform.InstantiateFixed(Platform, (Vec2)pos);
                         PlatformApi.PlatformApi.SetPos(Platform, (Vec2)pos);
-                        //rotate object
+
+                        // Rotate Object
                         StickyRoundedRectangle StickyRect = Platform.GetComponent<StickyRoundedRectangle>();
                         StickyRect.GetGroundBody().rotation = FloorToThousandnths((double)rotatson);
-                        //fix mats
+
+                        // Fix Materials
                         foreach (Transform t in Platform.transform)
                         {
-                            //if its a grass
+                            // Fix Grass
                             if (t.gameObject.name == "AnimatedGrass_0" || t.gameObject.name == "AnimatedGrass_0 (2)" || t.gameObject.name == "AnimatedGrass_0 (3)" || t.gameObject.name == "AnimatedGrass")
                             {
-                                //set its mat
+                                // Set the material
                                 t.gameObject.GetComponent<SpriteRenderer>().material = GrassMat;
                             }
                         }
                         if (pathType == PlatformApi.PlatformApi.PathType.AntiLockPlatform)
                         {
-                            //antilock platform
+                            // Anti Lock Platform
                             var AntiLockPlatformComp = Platform.AddComponent(typeof(AntiLockPlatform)) as AntiLockPlatform;
                             AntiLockPlatformComp.OrbitForce = FloorToThousandnths(OrbitForce);
                             AntiLockPlatformComp.OrbitPath = OrbitPath;
@@ -894,7 +871,6 @@ namespace MapMaker
                             var DropForce = Convert.ToDouble(DropPlayers["DropForce"]);
                             CreateDropPlayers(Platform, UUID, (Fix)DropForce, OnlyActivateOnRise);
                         }
-                        //Debug.Log("Platform spawned successfully");
                     }
 
                 }
@@ -922,7 +898,7 @@ namespace MapMaker
             Debug.Log("OnSceneLoaded: " + scene.name);
             if (IsLevelName(scene.name))
             {
-                //remove all shootrays that are still around as they dont like unloading when the scene unloads for some reson.
+                // Remove all shootrays that are still around as they dont like unloading when the scene unloads for some reason.
                 ShootRay[] allRays = Resources.FindObjectsOfTypeAll(typeof(ShootRay)) as ShootRay[];
                 foreach (var Ray in allRays)
                 {
@@ -936,14 +912,15 @@ namespace MapMaker
                 {
 
                     // Create a new GameObject
-                    GameObject triggerGameObject = new GameObject("TriggerObject");
+                    GameObject triggerGameObject = new("TriggerObject");
 
                     // Add the FixTransform and Trigger components to the GameObject
                     triggerGameObject.AddComponent<FixTransform>();
 
                     TriggerPrefab = triggerGameObject.AddComponent<Trigger>();
+                    
                     // Create a new GameObject
-                    GameObject spawnerGameObject = new GameObject("SpawnerObject");
+                    GameObject spawnerGameObject = new("SpawnerObject");
 
                     // Add the components to the GameObject
                     spawnerGameObject.AddComponent<FixTransform>();
@@ -955,24 +932,27 @@ namespace MapMaker
                     spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
-                    GameObject DisappearGameObject = new GameObject("DisappearPlatformsObject");
+                    GameObject DisappearGameObject = new("DisappearPlatformsObject");
 
                     // Add the components to the GameObject
                     DisappearGameObject.AddComponent<FixTransform>();
                     DisappearPlatformsOnSignalPrefab = DisappearGameObject.AddComponent<DisappearPlatformsOnSignal>();
-                    //reset this at the begiening of every round.
+
+                    // Reset this at the begiening of every round.
                     DisappearPlatformsOnSignal.DisappearPlatformsOnSignals = new();
                     DisappearGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     DisappearGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
                     spriteRender = DisappearGameObject.AddComponent<SpriteRenderer>();
                     SpriteGameObject = (GameObject)SpriteAssetBundle.LoadAsset("assets/assetbundleswanted/disapearingplatform.prefab");
                     spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
+                    
                     // Create a new GameObject
-                    GameObject AndGateObject = new GameObject("AndGateObject");
+                    GameObject AndGateObject = new("AndGateObject");
 
                     // Add the components to the GameObject
                     AndGateObject.AddComponent<FixTransform>();
-                    //put it offscreen
+
+                    // Put it offscreen
                     AndGateObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     AndGateObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     andGatePrefab = AndGateObject.AddComponent<AndGate>();
@@ -982,10 +962,12 @@ namespace MapMaker
                     AndGateRender.sprite = AndGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
-                    GameObject SignalDelayObject = new GameObject("SignalDelayObject");
+                    GameObject SignalDelayObject = new("SignalDelayObject");
+
                     // Add the components to the GameObject
                     SignalDelayObject.AddComponent<FixTransform>();
-                    //put it offscreen
+
+                    // Put it offscreen
                     SignalDelayObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     SignalDelayObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     SignalDelayPrefab = SignalDelayObject.AddComponent<SignalDelay>();
@@ -994,10 +976,12 @@ namespace MapMaker
                     SignalDelaySpriteRender.sprite = SignalDelaySpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
-                    GameObject OrGateObject = new GameObject("OrGateObject");
+                    GameObject OrGateObject = new("OrGateObject");
+
                     // Add the components to the GameObject
                     OrGateObject.AddComponent<FixTransform>();
-                    //put it offscreen
+
+                    // Put it offscreen
                     OrGateObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     OrGateObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     OrGatePrefab = OrGateObject.AddComponent<OrGate>();
@@ -1006,10 +990,12 @@ namespace MapMaker
                     OrGateSpriteRender.sprite = OrGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
-                    GameObject NotGateObject = new GameObject("NotGateObject");
+                    GameObject NotGateObject = new("NotGateObject");
+
                     // Add the components to the GameObject
                     NotGateObject.AddComponent<FixTransform>();
-                    //put it offscreen
+
+                    // Put it offscreen
                     NotGateObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     NotGateObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                     NotGatePrefab = NotGateObject.AddComponent<NotGate>();
@@ -1018,7 +1004,8 @@ namespace MapMaker
                     NotGateSpriteRender.sprite = NotGateSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
-                    GameObject ShootRayGameObject = new GameObject("ShootRayObject");
+                    GameObject ShootRayGameObject = new("ShootRayObject");
+
                     // Add the components to the GameObject
                     ShootRayGameObject.AddComponent<FixTransform>();
                     ShootRayGameObject.AddComponent<ShootBlink>();
@@ -1029,7 +1016,8 @@ namespace MapMaker
 
 
                     // Create a new GameObject
-                    GameObject DropPlayersGameObject = new GameObject("DropPlayersObject");
+                    GameObject DropPlayersGameObject = new("DropPlayersObject");
+                    
                     // Add the components to the GameObject
                     DropPlayersGameObject.AddComponent<FixTransform>();
                     DropPlayersPrefab = DropPlayersGameObject.AddComponent<DropPlayers>();
@@ -1040,7 +1028,8 @@ namespace MapMaker
                     spriteRender.sprite = SpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
-                    GameObject ShakePlatformGameObject = new GameObject("ShakePlatformObject");
+                    GameObject ShakePlatformGameObject = new("ShakePlatformObject");
+                    
                     // Add the components to the GameObject
                     ShakePlatformGameObject.AddComponent<FixTransform>();
                     ShakePlatformPrefab = ShakePlatformGameObject.AddComponent<ShakePlatform>();
@@ -1051,7 +1040,8 @@ namespace MapMaker
                     ShakePlatformRender.sprite = ShakePlatformSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
-                    GameObject LuaGameObject = new GameObject("LuaTestObject");
+                    GameObject LuaGameObject = new("LuaTestObject");
+                    
                     // Add the components to the GameObject
                     LuaGameObject.AddComponent<FixTransform>();
                     LuaPrefab = LuaGameObject.AddComponent<LuaMain>();
@@ -1062,37 +1052,37 @@ namespace MapMaker
                     LuaRender.sprite = LuaSpriteGameObject.GetComponent<SpriteRenderer>().sprite;
 
                     // Create a new GameObject
-                    GameObject SignalSystemObject = new GameObject("SignalSystemObject");
-
+                    GameObject SignalSystemObject = new("SignalSystemObject");
 
                     // Add the components to the GameObject
                     SignalSystemObject.AddComponent<FixTransform>();
                     signalSystem = SignalSystemObject.AddComponent<SignalSystem>();
-                    SignalSystem.LogicInputs = new List<LogicInput>();
-                    SignalSystem.LogicOutputs = new List<LogicOutput>();
-                    SignalSystem.LogicStartingOutputs = new List<LogicOutput>();
-                    SignalSystem.LogicGatesToAlwaysUpdate = new List<LogicGate>();
-                    SignalSystem.LineRenderers = new();
-                    SignalSystem.LogicInputsThatAlwaysUpdateThereLineConnectsons = new();
+                    SignalSystem.LogicInputs = [];
+                    SignalSystem.LogicOutputs = [];
+                    SignalSystem.LogicStartingOutputs = [];
+                    SignalSystem.LogicGatesToAlwaysUpdate = [];
+                    SignalSystem.LineRenderers = [];
+                    SignalSystem.LogicInputsThatAlwaysUpdateThereLineConnectsons = [];
                     SignalSystem.FirstUpdateOfTheRound = true;
-                    SignalSystem.AllLogicGates = new();
+                    SignalSystem.AllLogicGates = [];
                 }
                 catch (Exception ex)
                 {
                     Debug.LogError($"Error in spawning triggers/spawners at scene load: {ex}");
                 }
                 NextUUID = 0;
+                
                 //TODO remove this when done testing signal stuff
                 //TESTING START!
-                Vec2[] path = { new Vec2(Fix.Zero, (Fix)10), new Vec2((Fix)10, (Fix)10) };
-                Vec2[] center = { new Vec2((Fix)0, (Fix)15) };
+                Vec2[] path = { new(Fix.Zero, (Fix)10), new((Fix)10, (Fix)10) };
+                Vec2[] center = { new((Fix)0, (Fix)15) };
                 //var platform = PlatformApi.PlatformApi.SpawnPlatform((Fix)0, (Fix)10, (Fix)2, (Fix)2, (Fix)1, Fix.Zero, 0.05, null, PlatformType.slime, false, null, PlatformApi.PlatformApi.PathType.VectorFieldPlatform, 500, path, 0, false, 100, 100, center);
                 //CreateTrigger(new Vec2((Fix)(-10), (Fix)30), new Vec2((Fix)10, (Fix)10), 0, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
                 //CreateTrigger(new Vec2((Fix)10, (Fix)30), new Vec2((Fix)10, (Fix)10), 1, true);
-                int[] UUids = { 4, 0 };
+                int[] UUids = [4, 0];
                 //CreateOrGate(UUids, 6, new Vec2(Fix.Zero, (Fix)5), (Fix)0);
                 //CreateNotGate(6, 2, new Vec2((Fix)5, (Fix)5), (Fix)0);
-                int[] UUids2 = { 1, 5 };
+                int[] UUids2 = [1, 5];
                 //CreateOrGate(UUids2, 7, new Vec2(Fix.Zero, (Fix)(-5)), (Fix)0);
                 //CreateNotGate(7, 3, new Vec2((Fix)5, (Fix)(-5)), (Fix)0);
                 //CreateSignalDelay(2, 5, (Fix)0, new Vec2((Fix)2, (Fix)(-2)), (Fix)180);
@@ -1101,8 +1091,8 @@ namespace MapMaker
                 //CreateDisappearPlatformsOnSignal(platform, 3, Fix.Zero, (Fix)2, false);
                 //CreateShakePlatform(platform, 2, (Fix)0.5, true, (Fix)1);
                 //CreateDropPlayers(platform, 2, (Fix)100, true);
-                int[] UUids3 = { };
-                int[] UUids4 = { };
+                int[] UUids3 = [];
+                int[] UUids4 = [];
                 /*CreateLuaGate(UUids3, UUids4, new Vec2((Fix)10, (Fix)(10)), (Fix)0, @"
 if (not first) then
     SpawnPlatform(0, 0, 1, 1, 1, 90, 1, 0, 0, 1)
@@ -1132,53 +1122,47 @@ first = true");*/
                         return;
                     }
                 }*/
-                //find the platforms and remove them (shadow + david)
+
+                // Find the platforms and remove them (shadow + david)
                 levelt = GameObject.Find("Level").transform;
                 var index = 0;
                 foreach (Transform tplatform in levelt)
                 {
-                    //if its the first platform then steal some stuff from it before distroying it.
+                    // If its first, commit robery
                     if (index == 0)
                     {
-                        //steal matual 
+                        // Steal material 
                         PlatformMat = tplatform.gameObject.GetComponent<SpriteRenderer>().material;
                         WavePrefab = tplatform.gameObject.GetComponent<WaterWaves>().WavePrefab;
                     }
                     index++;
-                    //distroy it
+
+                    // End its life
                     Updater.DestroyFix(tplatform.gameObject);
                 }
                 LoadMapsFromFolder();
                 signalSystem.SetUpDicts();
-                Debug.Log("signal stuff is done!");
+                Debug.Log("Signal stuff has loaded!");
             }
             if (scene.name == "MainMenu")
             {
+                var menu = GameObject.Find("Tutorial").transform;
+                var buttonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/mapmaker button.prefab");
+                var discordPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/discord button.prefab");
+                var websitePrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/website button 1.prefab");
 
-                var TutorialButton = GameObject.Find("Tutorial");
-                //discord-link
-                var DiscordButton = GameObject.Find("discord-link");
-                var MapEditorButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/mapmaker button.prefab");
-                var MapEditorButtonObject = Instantiate<GameObject>(MapEditorButtonPrefab, TutorialButton.transform);
-                MapEditorButtonObject.transform.localPosition = new Vector3(800, 35);
-                MapEditorButtonObject.transform.localScale = new Vector3(3.5f, 3.5f);
-                var MapEditorButton = MapEditorButtonObject.GetComponent<Button>();
-                MapMakerButtonAction += OnClickDocs;
-                MapEditorButton.onClick.AddListener(MapMakerButtonAction);
-                var GetMapsButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/website button 1.prefab");
-                var GetMapsButtonObject = Instantiate<GameObject>(GetMapsButtonPrefab, TutorialButton.transform);
-                GetMapsButtonObject.transform.localPosition = new Vector3(-800, 35);
-                GetMapsButtonObject.transform.localScale = new Vector3(3.5f, 3.5f);
-                var GetMapsButton = GetMapsButtonObject.GetComponent<Button>();
-                WebsiteButtonAction += OnClickMap;
-                GetMapsButton.onClick.AddListener(WebsiteButtonAction);
-                var GetDiscordButtonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/discord button.prefab");
-                var GetDiscordButtonObject = Instantiate<GameObject>(GetDiscordButtonPrefab, DiscordButton.transform);
-                GetDiscordButtonObject.transform.localPosition = new Vector3(75, 25);
-                GetDiscordButtonObject.transform.localScale = new Vector3(0.20f, 0.20f);
-                var GetDiscordButton = GetDiscordButtonObject.GetComponent<Button>();
-                DiscordButtonAction += OnClickDiscord;
-                GetDiscordButton.onClick.AddListener(DiscordButtonAction);
+                GameObject CreateButton(string name, GameObject prefab, Transform parent, Vector3 localPosition, Vector3 localScale, UnityAction onClick)
+                {
+                    var buttonObject = Instantiate(prefab, parent);
+                    buttonObject.transform.localPosition = localPosition;
+                    buttonObject.transform.localScale = localScale;
+                    buttonObject.GetComponent<Button>().onClick.AddListener(onClick);
+                    return buttonObject;
+                }
+
+                CreateButton("MapMaker", buttonPrefab, menu, new Vector3(800, 35), new Vector3(3.5f, 3.5f), OnClickDocs);
+                CreateButton("Get Maps", websitePrefab, menu, new Vector3(-800, 35), new Vector3(3.5f, 3.5f), OnClickMap);
+                CreateButton("Discord", discordPrefab, GameObject.Find("discord-link").transform, new Vector3(75, 25), new Vector3(0.20f, 0.20f), OnClickDiscord);
             }
 
         }
@@ -1196,62 +1180,60 @@ first = true");*/
         }
         public static bool IsLevelName(String input)
         {
-            Regex regex = new Regex("Level[0-9]+", RegexOptions.IgnoreCase);
+            Regex regex = new("Level[0-9]+", RegexOptions.IgnoreCase);
             return regex.IsMatch(input);
         }
-        //https://stormconsultancy.co.uk/blog/storm-news/convert-an-angle-in-degrees-to-radians-in-c/
+
+        // Some stolen code
+        // https://stormconsultancy.co.uk/blog/storm-news/convert-an-angle-in-degrees-to-radians-in-c/
         public static Fix ConvertToRadians(double angle)
         {
             return (Fix)PhysTools.DegreesToRadians * (Fix)angle;
         }
-        //https://stackoverflow.com/questions/19167669/keep-only-numeric-value-from-a-string
-        // simply replace the offending substrings with an empty string
+         // Some stolen code
+        // https://stackoverflow.com/questions/19167669/keep-only-numeric-value-from-a-string
+        // Simply replace the offending substrings with an empty string
         public static int GetMapIdFromSceneName(string s)
         {
-            Regex rxNonDigits = new Regex(@"[^\d]+");
+            Regex rxNonDigits = new(@"[^\d]+");
             if (string.IsNullOrEmpty(s)) return 0;
             string cleaned = rxNonDigits.Replace(s, "");
-            //subtract 1 as scene names start with 1 but ids start with 0
+
+            // Remove one as maps use a zero based index
             return int.Parse(cleaned) - 1;
         }
-        //in part chatgpt code
+        
+        // Generated by ai :skull:
         public static ZipArchive UnzipFile(string zipFilePath)
         {
 
             // Open the zip file for reading
-            FileStream zipStream = new FileStream(zipFilePath, FileMode.Open);
-            ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+            FileStream zipStream = new(zipFilePath, FileMode.Open);
+            ZipArchive archive = new(zipStream, ZipArchiveMode.Read);
             return archive;
 
         }
-        //finds all the files with a path that the predicate acsepts as a string array 
+        // Finds all the files with a path that the predicate accepts as a string array 
         public static string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
         {
             Debug.Log("enter GetFileFromZipArchive");
-            string[] data = { };
+            string[] data = [];
+
             // Iterate through each entry in the zip file
-            //archive is disposed of at this point for some reson
+            // Archive is disposed of at this point for some reson
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
                 // If entry is a directory, skip it
-                //Debug.Log("check if its a drectory");
                 if (entry.FullName.EndsWith("/"))
                     continue;
-                //Debug.Log("it isnt a drectory");
-                //see if it is valid (if the predicate returns true)
                 string[] path = { entry.FullName };
                 string[] ValidPathArray = Array.FindAll(path, predicate);
                 if (ValidPathArray.Length != 0)
                 {
-                    //Debug.Log("about to read the contents of entry");
                     // Read the contents of the entry
-                    using (StreamReader reader = new StreamReader(entry.Open()))
-                    {
-                        //Debug.Log("reading the contents of entry");
-                        string contents = reader.ReadToEnd();
-                        //add the contents to data
-                        data = data.Append(contents).ToArray();
-                    }
+                    using StreamReader reader = new(entry.Open());
+                    string contents = reader.ReadToEnd();
+                    data = [.. data, contents];
                 }
             }
             return data;
@@ -1259,48 +1241,41 @@ first = true");*/
         public static Byte[][] GetFileFromZipArchiveBytes(ZipArchive archive, Predicate<string> predicate)
         {
             Debug.Log("enter GetFileFromZipArchive");
-            Byte[][] data = { };
+            Byte[][] data = [];
+            
             // Iterate through each entry in the zip file
-            //archive is disposed of at this point for some reson
+            // Archive is disposed of at this point for some reson
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
                 // If entry is a directory, skip it
-                //Debug.Log("check if its a drectory");
                 if (entry.FullName.EndsWith("/"))
                     continue;
-                //Debug.Log("it isnt a drectory");
-                //see if it is valid (if the predicate returns true)
                 string[] path = { entry.FullName };
                 string[] ValidPathArray = Array.FindAll(path, predicate);
                 if (ValidPathArray.Length != 0)
                 {
-                    //Debug.Log("about to read the contents of entry");
                     // Read the contents of the entry
-                    using (var entryStream = entry.Open())
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        //Debug.Log("reading the contents of entry");
-                        entryStream.CopyTo(memoryStream);
-                        //add the contents to data
-                        data = data.Append(memoryStream.ToArray()).ToArray();
-                    }
+                    using var entryStream = entry.Open();
+                    using var memoryStream = new MemoryStream();
+                    entryStream.CopyTo(memoryStream);
+                    data = data.Append(memoryStream.ToArray()).ToArray();
                 }
             }
             return data;
         }
 
 
-        //gets all of the .zip files from the maps folder and turns them into a array of ZipArchive's (david) ONLY CALL ON START!
+        // Gets all of the .zip files from the maps folder and turns them into a array of ZipArchive's (david) ONLY CALL ON START!
         public static ZipArchive[] GetZipArchives()
         {
             string[] MapZipFiles = Directory.GetFiles(mapsFolderPath, "*.zip");
             Debug.Log($"{MapZipFiles.Length} .zip's");
             foreach (string zipFile in MapZipFiles)
             {
-                zipArchives = zipArchives.Append(UnzipFile(zipFile)).ToArray();
+                zipArchives = [.. zipArchives, UnzipFile(zipFile)];
                 if (Path.GetFileName(zipFile) == "TESTING.zip")
                 {
-                    zipArchives = new[] {zipArchives[zipArchives.Length-1]};
+                    zipArchives = [zipArchives[zipArchives.Length-1]];
                     break;
                 }
             }
@@ -1308,30 +1283,31 @@ first = true");*/
             MyZipArchives = zipArchives;
             return zipArchives;
         }
-        //get the custom drill color from a dicsanry
+        // Get custom drill color
         public static Drill.PlatformColors DrillColors(int PlatformType, Dictionary<string, object> dict)
         {
             var colors = new Drill.PlatformColors();
-            //convert them to List<float> instead of object. (objects are so confusing)
+            // Convert them to List<float> instead of object. (objects are so confusing)
             List<object> ColorDarkObjectList = (List<object>)dict["ColorDark"];
             List<object> ColorMediumObjectList = (List<object>)dict["ColorMedium"];
             List<object> ColorLightObjectList = (List<object>)dict["ColorLight"];
             List<float> ColorDarkFloats = ListOfObjectsToListOfFloats(ColorDarkObjectList);
             List<float> ColorMediumFloats = ListOfObjectsToListOfFloats(ColorMediumObjectList);
             List<float> ColorLightFloats = ListOfObjectsToListOfFloats(ColorLightObjectList);
-            UnityEngine.Color ColorDark = new UnityEngine.Color(ColorDarkFloats[0], ColorDarkFloats[1], ColorDarkFloats[2], ColorDarkFloats[3]);
-            UnityEngine.Color ColorMedium = new UnityEngine.Color(ColorMediumFloats[0], ColorMediumFloats[1], ColorMediumFloats[2], ColorMediumFloats[3]);
-            UnityEngine.Color ColorLight = new UnityEngine.Color(ColorLightFloats[0], ColorLightFloats[1], ColorLightFloats[2], ColorLightFloats[3]);
+            UnityEngine.Color ColorDark = new(ColorDarkFloats[0], ColorDarkFloats[1], ColorDarkFloats[2], ColorDarkFloats[3]);
+            UnityEngine.Color ColorMedium = new(ColorMediumFloats[0], ColorMediumFloats[1], ColorMediumFloats[2], ColorMediumFloats[3]);
+            UnityEngine.Color ColorLight = new(ColorLightFloats[0], ColorLightFloats[1], ColorLightFloats[2], ColorLightFloats[3]);
             colors.dark = ColorDark;
             colors.medium = ColorMedium;
             colors.light = ColorLight;
-            //used to define the custom platform type. will be used whenever we drill it
+
+            // Used to define the custom platform type. will be used whenever we drill it
             colors.type = (PlatformType)PlatformType;
             return colors;
         }
         public static List<float> ListOfObjectsToListOfFloats(List<object> ObjectList)
         {
-            List<float> Floats = new List<float>();
+            List<float> Floats = [];
             for (int i = 0; i < ObjectList.Count; i++)
             {
                 Floats.Add((float)Convert.ToDouble(ObjectList[i]));
@@ -1690,7 +1666,7 @@ first = true");*/
             Lua.Register();
             return Lua;
         }
-        //lua stuff
+        // Lua stuff
         public static DynValue exec1(CallbackArguments args, string funcName, Func<double, double> func, MoonSharp.Interpreter.CoreLib.MathModule __instance)
         {
             return MoonSharp.Interpreter.CoreLib.MathModule.exec1(args, funcName, func);
@@ -1715,3 +1691,12 @@ first = true");*/
         }
     }
 }
+
+// ITS OVER!
+// HOLY SH*T, THAT TOOK A LONG TIME
+// Anyways insert random antimality thing here:
+
+/*
+    Don't Believe what you see, see what you believe.
+    - Antimality.
+*/
