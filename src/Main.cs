@@ -838,16 +838,7 @@ namespace MapMaker
                         }
                         if (pathType == PlatformApi.PlatformApi.PathType.VectorFieldPlatform)
                         {
-                            var VectorFieldPlatformComp = Platform.AddComponent(typeof(VectorFieldPlatform)) as VectorFieldPlatform;
-                            VectorFieldPlatformComp.centerPoint = centerPoint;
-                            VectorFieldPlatformComp.DeadZoneDist = FloorToThousandnths(DeadZoneDist);
-                            VectorFieldPlatformComp.DelaySeconds = FloorToThousandnths(DelaySeconds);
-                            VectorFieldPlatformComp.expandSpeed = FloorToThousandnths(expandSpeed);
-                            VectorFieldPlatformComp.normalSpeedFriction = FloorToThousandnths(normalSpeedFriction);
-                            VectorFieldPlatformComp.OrbitAccelerationMulitplier = FloorToThousandnths(OrbitAccelerationMulitplier);
-                            VectorFieldPlatformComp.targetRadius = FloorToThousandnths(targetRadius);
-                            VectorFieldPlatformComp.orbitSpeed = FloorToThousandnths(orbitSpeed);
-                            VectorFieldPlatformComp.ovalness01 = FloorToThousandnths(ovalness01);
+                            PlatformApi.PlatformApi.AddVectorFieldPlatform(Platform, FloorToThousandnths(DelaySeconds), FloorToThousandnths(orbitSpeed), FloorToThousandnths(expandSpeed), centerPoint, FloorToThousandnths(normalSpeedFriction), FloorToThousandnths(DeadZoneDist), FloorToThousandnths(OrbitAccelerationMulitplier), FloorToThousandnths(targetRadius), FloorToThousandnths(ovalness01));
                         }
                         if (platform.ContainsKey("MovingPlatformSignalStuff"))
                         {
