@@ -498,7 +498,7 @@ namespace MapMaker.Lua_stuff
             DetPhysics DetPhys = DetPhysics.Get();
             List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
             IPhysicsCollider physColliderBeingSearchedFor = platform.DPhysicsShape().GetPhysicsParent().monobehaviourCollider;
-            List<StickyRoundedRectangle> collidingRects = [];
+            List<LuaPlatformCollisionInfo> collidingRects = [];
 
             // potentially reallllly slow. unfortunate.
             for (int i = 0; i < collisionData.Count; i++)
@@ -508,16 +508,11 @@ namespace MapMaker.Lua_stuff
 
                 if (collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect)
                 {
+                    collidingRects.Add(new LuaPlatformCollisionInfo());
                 }
                 else if (collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect)
                 {
                 }
-                else
-                {
-                    continue;
-                }
-
-
             }
 
 
@@ -528,25 +523,39 @@ namespace MapMaker.Lua_stuff
         }
 
         // based on the game's CollisionInformation struct. Modified for the lua API
-        public struct LuaCollisionInfo
+        // also yeah  specific because
+        public struct LuaPlatformCollisionInfo
         {
+            public LuaPlatformCollisionInfo(int _layer, Fix _penetration, Vec2 _impactVelocity, Vec2 _collisionVecNormal, Vec2 _contactPoint, StickyRoundedRectangle _collider, StickyRoundedRectangle _collidee)
+            {
+                layer = _layer;
+                penetration = _penetration;
+                impactVelocity = _impactVelocity;
+                collisionVecNormal = _collisionVecNormal;
+                contactPoint = _contactPoint;
+                collider = _collider;
+                collidee = _collidee;
+            }
+
             public int layer;
             public Fix penetration;
             public Vec2 impactVelocity;
-            public Vec2 normalVector;
+            public Vec2 collisionVecNormal;
             public Vec2 contactPoint;
-            public IPhysicsCollider collider;
-            public IPhysicsCollider collidee;
+            public StickyRoundedRectangle collider;
+            public StickyRoundedRectangle collidee;
+            // used by GetAllPlatformsThatTouched(platform)
+            public StickyRoundedRectangle newPlatform;
         }
 
 
         public class LuaCollisionInfoPlatformsProxy
         {
-            LuaCollisionInfo target;
+            LuaPlatformCollisionInfo target;
 
 
             [MoonSharpHidden]
-            public LuaCollisionInfoPlatformsProxy(LuaCollisionInfo LuaCollision)
+            public LuaCollisionInfoPlatformsProxy(LuaPlatformCollisionInfo LuaCollision)
             {
                 target = LuaCollision;
             }
@@ -564,14 +573,23 @@ namespace MapMaker.Lua_stuff
             {
                 return target.impactVelocity;
             }
-
+            public Vec2 GetCollisionVecNormal()
+            {
+                return target.impactVelocity;
+            }
             public Vec2 GetContactPoint()
             {
                 return target.contactPoint;
             }
-            public int GetImpactVelocity()
+            // these two are kinda weird for GetAllPlatformsThatTouched(platform) because you have to pass in the platform that you are looking for
+
+            public StickyRoundedRectangle GetColliderPlatform()
             {
-                return target.impactVelocity;
+                return target.contactPoint;
+            }
+            public StickyRoundedRectangle GetColliderPlatform()
+            {
+                return target.contactPoint;
             }
 
 
