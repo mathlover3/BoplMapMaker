@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem.Composites;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 using static MapMaker.Lua_stuff.LuaPlayerPhysicsProxy;
 using static UnityEngine.ParticleSystem.PlaybackState;
@@ -1002,6 +1003,22 @@ namespace MapMaker.Lua_stuff
         {
             target.baseScaleForPlatform = (Fix)scale;
         }
+        public double GetMaxScale()
+        {
+            return (double)target.DPhysicsShape().MaxScale;
+        }
+        public void SetMaxScale(double scale)
+        {
+            target.DPhysicsShape().MaxScale = (Fix)scale;
+        }
+        public double GetMinScale()
+        {
+            return (double)target.DPhysicsShape().MinScale;
+        }
+        public void SetMinScale(double scale)
+        {
+            target.DPhysicsShape().MinScale = (Fix)scale;
+        }
         public string GetPlatformType()
         {
             switch (target.platformType)
@@ -1262,6 +1279,66 @@ namespace MapMaker.Lua_stuff
             }
             target.InverseMass = Fix.One / (Fix)Mass; 
         }
+        //these dont work due to them only being used to create the PhysicsBody when the object is created.
+        //if i realy want to add this i would have to replace the physics body in PhysicsBodyList.physicsBodies for the PhysicsBodyList that holds the object
+        //witch depends on if its a DPhysicsBox, a DPhysicsRect, or a DPhysicsRoundedRect. also dont froget to update the CompositeBody.combinedBody if it is a CompositeBody.
+        //but thankfuly those are the only 2 spots you would need to change because those are the only 2 spots that store PhysicsBody's.
+        //feel free to do this if you want too. if you do also add some more PhysicsBody propertys too.
+        //the reson it needs to be done this way is because PhysicsBody is a struct not a class and structs are passed by copying and pasting them whenever you edit them.
+        //unlike classes that are passed by refrence.
+        //unless ofc im just stupid and this isnt how it works at all and this code does work witch looking at the games code the more and more likely it seems that it would work.
+        //looking at the games code it seems to drectly set stuff and it works a lot everywhere in the games code. like in DPhysicsBox.set_velocity(Vec2).
+        //problum with doing that is i would need to know if its a DPhysicsBox, a DPhysicsRect, or a DPhysicsRoundedRect.
+        //witch is probaly posable with some cursed try catchs with casts inside them. or some way in c# i dont know of to check what class is inhariting a given interface.
+        //oh wow this is a long comment. lol. didnt intend that. this comment took like 10 minites to write lol
+        /*public double GetBouncyness()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetBouncyness on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetBouncyness on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            return (double)target.bounciness;
+        }
+        public void SetBouncyness(double newbouncyness)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetBouncyness on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetBouncyness on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.bounciness = (Fix)newbouncyness;
+        }
+        public double GetGravityScale()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetGravityScale on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetGravityScale on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            return (double)target.gravityScale;
+        }
+        public void SetGravityScale(double newGravity)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetGravityScale on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetGravityScale on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.gravityScale = (Fix)newGravity;
+        }*/
         public void AddForce(double ForceX, double ForceY)
         {
             if (!target.HasBeenInitialized)
