@@ -483,8 +483,30 @@ namespace MapMaker.Lua_stuff
         }
         public static DynValue GetAllPlatforms(Script script)
         {
-            StickyRoundedRectangle[] allObjects = Resources.FindObjectsOfTypeAll(typeof(StickyRoundedRectangle)) as StickyRoundedRectangle[];
-            List<StickyRoundedRectangle> result = new List<StickyRoundedRectangle>(allObjects);
+            //HOW IS THIS NOT MAKING THE GAME CRASH??? IDK MAN BUT IT SOMEHOW DOESNT (still should make it not call FindObjectsOfTypeAll as thats very slow)
+            //never mind i made it use the platform api list.
+            //StickyRoundedRectangle[] allObjects = Resources.FindObjectsOfTypeAll(typeof(StickyRoundedRectangle)) as StickyRoundedRectangle[];
+            List<StickyRoundedRectangle> result = new();
+            foreach (GameObject platform in PlatformApi.PlatformApi.PlatformList)
+            {
+                if (platform != null)
+                {
+                    var sticky = platform.GetComponent<StickyRoundedRectangle>();
+                    if (sticky != null)
+                    {
+                        result.Add(sticky);
+                    }
+                }
+            }
+            //fix to keep us from receving the prefab
+            //foreach (var platform in allObjects)
+            //{
+            //    if (platform.GetGroundBody() != null)
+            //    {
+            //        result.Add(platform);
+            //    }
+            //}
+
             return DynValue.NewTuple(
                 DynValue.NewNumber(result.Count),
                 DynValue.FromObject(script, result)
