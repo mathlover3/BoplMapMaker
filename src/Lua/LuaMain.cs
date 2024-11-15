@@ -596,7 +596,7 @@ namespace MapMaker.Lua_stuff
         }
         public double GetScale() { return (double)body.fixtrans.Scale; }
         public void SetScale(double scale) { PlayerHandler.Get().GetPlayer(body.idHolder.GetPlayerId()).Scale = (Fix)scale; }
-        public void GetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
+        public double GetAirAccel() { return (double)target.airAccel; }
         public double GetMass() { return (double)(Fix.One / target.inverseMass01); }
         public void SetSpeed(double NewValue) {target.Speed = (Fix)NewValue; }
         public void SetGroundedSpeed(double NewValue) {target.groundedSpeed = (Fix)NewValue; }
