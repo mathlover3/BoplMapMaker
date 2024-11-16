@@ -1062,6 +1062,25 @@ namespace MapMaker.Lua_stuff
                 throw new ScriptRuntimeException("Can't call SetHomeRot on a Platform object that is a boulder. check IsBoulder before calling!");
             }
         }
+        public void MakeAntiLock(double[] OrbitPathXs, double[] OrbitPathYs, double DelaySeconds, double OrbitForce)
+        {
+            if (IsBoulder())
+            {
+                throw new ScriptRuntimeException("Can't call MakeAntiLock on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
+            if (OrbitPathXs.Length != OrbitPathYs.Length)
+            {
+                throw new ScriptRuntimeException("called MakeAntiLock with a different number of OrbitPathX coordinates from the number of OrbitPathY coordinates");
+            }
+            GameObject platformObject = target.gameObject;
+            int length = OrbitPathXs.Length;
+            Vec2[] orbitPath = new Vec2[length];
+            for (int i = 0; i < length; i++)
+            {
+                orbitPath[i] = new Vec2((Fix)OrbitPathXs[i], (Fix)OrbitPathYs[i]);
+            }
+            PlatformApi.PlatformApi.AddAntiLockPlatform(platformObject, (Fix)OrbitForce, orbitPath, (Fix)DelaySeconds);
+        }
         public void MakeVectorField(double centerX, double centerY, double delaySeconds, double orbitSpeed, double expandSpeed, double normalSpeedFriction, double DeadZoneDist, double OrbitAccelerationMulitplier, double targetRadius, double ovalness01)
         {
             if (IsBoulder())
@@ -1072,6 +1091,44 @@ namespace MapMaker.Lua_stuff
             PlatformApi.PlatformApi.AddVectorFieldPlatform(platformObject, (Fix)delaySeconds, (Fix)orbitSpeed, (Fix)expandSpeed, new Vec2((Fix)centerX, (Fix)centerY), (Fix)normalSpeedFriction, (Fix)DeadZoneDist, (Fix)OrbitAccelerationMulitplier, (Fix)targetRadius, (Fix)ovalness01);
             Vec2 pos = PlatformApi.PlatformApi.GetHome(platformObject);
             PlatformApi.PlatformApi.SetHome(platformObject, pos + new Vec2((Fix)1, (Fix)0));
+        }
+        public bool IsAntiLock()
+        {
+            return target.gameObject.GetComponent<AntiLockPlatform>() != null;
+        }
+        public bool IsVectorField()
+        {
+            return target.gameObject.GetComponent<VectorFieldPlatform>() != null;
+        }
+        public void RemoveAntiLock()
+        {
+            if (IsBoulder())
+            {
+                throw new ScriptRuntimeException("Can't call RemoveAntiLock on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
+            GameObject platformObject = target.gameObject;
+            AntiLockPlatform component = platformObject.GetComponent<AntiLockPlatform>();
+            if (component == null)
+            {
+                throw new ScriptRuntimeException("called RemoveAntiLock on a platform without an AntilockPlatform component. make sure the platform has an AntilockPlatform compoment before calling by calling IsAntilock");
+            }
+           ((MonoUpdatable)component).IsDestroyed = true;
+            UnityEngine.Object.Destroy((UnityEngine.Object)(object)component);
+        }
+        public void RemoveVectorField()
+        {
+            if (IsBoulder())
+            {
+                throw new ScriptRuntimeException("Can't call RemoveVectorField on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
+            GameObject platformObject = target.gameObject;
+            VectorFieldPlatform component = platformObject.GetComponent<VectorFieldPlatform>();
+            if (component == null)
+            {
+                throw new ScriptRuntimeException("called RemoveVectorField on a platform without a VectorFieldPlatform component. make sure the platform has a VectorFieldPlatform compoment before calling by calling IsVectorField");
+            }
+            ((MonoUpdatable)component).IsDestroyed = true;
+            UnityEngine.Object.Destroy((UnityEngine.Object)(object)component);
         }
         public void ShakePlatform(double Duratson, double ShakeAmount)
         {
