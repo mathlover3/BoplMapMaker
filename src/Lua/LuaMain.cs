@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem.Composites;
 using UnityEngine.InputSystem.XR;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 using static MapMaker.Lua_stuff.LuaPlayerPhysicsProxy;
 using static UnityEngine.ParticleSystem.PlaybackState;
@@ -483,8 +484,18 @@ namespace MapMaker.Lua_stuff
         }
         public static DynValue GetAllPlatforms(Script script)
         {
-            StickyRoundedRectangle[] allObjects = Resources.FindObjectsOfTypeAll(typeof(StickyRoundedRectangle)) as StickyRoundedRectangle[];
-            List<StickyRoundedRectangle> result = new List<StickyRoundedRectangle>(allObjects);
+            List<StickyRoundedRectangle> result = new();
+            foreach (GameObject platform in PlatformApi.PlatformApi.PlatformList)
+            {
+                if (platform != null)
+                {
+                    var sticky = platform.GetComponent<StickyRoundedRectangle>();
+                    if (sticky != null)
+                    {
+                        result.Add(sticky);
+                    }
+                }
+            }
             return DynValue.NewTuple(
                 DynValue.NewNumber(result.Count),
                 DynValue.FromObject(script, result)
@@ -698,7 +709,7 @@ namespace MapMaker.Lua_stuff
         }
         public double GetScale() { return (double)body.fixtrans.Scale; }
         public void SetScale(double scale) { PlayerHandler.Get().GetPlayer(body.idHolder.GetPlayerId()).Scale = (Fix)scale; }
-        public void GetAirAccel(double NewValue) {target.airAccel = (Fix)NewValue; }
+        public double GetAirAccel() { return (double)target.airAccel; }
         public double GetMass() { return (double)(Fix.One / target.inverseMass01); }
         public void SetSpeed(double NewValue) {target.Speed = (Fix)NewValue; }
         public void SetGroundedSpeed(double NewValue) {target.groundedSpeed = (Fix)NewValue; }
@@ -1105,6 +1116,22 @@ namespace MapMaker.Lua_stuff
         {
             target.baseScaleForPlatform = (Fix)scale;
         }
+        public double GetMaxScale()
+        {
+            return (double)target.DPhysicsShape().MaxScale;
+        }
+        public void SetMaxScale(double scale)
+        {
+            target.DPhysicsShape().MaxScale = (Fix)scale;
+        }
+        public double GetMinScale()
+        {
+            return (double)target.DPhysicsShape().MinScale;
+        }
+        public void SetMinScale(double scale)
+        {
+            target.DPhysicsShape().MinScale = (Fix)scale;
+        }
         public string GetPlatformType()
         {
             switch (target.platformType)
@@ -1148,6 +1175,25 @@ namespace MapMaker.Lua_stuff
                 throw new ScriptRuntimeException("Can't call SetHomeRot on a Platform object that is a boulder. check IsBoulder before calling!");
             }
         }
+        public void MakeAntiLock(double[] OrbitPathXs, double[] OrbitPathYs, double DelaySeconds, double OrbitForce)
+        {
+            if (IsBoulder())
+            {
+                throw new ScriptRuntimeException("Can't call MakeAntiLock on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
+            if (OrbitPathXs.Length != OrbitPathYs.Length)
+            {
+                throw new ScriptRuntimeException("called MakeAntiLock with a different number of OrbitPathX coordinates from the number of OrbitPathY coordinates");
+            }
+            GameObject platformObject = target.gameObject;
+            int length = OrbitPathXs.Length;
+            Vec2[] orbitPath = new Vec2[length];
+            for (int i = 0; i < length; i++)
+            {
+                orbitPath[i] = new Vec2((Fix)OrbitPathXs[i], (Fix)OrbitPathYs[i]);
+            }
+            PlatformApi.PlatformApi.AddAntiLockPlatform(platformObject, (Fix)OrbitForce, orbitPath, (Fix)DelaySeconds);
+        }
         public void MakeVectorField(double centerX, double centerY, double delaySeconds, double orbitSpeed, double expandSpeed, double normalSpeedFriction, double DeadZoneDist, double OrbitAccelerationMulitplier, double targetRadius, double ovalness01)
         {
             if (IsBoulder())
@@ -1158,6 +1204,44 @@ namespace MapMaker.Lua_stuff
             PlatformApi.PlatformApi.AddVectorFieldPlatform(platformObject, (Fix)delaySeconds, (Fix)orbitSpeed, (Fix)expandSpeed, new Vec2((Fix)centerX, (Fix)centerY), (Fix)normalSpeedFriction, (Fix)DeadZoneDist, (Fix)OrbitAccelerationMulitplier, (Fix)targetRadius, (Fix)ovalness01);
             Vec2 pos = PlatformApi.PlatformApi.GetHome(platformObject);
             PlatformApi.PlatformApi.SetHome(platformObject, pos + new Vec2((Fix)1, (Fix)0));
+        }
+        public bool IsAntiLock()
+        {
+            return target.gameObject.GetComponent<AntiLockPlatform>() != null;
+        }
+        public bool IsVectorField()
+        {
+            return target.gameObject.GetComponent<VectorFieldPlatform>() != null;
+        }
+        public void RemoveAntiLock()
+        {
+            if (IsBoulder())
+            {
+                throw new ScriptRuntimeException("Can't call RemoveAntiLock on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
+            GameObject platformObject = target.gameObject;
+            AntiLockPlatform component = platformObject.GetComponent<AntiLockPlatform>();
+            if (component == null)
+            {
+                throw new ScriptRuntimeException("called RemoveAntiLock on a platform without an AntilockPlatform component. make sure the platform has an AntilockPlatform compoment before calling by calling IsAntilock");
+            }
+           ((MonoUpdatable)component).IsDestroyed = true;
+            UnityEngine.Object.Destroy((UnityEngine.Object)(object)component);
+        }
+        public void RemoveVectorField()
+        {
+            if (IsBoulder())
+            {
+                throw new ScriptRuntimeException("Can't call RemoveVectorField on a Platform object that is a boulder. check IsBoulder before calling!");
+            }
+            GameObject platformObject = target.gameObject;
+            VectorFieldPlatform component = platformObject.GetComponent<VectorFieldPlatform>();
+            if (component == null)
+            {
+                throw new ScriptRuntimeException("called RemoveVectorField on a platform without a VectorFieldPlatform component. make sure the platform has a VectorFieldPlatform compoment before calling by calling IsVectorField");
+            }
+            ((MonoUpdatable)component).IsDestroyed = true;
+            UnityEngine.Object.Destroy((UnityEngine.Object)(object)component);
         }
         public void ShakePlatform(double Duratson, double ShakeAmount)
         {
@@ -1365,6 +1449,66 @@ namespace MapMaker.Lua_stuff
             }
             target.InverseMass = Fix.One / (Fix)Mass; 
         }
+        //these dont work due to them only being used to create the PhysicsBody when the object is created.
+        //if i realy want to add this i would have to replace the physics body in PhysicsBodyList.physicsBodies for the PhysicsBodyList that holds the object
+        //witch depends on if its a DPhysicsBox, a DPhysicsRect, or a DPhysicsRoundedRect. also dont froget to update the CompositeBody.combinedBody if it is a CompositeBody.
+        //but thankfuly those are the only 2 spots you would need to change because those are the only 2 spots that store PhysicsBody's.
+        //feel free to do this if you want too. if you do also add some more PhysicsBody propertys too.
+        //the reson it needs to be done this way is because PhysicsBody is a struct not a class and structs are passed by copying and pasting them whenever you edit them.
+        //unlike classes that are passed by refrence.
+        //unless ofc im just stupid and this isnt how it works at all and this code does work witch looking at the games code the more and more likely it seems that it would work.
+        //looking at the games code it seems to drectly set stuff and it works a lot everywhere in the games code. like in DPhysicsBox.set_velocity(Vec2).
+        //problum with doing that is i would need to know if its a DPhysicsBox, a DPhysicsRect, or a DPhysicsRoundedRect.
+        //witch is probaly posable with some cursed try catchs with casts inside them. or some way in c# i dont know of to check what class is inhariting a given interface.
+        //oh wow this is a long comment. lol. didnt intend that. this comment took like 10 minites to write lol
+        /*public double GetBouncyness()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetBouncyness on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetBouncyness on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            return (double)target.bounciness;
+        }
+        public void SetBouncyness(double newbouncyness)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetBouncyness on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetBouncyness on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.bounciness = (Fix)newbouncyness;
+        }
+        public double GetGravityScale()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetGravityScale on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetGravityScale on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            return (double)target.gravityScale;
+        }
+        public void SetGravityScale(double newGravity)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetGravityScale on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetGravityScale on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.gravityScale = (Fix)newGravity;
+        }*/
         public void AddForce(double ForceX, double ForceY)
         {
             if (!target.HasBeenInitialized)

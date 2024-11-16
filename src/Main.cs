@@ -561,7 +561,7 @@ namespace MapMaker
                             Vecs1.Add(floatVec);
                         }
                         Vec2[] Vecs = [.. Vecs1];
-                        Debug.Log("orbit path decoded");
+                        // Debug.Log("orbit path decoded");
 
                         // Now we have a Vec2 array of the path
                         OrbitPath = Vecs;
