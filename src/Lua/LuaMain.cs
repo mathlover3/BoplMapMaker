@@ -546,7 +546,7 @@ namespace MapMaker.Lua_stuff
             //will only be reached if its not a boplmap
             return false;
         }
-        public void PlaySound(string name, double delay)
+        public void PlaySound(string name, float delay)
         {
             AudioManager.Get().Play(name, delay);
         }
