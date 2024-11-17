@@ -172,6 +172,7 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
+
         public static BoplBody SpawnSpike(StickyRoundedRectangle attachedGround, double percentAroundSurface, double scale, double offset)
         {
             if (attachedGround == null)
@@ -516,13 +517,24 @@ namespace MapMaker.Lua_stuff
             {
                 var collider = collisionData[i].colliderPP.monobehaviourCollider;
                 var collidee = collisionData[i].pp.monobehaviourCollider;
+                var hasFoundACollision = true;
+                StickyRoundedRectangle newPlatform = null;
 
                 if (collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect)
                 {
-                    collidingRects.Add(new LuaPlatformCollisionInfo());
+                    newPlatform = (StickyRoundedRectangle)collider;
                 }
                 else if (collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect)
                 {
+                    newPlatform = (StickyRoundedRectangle)collidee;
+                }
+                else
+                {
+                    hasFoundACollision = false;
+                }
+                if (hasFoundACollision) 
+                {
+                    collidingRects.Add(new LuaPlatformCollisionInfo();
                 }
             }
 
@@ -534,7 +546,6 @@ namespace MapMaker.Lua_stuff
         }
 
         // based on the game's CollisionInformation struct. Modified for the lua API
-        // also yeah  specific because
         public struct LuaPlatformCollisionInfo
         {
             public LuaPlatformCollisionInfo(int _layer, Fix _penetration, Vec2 _impactVelocity, Vec2 _collisionVecNormal, Vec2 _contactPoint, StickyRoundedRectangle _collider, StickyRoundedRectangle _collidee)
@@ -555,7 +566,10 @@ namespace MapMaker.Lua_stuff
             public Vec2 contactPoint;
             public StickyRoundedRectangle collider;
             public StickyRoundedRectangle collidee;
-            // used by GetAllPlatformsThatTouched(platform)
+            // used by GetAllPlatformsThatTouched(platform)/probably other collision detection functions if they exist.
+            // because platform in GetAllPlatformsThatTouched(platform) could have been the collider or collidee,
+            // it's not immediately clear which platform is the new platform which the user is probably looking for.
+            // this saves some repeated template code in every call to GetAllPlatformsThatTouched() in the lua api.
             public StickyRoundedRectangle newPlatform;
         }
 
@@ -586,7 +600,7 @@ namespace MapMaker.Lua_stuff
             }
             public Vec2 GetCollisionVecNormal()
             {
-                return target.impactVelocity;
+                return target.collisionVecNormal;
             }
             public Vec2 GetContactPoint()
             {
@@ -596,12 +610,13 @@ namespace MapMaker.Lua_stuff
 
             public StickyRoundedRectangle GetColliderPlatform()
             {
-                return target.contactPoint;
+                return target.collider;
             }
-            public StickyRoundedRectangle GetColliderPlatform()
+            public StickyRoundedRectangle GetCollideePlatform()
             {
-                return target.contactPoint;
+                return target.collidee;
             }
+            public StickyRoundedRectangle GetNewPlatform
 
 
 
