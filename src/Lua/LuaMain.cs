@@ -93,6 +93,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["GetInputValueWithId"] = (object)GetInputValueWithId;
             script.Globals["SetOutputWithId"] = (object)SetOutputWithId;
             script.Globals["GetFileFromMapFile"] = (object)GetFileFromMapFile;
+            script.Globals["PlaySound"] = (object)PlaySound;
             script.Options.DebugPrint = s => { Console.WriteLine(s); };
             // Register just MyClass, explicitely.
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
@@ -672,6 +673,10 @@ namespace MapMaker.Lua_stuff
             if (path == FileNameToGet) return true;
             //will only be reached if its not a boplmap
             return false;
+        }
+        public void PlaySound(string name, float delay)
+        {
+            AudioManager.Get().Play(name, delay);
         }
         public override void Logic(Fix SimDeltaTime)
         {
