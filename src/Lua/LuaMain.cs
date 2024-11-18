@@ -1222,8 +1222,6 @@ namespace MapMaker.Lua_stuff
             }
             GameObject platformObject = target.gameObject;
             PlatformApi.PlatformApi.AddVectorFieldPlatform(platformObject, (Fix)delaySeconds, (Fix)orbitSpeed, (Fix)expandSpeed, new Vec2((Fix)centerX, (Fix)centerY), (Fix)normalSpeedFriction, (Fix)DeadZoneDist, (Fix)OrbitAccelerationMulitplier, (Fix)targetRadius, (Fix)ovalness01);
-            Vec2 pos = PlatformApi.PlatformApi.GetHome(platformObject);
-            PlatformApi.PlatformApi.SetHome(platformObject, pos + new Vec2((Fix)1, (Fix)0));
         }
         public bool IsAntiLock()
         {
