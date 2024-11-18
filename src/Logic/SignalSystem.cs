@@ -497,7 +497,7 @@ namespace MapMaker
             {
                 output.WasOnLastTick = output.IsOn;
             }
-            if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.gameInProgress)
+            if (!GameTime.IsTimeStopped() && PlatformApi.PlatformApi.GameSessionHandler2.gameInProgress && Updater.SimTimeSinceLevelLoaded > (Fix)2.5)
             {
                 //for all of the gates.
                 foreach (var gate in LogicGatesInOrder)
@@ -547,7 +547,7 @@ namespace MapMaker
                 }
             }
             //in case time is stoped.
-            if (PlatformApi.PlatformApi.gameInProgress)
+            if (PlatformApi.PlatformApi.GameSessionHandler2.gameInProgress && Updater.SimTimeSinceLevelLoaded > (Fix)2.5)
             {
                 foreach (var gate in LogicGatesToAlwaysUpdate)
                 {
