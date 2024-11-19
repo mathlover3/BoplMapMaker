@@ -557,6 +557,7 @@ namespace MapMaker
                     {
                         gate.Logic(SimDeltaTime);
                         gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
+                        //these logs magicly fixes the desyncs???? idk but it seems like it.
                         var consoleMessage = "running logic, gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded. | tick: " + Updater.SimulationTicks.ToString();
                         UnityEngine.Debug.Log(consoleMessage);
                     }

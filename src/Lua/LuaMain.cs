@@ -1478,8 +1478,11 @@ namespace MapMaker.Lua_stuff
         //looking at the games code it seems to drectly set stuff and it works a lot everywhere in the games code. like in DPhysicsBox.set_velocity(Vec2).
         //problum with doing that is i would need to know if its a DPhysicsBox, a DPhysicsRect, or a DPhysicsRoundedRect.
         //witch is probaly posable with some cursed try catchs with casts inside them. or some way in c# i dont know of to check what class is inhariting a given interface.
-        //oh wow this is a long comment. lol. didnt intend that. this comment took like 10 minites to write lol
-        /*public double GetBouncyness()
+        //oh wow this is a long comment. lol. didnt intend that. this comment took like 10 minites to write lol -david
+
+
+        //nvm i did it anyways lol. keeping the comment though as its funny. -david
+        public double GetBouncyness()
         {
             if (!target.HasBeenInitialized)
             {
@@ -1489,9 +1492,33 @@ namespace MapMaker.Lua_stuff
             {
                 throw new ScriptRuntimeException("called GetBouncyness on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
-            return (double)target.bounciness;
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.bounciness;
+                }
+                return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].bounciness;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.bounciness;
+                }
+                return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].bounciness;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.bounciness;
+                }
+                return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].bounciness;
+            }
+            throw new Exception("umm what??? how is this posable??? this bopl bodys colider isnt any physics object??? this makes 0 sence...");
         }
-        public void SetBouncyness(double newbouncyness)
+        public void SetBouncyness(double value)
         {
             if (!target.HasBeenInitialized)
             {
@@ -1501,7 +1528,38 @@ namespace MapMaker.Lua_stuff
             {
                 throw new ScriptRuntimeException("called SetBouncyness on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
-            target.bounciness = (Fix)newbouncyness;
+            target.bounciness = (Fix)value;
+            //do some magic type stuff to detect what physics colider it is and act acordingly
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.bounciness = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].bounciness = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.bounciness = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].bounciness = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.bounciness = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].bounciness = (Fix)value;
+                return;
+            }
         }
         public double GetGravityScale()
         {
@@ -1513,9 +1571,33 @@ namespace MapMaker.Lua_stuff
             {
                 throw new ScriptRuntimeException("called GetGravityScale on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
-            return (double)target.gravityScale;
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.gravityScale;
+                }
+                return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].gravityScale;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.gravityScale;
+                }
+                return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].gravityScale;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.gravityScale;
+                }
+                return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].gravityScale;
+            }
+            throw new Exception("umm what??? how is this posable??? this bopl bodys colider isnt any physics object??? this makes 0 sence...");
         }
-        public void SetGravityScale(double newGravity)
+        public void SetGravityScale(double value)
         {
             if (!target.HasBeenInitialized)
             {
@@ -1525,8 +1607,428 @@ namespace MapMaker.Lua_stuff
             {
                 throw new ScriptRuntimeException("called SetGravityScale on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
             }
-            target.gravityScale = (Fix)newGravity;
-        }*/
+            target.gravityScale = (Fix)value;
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.gravityScale = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].gravityScale = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.gravityScale = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].gravityScale = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.gravityScale = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].gravityScale = (Fix)value;
+                return;
+            }
+        }
+        public double GetAngularVelocity()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetAngularVelocity on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetAngularVelocity on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.angularVelocity;
+                }
+                return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].angularVelocity;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.angularVelocity;
+                }
+                return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].angularVelocity;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.angularVelocity;
+                }
+                return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].angularVelocity;
+            }
+            throw new Exception("umm what??? how is this posable??? this bopl bodys colider isnt any physics object??? this makes 0 sence...");
+        }
+        public void SetAngularVelocity(double value)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetAngularVelocity on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetAngularVelocity on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.gravityScale = (Fix)value;
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.angularVelocity = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].angularVelocity = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.angularVelocity = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].angularVelocity = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.angularVelocity = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].angularVelocity = (Fix)value;
+                return;
+            }
+        }
+        public double GetStaticFriction()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetStaticFriction on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetStaticFriction on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.staticFriction;
+                }
+                return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].staticFriction;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.staticFriction;
+                }
+                return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].staticFriction;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.staticFriction;
+                }
+                return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].staticFriction;
+            }
+            throw new Exception("umm what??? how is this posable??? this bopl bodys colider isnt any physics object??? this makes 0 sence...");
+        }
+        public void SetStaticFriction(double value)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetStaticFriction on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetStaticFriction on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.gravityScale = (Fix)value;
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.staticFriction = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].staticFriction = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.staticFriction = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].staticFriction = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.staticFriction = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].staticFriction = (Fix)value;
+                return;
+            }
+        }
+        public double GetDynamicFriction()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetDynamicFriction on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetDynamicFriction on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.dynamicFriction;
+                }
+                return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].dynamicFriction;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.dynamicFriction;
+                }
+                return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].dynamicFriction;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.dynamicFriction;
+                }
+                return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].dynamicFriction;
+            }
+            throw new Exception("umm what??? how is this posable??? this bopl bodys colider isnt any physics object??? this makes 0 sence...");
+        }
+        public void SetDynamicFriction(double value)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetDynamicFriction on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetDynamicFriction on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.gravityScale = (Fix)value;
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.dynamicFriction = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].dynamicFriction = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.dynamicFriction = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].dynamicFriction = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.dynamicFriction = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].dynamicFriction = (Fix)value;
+                return;
+            }
+        }
+        public double GetAirFriction()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetAirFriction on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetAirFriction on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.airDrag;
+                }
+                return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].airDrag;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.airDrag;
+                }
+                return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].airDrag;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.airDrag;
+                }
+                return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].airDrag;
+            }
+            throw new Exception("umm what??? how is this posable??? this bopl bodys colider isnt any physics object??? this makes 0 sence...");
+        }
+        public void SetAirFriction(double value)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetAirFriction on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetAirFriction on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.gravityScale = (Fix)value;
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.airDrag = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].airDrag = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.airDrag = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].airDrag = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.airDrag = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].airDrag = (Fix)value;
+                return;
+            }
+        }
+        public double GetRotationalDrag()
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called GetRotationalDrag on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called GetRotationalDrag on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.rotationalDrag;
+                }
+                return (double)DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].rotationalDrag;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.rotationalDrag;
+                }
+                return (double)DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].rotationalDrag;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.rotationalDrag;
+                }
+                return (double)DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].rotationalDrag;
+            }
+            throw new Exception("umm what??? how is this posable??? this bopl bodys colider isnt any physics object??? this makes 0 sence...");
+        }
+        public void SetRotationalDrag(double value)
+        {
+            if (!target.HasBeenInitialized)
+            {
+                throw new ScriptRuntimeException("called SetRotationalDrag on a BoplBody before it was initialized. make sure it has been initialized before calling by calling HasBeenInitialized()");
+            }
+            if (IsBeingDestroyed())
+            {
+                throw new ScriptRuntimeException("called SetRotationalDrag on a BoplBody when it was being Destroyed. make sure its not being Destroyed before calling by calling IsBeingDestroyed()");
+            }
+            target.gravityScale = (Fix)value;
+            if (target.physicsCollider is DPhysicsBox)
+            {
+                if (DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.rotationalDrag = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().boxes.physicsBodies[DetPhysics.Get().boxes.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].rotationalDrag = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsCircle)
+            {
+                if (DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.rotationalDrag = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().circles.physicsBodies[DetPhysics.Get().circles.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].rotationalDrag = (Fix)value;
+                return;
+            }
+            if (target.physicsCollider is DPhysicsRoundedRect)
+            {
+                if (DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].IsComposite())
+                {
+                    DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].compositeParent.combinedBody.rotationalDrag = (Fix)value;
+                    return;
+                }
+                DetPhysics.Get().roundedRects.physicsBodies[DetPhysics.Get().roundedRects.ColliderIndex(target.physicsCollider.GetPhysicsParent().instanceId)].rotationalDrag = (Fix)value;
+                return;
+            }
+        }
         public void AddForce(double ForceX, double ForceY)
         {
             if (!target.HasBeenInitialized)
