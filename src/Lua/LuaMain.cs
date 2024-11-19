@@ -535,7 +535,7 @@ namespace MapMaker.Lua_stuff
                 }
                 if (hasFoundACollision) 
                 {
-                    collidingRects.Add(new LuaPlatformCollisionInfo();
+                    collidingRects.Add(new LuaPlatformCollisionInfo());
                 }
             }
 
@@ -617,7 +617,7 @@ namespace MapMaker.Lua_stuff
             {
                 return target.collidee;
             }
-            public StickyRoundedRectangle GetNewPlatform
+            //public StickyRoundedRectangle GetNewPlatform
 
 
 
