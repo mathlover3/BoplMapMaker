@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static Mono.Security.X509.X520;
 
 namespace MapMaker
 {
@@ -556,6 +557,16 @@ namespace MapMaker
                     {
                         gate.Logic(SimDeltaTime);
                         gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
+                        var consoleMessage = "running logic, gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded. | tick: " + Updater.SimulationTicks.ToString();
+                        UnityEngine.Debug.Log(consoleMessage);
+                    }
+                    else 
+                    {
+                        var consoleMessage =  "skipping running logic because gate.LastTimeUpdated == Updater.SimTimeSinceLevelLoaded. | Updater.SimTimeSinceLevelLoaded: "
+                        + Updater.SimTimeSinceLevelLoaded.ToString()
+                        + " | tick: " + Updater.SimulationTicks.ToString();
+                        UnityEngine.Debug.Log(consoleMessage);
+
                     }
                 }
             }

@@ -173,6 +173,7 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
+
         public static BoplBody SpawnSpike(StickyRoundedRectangle attachedGround, double percentAroundSurface, double scale, double offset)
         {
             if (attachedGround == null)
@@ -502,6 +503,133 @@ namespace MapMaker.Lua_stuff
                 DynValue.FromObject(script, result)
             );
         }
+
+        // because of the ordering of MonoUpdatable.updateSim(), DetPhys.Simulate(), and MonoUpdatable.lateUpdate(), These'll be the collisions from last frame/last tick.
+        // that's why I put it in past tense
+        public static DynValue GetAllPlatformsThatTouched(Script script, StickyRoundedRectangle platform)
+        {
+            DetPhysics DetPhys = DetPhysics.Get();
+            List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
+            IPhysicsCollider physColliderBeingSearchedFor = platform.DPhysicsShape().GetPhysicsParent().monobehaviourCollider;
+            List<LuaPlatformCollisionInfo> collidingRects = [];
+
+            // potentially reallllly slow. unfortunate.
+            for (int i = 0; i < collisionData.Count; i++)
+            {
+                var collider = collisionData[i].colliderPP.monobehaviourCollider;
+                var collidee = collisionData[i].pp.monobehaviourCollider;
+                var hasFoundACollision = true;
+                StickyRoundedRectangle newPlatform = null;
+
+                if (collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect)
+                {
+                    newPlatform = (StickyRoundedRectangle)collider;
+                }
+                else if (collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect)
+                {
+                    newPlatform = (StickyRoundedRectangle)collidee;
+                }
+                else
+                {
+                    hasFoundACollision = false;
+                }
+                if (hasFoundACollision) 
+                {
+                    collidingRects.Add(new LuaPlatformCollisionInfo());
+                }
+            }
+
+
+            return DynValue.NewTuple(
+                DynValue.NewNumber(collidingRects.Count),
+                DynValue.FromObject(script, collidingRects)
+            );
+        }
+
+        // based on the game's CollisionInformation struct. Modified for the lua API
+        public struct LuaPlatformCollisionInfo
+        {
+            public LuaPlatformCollisionInfo(int _layer, Fix _penetration, Vec2 _impactVelocity, Vec2 _collisionVecNormal, Vec2 _contactPoint, StickyRoundedRectangle _collider, StickyRoundedRectangle _collidee)
+            {
+                layer = _layer;
+                penetration = _penetration;
+                impactVelocity = _impactVelocity;
+                collisionVecNormal = _collisionVecNormal;
+                contactPoint = _contactPoint;
+                collider = _collider;
+                collidee = _collidee;
+            }
+
+            public int layer;
+            public Fix penetration;
+            public Vec2 impactVelocity;
+            public Vec2 collisionVecNormal;
+            public Vec2 contactPoint;
+            public StickyRoundedRectangle collider;
+            public StickyRoundedRectangle collidee;
+            // used by GetAllPlatformsThatTouched(platform)/probably other collision detection functions if they exist.
+            // because platform in GetAllPlatformsThatTouched(platform) could have been the collider or collidee,
+            // it's not immediately clear which platform is the new platform which the user is probably looking for.
+            // this saves some repeated template code in every call to GetAllPlatformsThatTouched() in the lua api.
+            public StickyRoundedRectangle newPlatform;
+        }
+
+
+        public class LuaCollisionInfoPlatformsProxy
+        {
+            LuaPlatformCollisionInfo target;
+
+
+            [MoonSharpHidden]
+            public LuaCollisionInfoPlatformsProxy(LuaPlatformCollisionInfo LuaCollision)
+            {
+                target = LuaCollision;
+            }
+
+            public int GetLayerInt()
+            {
+                return target.layer;
+            }
+
+            public Fix GetPenetration()
+            {
+                return target.penetration;
+            }
+            public Vec2 GetImpactVelocity()
+            {
+                return target.impactVelocity;
+            }
+            public Vec2 GetCollisionVecNormal()
+            {
+                return target.collisionVecNormal;
+            }
+            public Vec2 GetContactPoint()
+            {
+                return target.contactPoint;
+            }
+            // these two are kinda weird for GetAllPlatformsThatTouched(platform) because you have to pass in the platform that you are looking for
+
+            public StickyRoundedRectangle GetColliderPlatform()
+            {
+                return target.collider;
+            }
+            public StickyRoundedRectangle GetCollideePlatform()
+            {
+                return target.collidee;
+            }
+            //public StickyRoundedRectangle GetNewPlatform
+
+
+
+            public int layer;
+            public Fix penetration;
+            public Vec2 impactVelocity;
+            public Vec2 normalVector;
+            public Vec2 contactPoint;
+            public PhysicsParent collider;
+            public PhysicsParent collidee;
+        }
+
         public static double GetDeltaTime()
         {
             return (double)deltaTime;

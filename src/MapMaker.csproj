@@ -7,7 +7,9 @@
     <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <OutputPath>..\bin\Debug</OutputPath> 
+    <OutputPath>..\bin\Debug</OutputPath>
+    <Configurations>Debug;Release;DBG_DoNotRunBuildScript</Configurations>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent> 
   </PropertyGroup>
 
   <ItemGroup>
@@ -314,7 +316,7 @@
     <Folder Include="Interfaces\" />
   </ItemGroup>
   
-<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' != 'DBG_DoNotRunBuildScript'">
   <PropertyGroup>
     <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
   </PropertyGroup>
