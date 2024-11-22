@@ -18,6 +18,8 @@ using MoonSharp.Interpreter;
 using UnityEngine.Events;
 using System.Collections;
 using static MapMaker.PipeStuff;
+using TMPro;
+using MapMaker.utils;
 namespace MapMaker
 {
     [BepInDependency("com.entwinedteam.entwined")]
@@ -396,6 +398,7 @@ namespace MapMaker
                 {
                     Dictionary<string, object> Meta = MiniJSON.Json.Deserialize(MetaDataJsons[i]) as Dictionary<string, object>;
                     Debug.Log(MetaDataJsons[i]);
+                    var mapName = Meta["MapName"] as string;
                     if (Convert.ToInt32(Meta["MapUUID"]) == CurrentMapUUID || IsReplay() || IsInTestMode)
                     {
                         Dictionary<string, object> Dict = MiniJSON.Json.Deserialize(mapJson) as Dictionary<string, object>;
@@ -440,6 +443,10 @@ namespace MapMaker
                         {
                             MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
                         }
+
+                        // display map title
+                        TextMeshPro mapTitle = LuaSpawner.SpawnText(new Vec2(Fix.Zero, (Fix)36), Fix.Zero, (Fix)(24/18), mapName, Color.white);
+                        mapTitle.gameObject.AddComponent<FadeOutText>();
                     }
                 }
                 catch (Exception ex)
