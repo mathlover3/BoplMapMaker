@@ -168,7 +168,8 @@ namespace MapMaker.Lua_stuff
             Explosion,
             BlackHole,
             Mine,
-            Missile
+            Missile,
+            Text
         }
         public static BoplBody SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
         {
@@ -281,6 +282,34 @@ namespace MapMaker.Lua_stuff
             return blackHole2;
         }
         //modifyed chatgpt code
+        public static void SpawnText(Vec2 pos, Fix rotation, Fix scale, string text, Color color)
+        {
+            // spawn text element with tmp ugui world space at pos with rotation and scale and text and color
+
+            // TODO: GO OVER CHATGPT CODE
+
+            // Create a new TextMeshPro UGUI object
+            var textObj = new GameObject("WorldText");
+            var textComponent = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+
+            // Set the text properties
+            textComponent.text = text;
+            textComponent.color = color;
+            textComponent.alignment = TMPro.TextAlignmentOptions.Center;
+
+            // Set it to World Space Canvas
+            var canvas = textObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+
+            // Adjust transform
+            var rectTransform = textObj.GetComponent<RectTransform>();
+            rectTransform.position = new Vector3((float)pos.x, (float)pos.y, 0);
+            rectTransform.rotation = Quaternion.Euler(0, 0, (float)rotation);
+            rectTransform.localScale = Vector3.one * (float)scale;
+
+            // Set the size of the text box
+            rectTransform.sizeDelta = new Vector2(200, 50); // Adjust as needed for your text size
+        }
         public static Fix CalculateAngle(Vec2 vec2)
         {
             // Vector (0, 1)
