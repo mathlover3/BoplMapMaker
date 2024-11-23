@@ -546,6 +546,7 @@ namespace MapMaker.Lua_stuff
 
                     collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
                         currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, newPlatform));
+                    UnityEngine.Debug.LogWarning("GetAllPlatformsCollisionsThatTouched() collidingRect object == null: " + (collidingRects[collidingRects.Count-1] == null).ToString());
                 }
             }
 
@@ -587,35 +588,40 @@ namespace MapMaker.Lua_stuff
 
         public class LuaCollisionInfoPlatformsProxy
         {
-            LuaPlatformCollisionInfo target;
+            public LuaPlatformCollisionInfo target;
 
 
             [MoonSharpHidden]
-            public LuaCollisionInfoPlatformsProxy(LuaPlatformCollisionInfo LuaCollision)
+            public LuaCollisionInfoPlatformsProxy(LuaPlatformCollisionInfo p)
             {
-                target = LuaCollision;
+                target = p;
+                UnityEngine.Debug.LogWarning("CALLED CONSTRUCTOR OF LuaCollisionInfoPlatformsProxy");
+            }
+            public string GetClassType()
+            {
+                return "PlatformCollisionInfo";
             }
 
-            public int GetLayerInt()
+            public double GetLayerInt()
             {
-                return target.layer;
+                return (double)target.layer;
             }
 
-            public Double GetPenetration()
+            public double GetPenetration()
             {
-                return target.penetration;
+                return (double)target.penetration;
             }
-            public Vec2 GetImpactVelocity()
+            public DynValue GetImpactVelocity()
             {
-                return target.impactVelocity;
+                return Vec2ToTuple(target.impactVelocity);
             }
-            public Vec2 GetCollisionVecNormal()
+            public DynValue GetCollisionVecNormal()
             {
-                return target.collisionVecNormal;
+                return Vec2ToTuple(target.collisionVecNormal);
             }
-            public Vec2 GetContactPoint()
+            public DynValue GetContactPoint()
             {
-                return target.contactPoint;
+                return Vec2ToTuple(target.contactPoint);
             }
             // these two are kinda weird for GetAllPlatformsThatTouched(platform) because you have to pass in the platform that you are looking for
 
@@ -1369,6 +1375,7 @@ namespace MapMaker.Lua_stuff
             if (target.GetComponent<FlammableSmoke>() != null) { type = "Smoke"; }
             if (target.GetComponent<SmokeGrenadeExplode2>() != null) { type = "Smoke Grenade"; }
             if (target.GetComponent<ShakablePlatform>() != null) { type = "Platform"; }
+            UnityEngine.Debug.LogWarning("CALLED CONSTRUCTOR OF BoplBodyProxy");
 
         }
         public string GetClassType()
