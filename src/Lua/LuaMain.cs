@@ -101,6 +101,7 @@ namespace MapMaker.Lua_stuff
             UserData.RegisterProxyType<PlatformProxy, StickyRoundedRectangle>(r => new PlatformProxy(r));
             UserData.RegisterProxyType<BoplBodyProxy, BoplBody>(r => new BoplBodyProxy(r));
             UserData.RegisterProxyType<BlackHoleProxy, BlackHole>(r => new BlackHoleProxy(r));
+            UserData.RegisterProxyType<LuaCollisionInfoPlatformsProxy, LuaPlatformCollisionInfo>(r => new LuaCollisionInfoPlatformsProxy(r));
             return script;
         }
         public void Register()
@@ -518,32 +519,41 @@ namespace MapMaker.Lua_stuff
             List<LuaPlatformCollisionInfo> collidingRects = [];
 
             UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): starting for loop");
+            UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): collisionData.Count: " + collisionData.Count.ToString());
             for (int i = 0; i < collisionData.Count; i++)
             {
                 UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): iteration count: " + i.ToString());
                 var currCollsion = collisionData[i];
                 var collider = currCollsion.colliderPP.monobehaviourCollider;
                 var collidee = currCollsion.pp.monobehaviourCollider;
+                StickyRoundedRectangle collideeRR = null;
+                StickyRoundedRectangle colliderRR = null;
                 var hasFoundACollision = true;
                 StickyRoundedRectangle newPlatform = null;
 
                 if (collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect)
                 {
-                    newPlatform = (StickyRoundedRectangle)collidee;
+                    UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect");
+                    newPlatform = ((DPhysicsRoundedRect)collidee).stickyRR;
                 }
                 else if (collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect)
                 {
-                    newPlatform = (StickyRoundedRectangle)collider;
+                    UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect");
+                    newPlatform = ((DPhysicsRoundedRect)collider).stickyRR;
                 }
                 else
                 {
                     hasFoundACollision = false;
                 }
-                if (hasFoundACollision) 
+                UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): hasFoundACollision " + hasFoundACollision.ToString());
+                if (hasFoundACollision)
                 {
+                    collideeRR = ((DPhysicsRoundedRect)collidee).stickyRR;
+                    colliderRR = ((DPhysicsRoundedRect)collidee).stickyRR;
+
+                    UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): attempting to add value to list ");
                     collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
-                        currCollsion.normal, currCollsion.contactPoint, (StickyRoundedRectangle)currCollsion.colliderPP.monobehaviourCollider,
-                        (StickyRoundedRectangle)currCollsion.pp.monobehaviourCollider, newPlatform));
+                        currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, newPlatform));
                 }
             }
 
@@ -555,7 +565,7 @@ namespace MapMaker.Lua_stuff
         }
 
         // based on the game's CollisionInformation struct. Modified for the lua API
-        public struct LuaPlatformCollisionInfo
+        public class LuaPlatformCollisionInfo
         {
             public LuaPlatformCollisionInfo(int _layer, Fix _penetration, Vec2 _impactVelocity, Vec2 _collisionVecNormal, Vec2 _contactPoint, StickyRoundedRectangle _collider, StickyRoundedRectangle _collidee, StickyRoundedRectangle _newPlatform=null)
             {
