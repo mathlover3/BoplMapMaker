@@ -515,7 +515,7 @@ namespace MapMaker.Lua_stuff
             DetPhysics DetPhys = DetPhysics.Get();
             List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
             IPhysicsCollider physColliderBeingSearchedFor = platform.DPhysicsShape().GetPhysicsParent().monobehaviourCollider;
-            List<LuaPlatformCollisionInfo> collidingRects = [];
+            List<LuaCollisionInfoPlatformsProxy> collidingRects = [];
 
             for (int i = 0; i < collisionData.Count; i++)
             {
@@ -544,8 +544,8 @@ namespace MapMaker.Lua_stuff
                     collideeRR = ((DPhysicsRoundedRect)collidee).stickyRR;
                     colliderRR = ((DPhysicsRoundedRect)collidee).stickyRR;
 
-                    collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
-                        currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, newPlatform));
+                    collidingRects.Add((new LuaCollisionInfoPlatformsProxy(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
+                        currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, newPlatform))));
                     UnityEngine.Debug.LogWarning("GetAllPlatformsCollisionsThatTouched() collidingRect object == null: " + (collidingRects[collidingRects.Count-1] == null).ToString());
                 }
             }
