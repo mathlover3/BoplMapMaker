@@ -9,6 +9,7 @@ using static UnityEngine.UIElements.UIRAtlasAllocator;
 using UnityEngine.UIElements;
 using UnityEngine;
 using System.Net.Configuration;
+using TMPro;
 
 namespace MapMaker.Lua_stuff
 {
@@ -168,7 +169,8 @@ namespace MapMaker.Lua_stuff
             Explosion,
             BlackHole,
             Mine,
-            Missile
+            Missile,
+            Text
         }
         public static BoplBody SpawnArrow(Vec2 pos, Fix scale, Vec2 StartVel, Color color)
         {
@@ -266,21 +268,30 @@ namespace MapMaker.Lua_stuff
 
             return boplBody;
         }
-/*
-        public static BlackHole SpawnBlackHole(Vec2 pos, Fix scale)
-        {
-            BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
-            blackHole2.Grow(Fix.One/(scale-blackHole2.growth), Fix.Zero);
-            return blackHole2;
-        }
-        */
+
         public static BlackHole SpawnBlackHole(Vec2 pos, Fix size)
         {
             BlackHole blackHole2 = FixTransform.InstantiateFixed<BlackHole>(blackHole, pos);
             blackHole2.GrowIncrementally(size - Fix.One);
             return blackHole2;
         }
-        //modifyed chatgpt code
+
+        public static TextMeshPro SpawnText(Vec2 pos, Fix rotation, Fix scale, string contents, Color color)
+        {
+            TextMeshPro text = new GameObject(contents, typeof(RectTransform), typeof(MeshRenderer), typeof(CanvasRenderer), typeof(MeshFilter), typeof(TextMeshPro), typeof(TMP_SpriteAnimator)).GetComponent<TextMeshPro>();
+            text.text = contents;
+            text.color = color;
+            text.fontSize = 18;
+            text.alignment = TextAlignmentOptions.Center;
+
+            text.rectTransform.position = new Vector3((float)pos.x, (float)pos.y, 0);
+            text.rectTransform.rotation = Quaternion.Euler(0, 0, (float)rotation);
+            text.rectTransform.localScale = Vector3.one * (float)scale;
+            Vector2 preferredSize = text.GetPreferredValues();
+            text.rectTransform.sizeDelta = preferredSize;
+            return text;
+        }
+
         public static Fix CalculateAngle(Vec2 vec2)
         {
             // Vector (0, 1)
