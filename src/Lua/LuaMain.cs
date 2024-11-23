@@ -512,17 +512,13 @@ namespace MapMaker.Lua_stuff
         // that's why I put it in past tense
         public static DynValue GetAllPlatformsCollisionsThatTouched(Script script, StickyRoundedRectangle platform)
         {
-            UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched() called. | platform: " + platform.ToString() + " | script: " + script.ToString());
             DetPhysics DetPhys = DetPhysics.Get();
             List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
             IPhysicsCollider physColliderBeingSearchedFor = platform.DPhysicsShape().GetPhysicsParent().monobehaviourCollider;
             List<LuaPlatformCollisionInfo> collidingRects = [];
 
-            UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): starting for loop");
-            UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): collisionData.Count: " + collisionData.Count.ToString());
             for (int i = 0; i < collisionData.Count; i++)
             {
-                UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): iteration count: " + i.ToString());
                 var currCollsion = collisionData[i];
                 var collider = currCollsion.colliderPP.monobehaviourCollider;
                 var collidee = currCollsion.pp.monobehaviourCollider;
@@ -533,31 +529,26 @@ namespace MapMaker.Lua_stuff
 
                 if (collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect)
                 {
-                    UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect");
                     newPlatform = ((DPhysicsRoundedRect)collidee).stickyRR;
                 }
                 else if (collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect)
                 {
-                    UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect");
                     newPlatform = ((DPhysicsRoundedRect)collider).stickyRR;
                 }
                 else
                 {
                     hasFoundACollision = false;
                 }
-                UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): hasFoundACollision " + hasFoundACollision.ToString());
                 if (hasFoundACollision)
                 {
                     collideeRR = ((DPhysicsRoundedRect)collidee).stickyRR;
                     colliderRR = ((DPhysicsRoundedRect)collidee).stickyRR;
 
-                    UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): attempting to add value to list ");
                     collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
                         currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, newPlatform));
                 }
             }
 
-            UnityEngine.Debug.Log("GetAllPlatformsCollisionsThatTouched(): returning value");
             return DynValue.NewTuple(
                 DynValue.NewNumber(collidingRects.Count),
                 DynValue.FromObject(script, collidingRects)
@@ -567,15 +558,8 @@ namespace MapMaker.Lua_stuff
         // based on the game's CollisionInformation struct. Modified for the lua API
         public class LuaPlatformCollisionInfo
         {
-            public LuaPlatformCollisionInfo(int _layer, Fix _penetration, Vec2 _impactVelocity, Vec2 _collisionVecNormal, Vec2 _contactPoint, StickyRoundedRectangle _collider, StickyRoundedRectangle _collidee, StickyRoundedRectangle _newPlatform=null)
+            public LuaPlatformCollisionInfo(int _layer, Fix _penetration, Vec2 _impactVelocity, Vec2 _collisionVecNormal, Vec2 _contactPoint, StickyRoundedRectangle _collider, StickyRoundedRectangle _collidee, StickyRoundedRectangle _newPlatform)
             {
-                // fallback!
-                if (_newPlatform == null)
-                {
-                    newPlatform = collider;
-                    UnityEngine.Debug.LogWarning("LuaPlatformCollisionInfo() construct function: _newPlatform is null, falling back by setting new platform to collider. " +
-                        "This is probably not a bug in your lua and is instead probably a bug in map loader itself.");
-                }
                 layer = _layer;
                 penetration = (double)_penetration;
                 impactVelocity = _impactVelocity;
@@ -650,14 +634,14 @@ namespace MapMaker.Lua_stuff
 
 
 
-            public int layer;
-            public Fix penetration;
-            public Vec2 impactVelocity;
-            public Vec2 normalVector;
-            public Vec2 contactPoint;
-            public PhysicsParent collider;
-            public PhysicsParent collidee;
-            public StickyRoundedRectangle newPlatform;
+            //public int layer;
+            //public Fix penetration;
+            //public Vec2 impactVelocity;
+            //public Vec2 normalVector;
+            //public Vec2 contactPoint;
+            //public PhysicsParent collider;
+            //public PhysicsParent collidee;
+            //public StickyRoundedRectangle newPlatform;
         }
 
         public static double GetDeltaTime()
