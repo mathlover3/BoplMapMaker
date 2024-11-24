@@ -515,7 +515,7 @@ namespace MapMaker.Lua_stuff
             DetPhysics DetPhys = DetPhysics.Get();
             List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
             IPhysicsCollider physColliderBeingSearchedFor = platform.DPhysicsShape().GetPhysicsParent().monobehaviourCollider;
-            List<LuaCollisionInfoPlatformsProxy> collidingRects = [];
+            List<LuaPlatformCollisionInfo> collidingRects = [];
 
             for (int i = 0; i < collisionData.Count; i++)
             {
@@ -544,9 +544,8 @@ namespace MapMaker.Lua_stuff
                     collideeRR = ((DPhysicsRoundedRect)collidee).stickyRR;
                     colliderRR = ((DPhysicsRoundedRect)collidee).stickyRR;
 
-                    collidingRects.Add((new LuaCollisionInfoPlatformsProxy(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
-                        currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, newPlatform))));
-                    UnityEngine.Debug.LogWarning("GetAllPlatformsCollisionsThatTouched() collidingRect object == null: " + (collidingRects[collidingRects.Count-1] == null).ToString());
+                    collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
+                        currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, newPlatform));                
                 }
             }
 
@@ -595,7 +594,6 @@ namespace MapMaker.Lua_stuff
             public LuaCollisionInfoPlatformsProxy(LuaPlatformCollisionInfo p)
             {
                 target = p;
-                UnityEngine.Debug.LogWarning("CALLED CONSTRUCTOR OF LuaCollisionInfoPlatformsProxy");
             }
             public string GetClassType()
             {
@@ -1375,7 +1373,6 @@ namespace MapMaker.Lua_stuff
             if (target.GetComponent<FlammableSmoke>() != null) { type = "Smoke"; }
             if (target.GetComponent<SmokeGrenadeExplode2>() != null) { type = "Smoke Grenade"; }
             if (target.GetComponent<ShakablePlatform>() != null) { type = "Platform"; }
-            UnityEngine.Debug.LogWarning("CALLED CONSTRUCTOR OF BoplBodyProxy");
 
         }
         public string GetClassType()
