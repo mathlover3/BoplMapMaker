@@ -508,6 +508,30 @@ namespace MapMaker.Lua_stuff
             );
         }
 
+        // these are from the last frame
+        public static DynValue GetAllPlatformCollisions(Script script)
+        {
+            DetPhysics DetPhys = DetPhysics.Get();
+            List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
+            List<LuaPlatformCollisionInfo> collidingRects = [];
+            for (int i = 0; i < collisionData.Count; i++)
+            {
+                var currCollsion = collisionData[i];
+                var collider = currCollsion.colliderPP.monobehaviourCollider;
+                var collidee = currCollsion.pp.monobehaviourCollider;
+                var collideeRR = ((DPhysicsRoundedRect)collidee).stickyRR;
+                var colliderRR = ((DPhysicsRoundedRect)collidee).stickyRR;
+
+                // just set new platform to collider because it's not really applicable
+                collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
+                    currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, colliderRR));
+            }
+            return DynValue.NewTuple(
+                DynValue.NewNumber(collidingRects.Count),
+                DynValue.FromObject(script, collidingRects)
+            );
+        }
+
         // because of the ordering of MonoUpdatable.updateSim(), DetPhys.Simulate(), and MonoUpdatable.lateUpdate(), These'll be the collisions from last frame/last tick.
         // that's why I put it in past tense
         public static DynValue GetAllPlatformsCollisionsThatTouched(Script script, StickyRoundedRectangle platform)
@@ -600,7 +624,7 @@ namespace MapMaker.Lua_stuff
                 return "PlatformCollisionInfo";
             }
 
-            public double GetLayerInt()
+            public double GetLayerNumber()
             {
                 return (double)target.layer;
             }
