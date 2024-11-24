@@ -439,13 +439,19 @@ namespace MapMaker
                         {
                             MoreJsonParceing.SpawnSpawners((List<object>)Dict["Spawners"]);
                         }
+                        bool lua = false;
                         if (Dict.ContainsKey("LuaGates"))
                         {
+                            lua = true;
                             MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
+                        }
+                        if (Dict.ContainsKey("Texts"))
+                        {
+                            MoreJsonParceing.SpawnTexts((List<object>)Dict["Texts"], i);
                         }
 
                         // display map title
-                        TextMeshPro mapTitle = LuaSpawner.SpawnText(new Vec2(Fix.Zero, (Fix)36), Fix.Zero, (Fix)(24/18), mapName, Color.white);
+                        TextMeshPro mapTitle = LuaSpawner.SpawnText(new Vec2(Fix.Zero, (Fix)36), Fix.Zero, (Fix)(24/18), mapName, lua ? Color.yellow : Color.white);
                         mapTitle.gameObject.AddComponent<FadeOutText>();
                     }
                 }

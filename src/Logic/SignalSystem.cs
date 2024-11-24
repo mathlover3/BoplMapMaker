@@ -559,15 +559,14 @@ namespace MapMaker
                         gate.LastTimeUpdated = Updater.SimTimeSinceLevelLoaded;
                         //these logs magicly fixes the desyncs???? idk but it seems like it.
                         var consoleMessage = "running logic, gate.LastTimeUpdated != Updater.SimTimeSinceLevelLoaded. | tick: " + Updater.SimulationTicks.ToString();
-                        UnityEngine.Debug.Log(consoleMessage);
+                        // UnityEngine.Debug.Log(consoleMessage); ### IS THAT FOR DEBUG? ITS KINDA ANNOYING
                     }
                     else 
                     {
                         var consoleMessage =  "skipping running logic because gate.LastTimeUpdated == Updater.SimTimeSinceLevelLoaded. | Updater.SimTimeSinceLevelLoaded: "
                         + Updater.SimTimeSinceLevelLoaded.ToString()
                         + " | tick: " + Updater.SimulationTicks.ToString();
-                        UnityEngine.Debug.Log(consoleMessage);
-
+                        // UnityEngine.Debug.Log(consoleMessage); ### IS THAT FOR DEBUG? ITS KINDA ANNOYING
                     }
                 }
             }
