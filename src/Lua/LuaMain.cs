@@ -95,6 +95,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["GetFileFromMapFile"] = (object)GetFileFromMapFile;
             script.Globals["PlaySound"] = (object)PlaySound;
             script.Globals["GetAllPlatformsCollisionsThatTouched"] = (object)GetAllPlatformsCollisionsThatTouched;
+            script.Globals["GetAllPlatformCollisionsThatHappened"] = (object)GetAllPlatformCollisionsThatHappened;
             script.Options.DebugPrint = s => { Console.WriteLine(s); };
             // Register just MyClass, explicitely.
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
@@ -509,7 +510,7 @@ namespace MapMaker.Lua_stuff
         }
 
         // these are from the last frame
-        public static DynValue GetAllPlatformCollisions(Script script)
+        public static DynValue GetAllPlatformCollisionsThatHappened(Script script)
         {
             DetPhysics DetPhys = DetPhysics.Get();
             List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
@@ -519,8 +520,14 @@ namespace MapMaker.Lua_stuff
                 var currCollsion = collisionData[i];
                 var collider = currCollsion.colliderPP.monobehaviourCollider;
                 var collidee = currCollsion.pp.monobehaviourCollider;
+
+                if (collider.shape != Shape.RoundedRect || collidee.shape != Shape.RoundedRect)
+                {
+                    continue;
+                }
+
                 var collideeRR = ((DPhysicsRoundedRect)collidee).stickyRR;
-                var colliderRR = ((DPhysicsRoundedRect)collidee).stickyRR;
+                var colliderRR = ((DPhysicsRoundedRect)collider).stickyRR;
 
                 // just set new platform to collider because it's not really applicable
                 collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
