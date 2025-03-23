@@ -20,6 +20,7 @@ using System.Collections;
 using static MapMaker.PipeStuff;
 using TMPro;
 using MapMaker.utils;
+using System.Data;
 namespace MapMaker
 {
     [BepInDependency("com.entwinedteam.entwined")]
@@ -27,7 +28,7 @@ namespace MapMaker
     public class Plugin : BaseUnityPlugin
     {   
         // Developer mode! PLEASE TURN OFF BEFORE BUILDING!
-        public static bool DeveloperMode = false;
+        public static bool DeveloperMode = true;
 
         public static Plugin instance;
         public static Harmony harmony;
@@ -128,8 +129,13 @@ namespace MapMaker
             NoMapFoundWithId,
             MultipleMapsFoundWithId
         }
+
+        public static GameObject pluginUpdater; // starting with 2.4.3, mods either need to use a workaround like this or HideManagerGameObject needs to be enabled in bepinex config,
+                                                // which is off by default at time of writing.
         private void Awake()
-        {   
+        {
+            a
+
             // Define the instance
             instance = this;
 
@@ -190,6 +196,8 @@ namespace MapMaker
 
         public void Start()
         {
+            Logger.LogWarning("######## Start() called");
+            int zero = 0;
             ZipArchive[] zipArchives2;
             // If we are loading a replay the zip archive is already set
             if (!IsReplay())
@@ -1697,7 +1705,17 @@ first = true");*/
             return sinh / cosh;
         }
     }
+
+    // you know it's probably easier for me to just make a separate mod that edits the config file and then make map maker require it 
+    public class PluginUpdater : MonoBehaviour
+    {
+        public void Start() { }
+
+        public void Update() { }
+    }
 }
+
+
 
 // ITS OVER!
 // HOLY SH*T, THAT TOOK A LONG TIME
