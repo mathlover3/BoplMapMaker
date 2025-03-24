@@ -134,7 +134,6 @@ namespace MapMaker
                                                 // which is off by default at time of writing.
         private void Awake()
         {
-            a
 
             // Define the instance
             instance = this;
@@ -1704,14 +1703,6 @@ first = true");*/
             var sinh = (Fix.Pow((Fix)2.718281828459045, (Fix)d) - Fix.Pow((Fix)2.718281828459045, (Fix)(-d))) / (Fix)2;
             return sinh / cosh;
         }
-    }
-
-    // you know it's probably easier for me to just make a separate mod that edits the config file and then make map maker require it 
-    public class PluginUpdater : MonoBehaviour
-    {
-        public void Start() { }
-
-        public void Update() { }
     }
 }
 
