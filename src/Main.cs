@@ -28,7 +28,7 @@ namespace MapMaker
     public class Plugin : BaseUnityPlugin
     {   
         // Developer mode! PLEASE TURN OFF BEFORE BUILDING!
-        public static bool DeveloperMode = true;
+        public static bool DeveloperMode = false;
 
         public static Plugin instance;
         public static Harmony harmony;
