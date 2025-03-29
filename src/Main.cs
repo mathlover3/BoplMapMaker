@@ -196,7 +196,6 @@ namespace MapMaker
         public void Start()
         {
             Logger.LogWarning("######## Start() called");
-            int zero = 0;
             ZipArchive[] zipArchives2;
             // If we are loading a replay the zip archive is already set
             if (!IsReplay())
