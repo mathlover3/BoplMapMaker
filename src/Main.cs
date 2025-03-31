@@ -20,6 +20,7 @@ using System.Collections;
 using static MapMaker.PipeStuff;
 using TMPro;
 using MapMaker.utils;
+using System.Data;
 namespace MapMaker
 {
     [BepInDependency("com.entwinedteam.entwined")]
@@ -128,8 +129,12 @@ namespace MapMaker
             NoMapFoundWithId,
             MultipleMapsFoundWithId
         }
+
+        public static GameObject pluginUpdater; // starting with 2.4.3, mods either need to use a workaround like this or HideManagerGameObject needs to be enabled in bepinex config,
+                                                // which is off by default at time of writing.
         private void Awake()
-        {   
+        {
+
             // Define the instance
             instance = this;
 
@@ -190,6 +195,7 @@ namespace MapMaker
 
         public void Start()
         {
+            Logger.LogWarning("######## Start() called");
             ZipArchive[] zipArchives2;
             // If we are loading a replay the zip archive is already set
             if (!IsReplay())
@@ -1698,6 +1704,8 @@ first = true");*/
         }
     }
 }
+
+
 
 // ITS OVER!
 // HOLY SH*T, THAT TOOK A LONG TIME
