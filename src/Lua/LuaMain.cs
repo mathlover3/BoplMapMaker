@@ -1019,6 +1019,8 @@ namespace MapMaker.Lua_stuff
                     return Ability.Beam;
                 case "Duplicator":
                     return Ability.Duplicator;
+                case "Magnet":
+                    return Ability.Magnet;
                 default:
                     throw new ScriptRuntimeException($"{str} is not a valid ability");
             }
@@ -1086,6 +1088,8 @@ namespace MapMaker.Lua_stuff
                     return "Beam";
                 case Ability.Duplicator:
                     return "Duplicator";
+                case Ability.Magnet:
+                    return "Magnet";
                 default:
                     return "Unknown/Modded/None";
             }
@@ -1121,7 +1125,8 @@ namespace MapMaker.Lua_stuff
             Drill = 26,
             Grapple = 27,
             Beam = 28,
-            Duplicator = 29
+            Duplicator = 29,
+            Magnet = 30
         }
     }
     public class PlatformProxy
