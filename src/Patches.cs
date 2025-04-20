@@ -16,11 +16,35 @@ using MonoMod.Cil;
 using System.Linq;
 using System.IO;
 using System.ComponentModel;
+using TMPro;
+using System.Drawing;
+using System.Runtime.Remoting.Contexts;
+//using UnityEngine.UIElements;
 
 namespace MapMaker
 {
     public class Patches
     {
+        [HarmonyPatch(typeof(MainMenu))]
+        public class MainMenuPatches
+        {
+            // for some reason this gets called like 4 times just from starting up the game.
+            [HarmonyPatch("Start")]
+            [HarmonyPostfix]
+            private static void mapMaker_noMaps_warnPostfix()
+            {
+                if (Plugin.MyZipArchives.Count() == 0)
+                {
+                    if (Plugin.maplessText != null)
+                    {
+                        GameObject.Destroy(Plugin.maplessText.gameObject);
+                    }
+                    Plugin.maplessText = LuaSpawner.SpawnText(new Vec2(Fix.Zero, (Fix)4.6), Fix.Zero, (Fix)0.15, "No maps loaded! Local games do not work in map maker " +
+                        "without maps.\nCheck <game or mod manager profile directory>/BepInEx/Plugins/Maps/.", UnityEngine.Color.red);
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(MachoThrow2))]
         public class MachoThrow2Patches
         {
@@ -934,9 +958,10 @@ namespace MapMaker
                 {
                     GameSessionHandler.LeaveGame(false, false);
                 }
-                
+
             }
         }
+
         [HarmonyPatch(typeof(CharacterSelectHandler_online))]
         public class CharacterSelectHandler_onlinePatches
         {
