@@ -130,8 +130,10 @@ namespace MapMaker
             MultipleMapsFoundWithId
         }
 
-        public static GameObject pluginUpdater; // starting with 2.4.3, mods either need to use a workaround like this or HideManagerGameObject needs to be enabled in bepinex config,
-                                                // which is off by default at time of writing.
+        //public static bool noMapsCheckHasSpawnedText = false;
+
+        public static TextMeshPro maplessText;
+
         private void Awake()
         {
 
@@ -205,11 +207,6 @@ namespace MapMaker
                 if (zipArchives2.Length == 0)
                 {
                     logger.LogError("NO MAPS LOADED! map maker won\'t function correctly unless you add maps.");
-                    // I though I was gonna have to look at other mods' code and "adapt" some of it but then I remembered we already have text spawning in lua.
-                    // this is a lot more convenient -jo
-                    TextMeshPro maplessWarning = LuaSpawner.SpawnText(new Vec2(Fix.Zero, (Fix)4.6), Fix.Zero, (Fix)0.15,  "No maps loaded! Map maker doesn't function properly without maps.\n" +
-                        "Check <game or mod manager profile directory>/BepInEx/Plugins/Maps/.", Color.red);
-                    DontDestroyOnLoad(maplessWarning);
                 }
             }
             else
