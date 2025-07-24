@@ -35,7 +35,6 @@ namespace MapMaker.Lua_stuff
             UnityEngine.Debug.Log("Getting Game Objects");
             var numObjectsFound = 0;
             var numObjectsToFind = 8;
-            List<String> objectNamesRemaining = ["Bow", "Mine", "BlackHole2", "AbilityPickup_Dynamic", "Smoke", "Spark", "SpikeAttack"];
             // I hate how messy this is but it can't easily be flattened into a loop because they all do slightly different things
             foreach (GameObject obj in allObjects)
             {
