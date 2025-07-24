@@ -31,120 +31,115 @@ namespace MapMaker.Lua_stuff
         public void Awake()
         {
             UnityEngine.Debug.Log("LuaSpawner Awake");
-            //only do all of this if it hasnt already been done.
-            if (BowObject == null || arrow == null || grenade == null || AbilityPickup == null || blackHole == null)
+            GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
+            UnityEngine.Debug.Log("Getting Game Objects");
+            var numObjectsFound = 0;
+            var numObjectsToFind = 8;
+            // I hate how messy this is but it can't easily be flattened into a loop because they all do slightly different things
+            foreach (GameObject obj in allObjects)
             {
-
-
-                GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
-                UnityEngine.Debug.Log("Getting Game Objects");
-                var objectsFound = 0;
-                var ObjectsToFind = 8;
-                foreach (GameObject obj in allObjects)
+                if (obj.name == "Bow" && BowObject == null)
                 {
-                    if (obj.name == "Bow")
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    BowObject = obj;
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    numObjectsFound++;
+                    if (numObjectsFound == numObjectsToFind)
                     {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        BowObject = obj;
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        objectsFound++;
-                        if (objectsFound == ObjectsToFind)
-                        {
-                            break;
-                        }
-                    }
-                    if (obj.name == "Mine")
-                    {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        mine = obj.GetComponent<BoplBody>();
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        objectsFound++;
-                        if (objectsFound == ObjectsToFind)
-                        {
-                            break;
-                        }
-                    }
-                    if (obj.name == "BlackHole2")
-                    {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        blackHole = obj.GetComponent<BlackHole>();
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        objectsFound++;
-                        if (objectsFound == ObjectsToFind)
-                        {
-                            break;
-                        }
-                    }
-                    if (obj.name == "AbilityPickup_Dynamic")
-                    {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        AbilityPickup = obj.GetComponent<DynamicAbilityPickup>();
-                        objectsFound++;
-                        if (objectsFound == ObjectsToFind)
-                        {
-                            break;
-                        }
-                    }
-                    if (obj.name == "Smoke")
-                    {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        SmokeGrenade = obj.GetComponent<ThrowItem2>().ItemPrefab;
-                        objectsFound++;
-                        if (objectsFound == ObjectsToFind)
-                        {
-                            break;
-                        }
-                    }
-                    if (obj.name == "Spark")
-                    {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        MissleExplosion = obj.GetComponent<Missile>().onHitExplosionPrefab;
-                        missile = obj.GetComponent<BoplBody>();
-                        objectsFound+=2;
-                        if (objectsFound == ObjectsToFind)
-                        {
-                            break;
-                        }
-                    }
-                    if (obj.name == "SpikeAttack")
-                    {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        spikePrefab = obj.GetComponent<SpikeAttack>();
-                        objectsFound++;
-                        if (objectsFound == ObjectsToFind)
-                        {
-                            break;
-                        }
+                        break;
                     }
                 }
-                UnityEngine.Debug.Log("getting Grenade");
-                ThrowItem2[] allThrowItem2 = Resources.FindObjectsOfTypeAll(typeof(ThrowItem2)) as ThrowItem2[];
-                foreach (ThrowItem2 obj in allThrowItem2)
+                if (obj.name == "Mine" && mine == null)
                 {
-                    if (obj.name == "Grenade")
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    mine = obj.GetComponent<BoplBody>();
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    numObjectsFound++;
+                    if (numObjectsFound == numObjectsToFind)
                     {
-                        // Found the object with the desired name
-                        // You can now store its reference or perform any other actions
-                        UnityEngine.Debug.Log("Found the object: " + obj.name);
-                        grenade = obj.ItemPrefab;
+                        break;
                     }
                 }
-                //get the BowTransform
-                var BowTransform = BowObject.GetComponent(typeof(BowTransform)) as BowTransform;
-                //get the Arrow prefab from the BowTransform
-                arrow = (BoplBody)AccessTools.Field(typeof(BowTransform), "Arrow").GetValue(BowTransform);
+                if (obj.name == "BlackHole2" && blackHole == null)
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    blackHole = obj.GetComponent<BlackHole>();
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    numObjectsFound++;
+                    if (numObjectsFound == numObjectsToFind)
+                    {
+                        break;
+                    }
+                }
+                if (obj.name == "AbilityPickup_Dynamic" && AbilityPickup == null)
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    AbilityPickup = obj.GetComponent<DynamicAbilityPickup>();
+                    numObjectsFound++;
+                    if (numObjectsFound == numObjectsToFind)
+                    {
+                        break;
+                    }
+                }
+                if (obj.name == "Smoke" && SmokeGrenade == null)
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    SmokeGrenade = obj.GetComponent<ThrowItem2>().ItemPrefab;
+                    numObjectsFound++;
+                    if (numObjectsFound == numObjectsToFind)
+                    {
+                        break;
+                    }
+                }
+                if (obj.name == "Spark" && (MissleExplosion == null || missile == null))
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    MissleExplosion = obj.GetComponent<Missile>().onHitExplosionPrefab;
+                    missile = obj.GetComponent<BoplBody>();
+                    numObjectsFound+=2;
+                    if (numObjectsFound == numObjectsToFind)
+                    {
+                        break;
+                    }
+                }
+                if (obj.name == "SpikeAttack" && spikePrefab == null)
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    spikePrefab = obj.GetComponent<SpikeAttack>();
+                    numObjectsFound++;
+                    if (numObjectsFound == numObjectsToFind)
+                    {
+                        break;
+                    }
+                }
             }
+            UnityEngine.Debug.Log("getting Grenade");
+            ThrowItem2[] allThrowItem2 = Resources.FindObjectsOfTypeAll(typeof(ThrowItem2)) as ThrowItem2[];
+            foreach (ThrowItem2 obj in allThrowItem2)
+            {
+                if (obj.name == "Grenade")
+                {
+                    // Found the object with the desired name
+                    // You can now store its reference or perform any other actions
+                    UnityEngine.Debug.Log("Found the object: " + obj.name);
+                    grenade = obj.ItemPrefab;
+                }
+            }
+            //get the BowTransform
+            var BowTransform = BowObject.GetComponent(typeof(BowTransform)) as BowTransform;
+            //get the Arrow prefab from the BowTransform
+            arrow = (BoplBody)AccessTools.Field(typeof(BowTransform), "Arrow").GetValue(BowTransform);
             if (WhiteSlimeMat == null)
             {
                 Material[] allMaterials = Resources.FindObjectsOfTypeAll(typeof(Material)) as Material[];
@@ -158,6 +153,7 @@ namespace MapMaker.Lua_stuff
                 }
             }
         }
+
         public enum ObjectSpawnType
         {
             None,
