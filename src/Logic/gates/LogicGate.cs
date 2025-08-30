@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BoplFixedMath;
 using UnityEngine;
-using static UnityEngine.UIElements.UIRAtlasManager;
+//using static UnityEngine.UIElements.UIRAtlasManager;
 
 namespace MapMaker
 {

@@ -94,12 +94,15 @@ namespace MapMaker.Lua_stuff
             script.Globals["SetOutputWithId"] = (object)SetOutputWithId;
             script.Globals["GetFileFromMapFile"] = (object)GetFileFromMapFile;
             script.Globals["PlaySound"] = (object)PlaySound;
+            script.Globals["GetAllPlatformsCollisionsThatTouched"] = (object)GetAllPlatformsCollisionsThatTouched;
+            script.Globals["GetAllPlatformCollisionsThatHappened"] = (object)GetAllPlatformCollisionsThatHappened;
             script.Options.DebugPrint = s => { Console.WriteLine(s); };
             // Register just MyClass, explicitely.
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
             UserData.RegisterProxyType<PlatformProxy, StickyRoundedRectangle>(r => new PlatformProxy(r));
             UserData.RegisterProxyType<BoplBodyProxy, BoplBody>(r => new BoplBodyProxy(r));
             UserData.RegisterProxyType<BlackHoleProxy, BlackHole>(r => new BlackHoleProxy(r));
+            UserData.RegisterProxyType<LuaCollisionInfoPlatformsProxy, LuaPlatformCollisionInfo>(r => new LuaCollisionInfoPlatformsProxy(r));
             return script;
         }
         public void Register()
@@ -156,9 +159,11 @@ namespace MapMaker.Lua_stuff
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
-                UnityEngine.Debug.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
-                Plugin.logger.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
+                var consoleError = $"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e}" +
+                    $"\n(if this is blank, you likely did something like calling a function on a type that doesn't have that function.)";
+                Console.WriteLine(consoleError);
+                UnityEngine.Debug.LogError(consoleError);
+                Plugin.logger.LogError(consoleError);
                 return DynValue.Nil;
             }
             /*foreach (var Key in script.Globals.Keys)
@@ -504,41 +509,76 @@ namespace MapMaker.Lua_stuff
             );
         }
 
+        // these are from the last frame
+        public static DynValue GetAllPlatformCollisionsThatHappened(Script script)
+        {
+            DetPhysics DetPhys = DetPhysics.Get();
+            List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
+            List<LuaPlatformCollisionInfo> collidingRects = [];
+            for (int i = 0; i < collisionData.Count; i++)
+            {
+                var currCollsion = collisionData[i];
+                var collider = currCollsion.colliderPP.monobehaviourCollider;
+                var collidee = currCollsion.pp.monobehaviourCollider;
+
+                if (collider.shape != Shape.RoundedRect || collidee.shape != Shape.RoundedRect)
+                {
+                    continue;
+                }
+
+                var collideeRR = ((DPhysicsRoundedRect)collidee).stickyRR;
+                var colliderRR = ((DPhysicsRoundedRect)collider).stickyRR;
+
+                // just set new platform to collider because it's not really applicable
+                collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
+                    currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, colliderRR));
+            }
+            return DynValue.NewTuple(
+                DynValue.NewNumber(collidingRects.Count),
+                DynValue.FromObject(script, collidingRects)
+            );
+        }
+
         // because of the ordering of MonoUpdatable.updateSim(), DetPhys.Simulate(), and MonoUpdatable.lateUpdate(), These'll be the collisions from last frame/last tick.
         // that's why I put it in past tense
-        public static DynValue GetAllPlatformsThatTouched(Script script, StickyRoundedRectangle platform)
+        public static DynValue GetAllPlatformsCollisionsThatTouched(Script script, StickyRoundedRectangle platform)
         {
             DetPhysics DetPhys = DetPhysics.Get();
             List<CollisionInformation> collisionData = DetPhys.ToMakeCallBacks;
             IPhysicsCollider physColliderBeingSearchedFor = platform.DPhysicsShape().GetPhysicsParent().monobehaviourCollider;
             List<LuaPlatformCollisionInfo> collidingRects = [];
 
-            // potentially reallllly slow. unfortunate.
             for (int i = 0; i < collisionData.Count; i++)
             {
-                var collider = collisionData[i].colliderPP.monobehaviourCollider;
-                var collidee = collisionData[i].pp.monobehaviourCollider;
+                var currCollsion = collisionData[i];
+                var collider = currCollsion.colliderPP.monobehaviourCollider;
+                var collidee = currCollsion.pp.monobehaviourCollider;
+                StickyRoundedRectangle collideeRR = null;
+                StickyRoundedRectangle colliderRR = null;
                 var hasFoundACollision = true;
                 StickyRoundedRectangle newPlatform = null;
 
                 if (collider == physColliderBeingSearchedFor && collidee.shape == Shape.RoundedRect)
                 {
-                    newPlatform = (StickyRoundedRectangle)collider;
+                    newPlatform = ((DPhysicsRoundedRect)collidee).stickyRR;
                 }
                 else if (collidee == physColliderBeingSearchedFor && collider.shape == Shape.RoundedRect)
                 {
-                    newPlatform = (StickyRoundedRectangle)collidee;
+                    newPlatform = ((DPhysicsRoundedRect)collider).stickyRR;
                 }
                 else
                 {
                     hasFoundACollision = false;
                 }
-                if (hasFoundACollision) 
+                if (hasFoundACollision)
                 {
-                    collidingRects.Add(new LuaPlatformCollisionInfo());
+                    collideeRR = ((DPhysicsRoundedRect)collidee).stickyRR;
+                    colliderRR = ((DPhysicsRoundedRect)collidee).stickyRR;
+
+                    collidingRects.Add(new LuaPlatformCollisionInfo(currCollsion.layer, currCollsion.penetration, currCollsion.colliderImpactVelocity,
+                        currCollsion.normal, currCollsion.contactPoint, colliderRR, collideeRR, newPlatform));                
                 }
             }
-
 
             return DynValue.NewTuple(
                 DynValue.NewNumber(collidingRects.Count),
@@ -547,21 +587,22 @@ namespace MapMaker.Lua_stuff
         }
 
         // based on the game's CollisionInformation struct. Modified for the lua API
-        public struct LuaPlatformCollisionInfo
+        public class LuaPlatformCollisionInfo
         {
-            public LuaPlatformCollisionInfo(int _layer, Fix _penetration, Vec2 _impactVelocity, Vec2 _collisionVecNormal, Vec2 _contactPoint, StickyRoundedRectangle _collider, StickyRoundedRectangle _collidee)
+            public LuaPlatformCollisionInfo(int _layer, Fix _penetration, Vec2 _impactVelocity, Vec2 _collisionVecNormal, Vec2 _contactPoint, StickyRoundedRectangle _collider, StickyRoundedRectangle _collidee, StickyRoundedRectangle _newPlatform)
             {
                 layer = _layer;
-                penetration = _penetration;
+                penetration = (double)_penetration;
                 impactVelocity = _impactVelocity;
                 collisionVecNormal = _collisionVecNormal;
                 contactPoint = _contactPoint;
                 collider = _collider;
                 collidee = _collidee;
+                newPlatform = _newPlatform;
             }
 
             public int layer;
-            public Fix penetration;
+            public double penetration;
             public Vec2 impactVelocity;
             public Vec2 collisionVecNormal;
             public Vec2 contactPoint;
@@ -577,35 +618,39 @@ namespace MapMaker.Lua_stuff
 
         public class LuaCollisionInfoPlatformsProxy
         {
-            LuaPlatformCollisionInfo target;
+            public LuaPlatformCollisionInfo target;
 
 
             [MoonSharpHidden]
-            public LuaCollisionInfoPlatformsProxy(LuaPlatformCollisionInfo LuaCollision)
+            public LuaCollisionInfoPlatformsProxy(LuaPlatformCollisionInfo p)
             {
-                target = LuaCollision;
+                target = p;
+            }
+            public string GetClassType()
+            {
+                return "PlatformCollisionInfo";
             }
 
-            public int GetLayerInt()
+            public double GetLayerNumber()
             {
-                return target.layer;
+                return (double)target.layer;
             }
 
-            public Fix GetPenetration()
+            public double GetPenetration()
             {
-                return target.penetration;
+                return (double)target.penetration;
             }
-            public Vec2 GetImpactVelocity()
+            public DynValue GetImpactVelocity()
             {
-                return target.impactVelocity;
+                return Vec2ToTuple(target.impactVelocity);
             }
-            public Vec2 GetCollisionVecNormal()
+            public DynValue GetCollisionVecNormal()
             {
-                return target.collisionVecNormal;
+                return Vec2ToTuple(target.collisionVecNormal);
             }
-            public Vec2 GetContactPoint()
+            public DynValue GetContactPoint()
             {
-                return target.contactPoint;
+                return Vec2ToTuple(target.contactPoint);
             }
             // these two are kinda weird for GetAllPlatformsThatTouched(platform) because you have to pass in the platform that you are looking for
 
@@ -617,17 +662,21 @@ namespace MapMaker.Lua_stuff
             {
                 return target.collidee;
             }
-            //public StickyRoundedRectangle GetNewPlatform
+            public StickyRoundedRectangle GetNewPlatform()
+            {
+                return target.newPlatform;
+            }
 
 
 
-            public int layer;
-            public Fix penetration;
-            public Vec2 impactVelocity;
-            public Vec2 normalVector;
-            public Vec2 contactPoint;
-            public PhysicsParent collider;
-            public PhysicsParent collidee;
+            //public int layer;
+            //public Fix penetration;
+            //public Vec2 impactVelocity;
+            //public Vec2 normalVector;
+            //public Vec2 contactPoint;
+            //public PhysicsParent collider;
+            //public PhysicsParent collidee;
+            //public StickyRoundedRectangle newPlatform;
         }
 
         public static double GetDeltaTime()
@@ -970,6 +1019,8 @@ namespace MapMaker.Lua_stuff
                     return Ability.Beam;
                 case "Duplicator":
                     return Ability.Duplicator;
+                case "Magnet":
+                    return Ability.Magnet;
                 default:
                     throw new ScriptRuntimeException($"{str} is not a valid ability");
             }
@@ -1037,6 +1088,8 @@ namespace MapMaker.Lua_stuff
                     return "Beam";
                 case Ability.Duplicator:
                     return "Duplicator";
+                case Ability.Magnet:
+                    return "Magnet";
                 default:
                     return "Unknown/Modded/None";
             }
@@ -1072,7 +1125,8 @@ namespace MapMaker.Lua_stuff
             Drill = 26,
             Grapple = 27,
             Beam = 28,
-            Duplicator = 29
+            Duplicator = 29,
+            Magnet = 30
         }
     }
     public class PlatformProxy

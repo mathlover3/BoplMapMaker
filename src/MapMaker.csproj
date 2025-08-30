@@ -17,7 +17,7 @@
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
-    <PackageReference Include="UnityEngine.Modules" Version="2019.4.5" IncludeAssets="compile" />
+    <PackageReference Include="UnityEngine.Modules" Version="2022.3.60" IncludeAssets="compile" />
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
   </ItemGroup>
   
@@ -56,12 +56,21 @@
       <HintPath>../lib/MoonSharp.VsCodeDebugger.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="netstandard">
+      <HintPath>..\..\bopl 2.4.3 libs\netstandard.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\bopl 2.4.3 libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PlatformApi">
       <HintPath>../lib/PlatformApi.dll</HintPath>
     </Reference>
     <Reference Include="Purchasing.Common">
       <HintPath>../lib/Purchasing.Common.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.AI.Navigation">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.AI.Navigation.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.DataPrivacy">
       <HintPath>../lib/Unity.Analytics.DataPrivacy.dll</HintPath>
@@ -71,9 +80,54 @@
       <HintPath>../lib/Unity.InputSystem.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.InputSystem.ForUI">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.InputSystem.ForUI.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Mathematics">
       <HintPath>../lib/Unity.Mathematics.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Services.Analytics">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Analytics.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Analytics">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Analytics.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Components">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Components.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Configuration">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Device">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Device.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Environments">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Environments.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Environments.Internal">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Environments.Internal.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Internal">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Internal.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Networking">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Registration">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Registration.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Scheduler">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Scheduler.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Telemetry">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Telemetry.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Core.Threading">
+      <HintPath>..\..\bopl 2.4.3 libs\Unity.Services.Core.Threading.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>../lib/Unity.TextMeshPro.dll</HintPath>
@@ -120,6 +174,9 @@
     <Reference Include="UnityEngine.ClusterRendererModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.ClusterRendererModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ContentLoadModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.ContentLoadModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -134,6 +191,9 @@
     </Reference>
     <Reference Include="UnityEngine.GameCenterModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.GameCenterModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.GIModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.GIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GridModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.GridModule.dll</HintPath>
@@ -162,6 +222,9 @@
     <Reference Include="UnityEngine.Monetization">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.Monetization.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.NVIDIAModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.NVIDIAModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
@@ -176,6 +239,9 @@
     </Reference>
     <Reference Include="UnityEngine.ProfilerModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.ProfilerModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PropertiesModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.PropertiesModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Purchasing">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.Purchasing.dll</HintPath>
@@ -207,6 +273,9 @@
     <Reference Include="UnityEngine.Purchasing.WinRTStub">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.Purchasing.WinRTStub.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.ScreenCaptureModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.ScreenCaptureModule.dll</HintPath>
     </Reference>
@@ -237,8 +306,14 @@
     <Reference Include="UnityEngine.TerrainPhysicsModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.TerrainPhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.TextCoreModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.TextCoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreTextEngineModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.TextCoreTextEngineModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
@@ -265,11 +340,17 @@
     <Reference Include="UnityEngine.UNETModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsCommonModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.UnityAnalyticsCommonModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UnityAnalyticsModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.UnityAnalyticsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityConnectModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityCurlModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.UnityCurlModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityTestProtocolModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.UnityTestProtocolModule.dll</HintPath>
@@ -297,6 +378,9 @@
     </Reference>
     <Reference Include="UnityEngine.VideoModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VirtualTexturingModule">
+      <HintPath>..\..\bopl 2.4.3 libs\UnityEngine.VirtualTexturingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VRModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Bopl Battle\BoplBattle_Data\Managed\UnityEngine.VRModule.dll</HintPath>

@@ -20,6 +20,7 @@ using System.Collections;
 using static MapMaker.PipeStuff;
 using TMPro;
 using MapMaker.utils;
+using System.Data;
 namespace MapMaker
 {
     [BepInDependency("com.entwinedteam.entwined")]
@@ -128,8 +129,14 @@ namespace MapMaker
             NoMapFoundWithId,
             MultipleMapsFoundWithId
         }
+
+        //public static bool noMapsCheckHasSpawnedText = false;
+
+        public static TextMeshPro maplessText;
+
         private void Awake()
-        {   
+        {
+
             // Define the instance
             instance = this;
 
@@ -190,6 +197,7 @@ namespace MapMaker
 
         public void Start()
         {
+            Logger.LogWarning("######## Start() called");
             ZipArchive[] zipArchives2;
             // If we are loading a replay the zip archive is already set
             if (!IsReplay())
@@ -208,8 +216,25 @@ namespace MapMaker
             foreach (ZipArchive zipArchive in zipArchives2)
             {
                 // Get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
-                JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
-                MetaDataList.Add(GetFileFromZipArchive(zipArchive, IsMetaDataFile)[0]);
+                try
+                {
+                    JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
+                    MetaDataList.Add(GetFileFromZipArchive(zipArchive, IsMetaDataFile)[0]);
+                }
+                // IndexOutOfRangeException will be thrown if this zip file isn't a bopl map or is corrupt
+                catch (IndexOutOfRangeException e)
+                {
+                    List<ZipArchive> ListzipArchives2 = zipArchives2.ToList();
+                    int zipArchiveIndex = Array.IndexOf(zipArchives2, zipArchive) ;
+                    ListzipArchives2.Remove(zipArchive);
+                    zipArchives2 = ListzipArchives2.ToArray();
+                    MyZipArchives = ListzipArchives2.ToArray();
+                    Logger.LogWarning("There is an invalid map in your maps folder.");
+                }
+            }
+            if (zipArchives2.Length == 0)
+            {
+                logger.LogError("NO MAPS LOADED! map maker won\'t function correctly unless you add maps.");
             }
             MapJsons = [.. JsonList];
             MetaDataJsons = [.. MetaDataList];
@@ -1226,6 +1251,7 @@ first = true");*/
             return archive;
 
         }
+
         // Finds all the files with a path that the predicate accepts as a string array 
         public static string[] GetFileFromZipArchive(ZipArchive archive, Predicate<string> predicate)
         {
@@ -1251,6 +1277,7 @@ first = true");*/
             }
             return data;
         }
+
         public static Byte[][] GetFileFromZipArchiveBytes(ZipArchive archive, Predicate<string> predicate)
         {
             Debug.Log("enter GetFileFromZipArchive");
@@ -1704,6 +1731,8 @@ first = true");*/
         }
     }
 }
+
+
 
 // ITS OVER!
 // HOLY SH*T, THAT TOOK A LONG TIME
