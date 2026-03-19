@@ -20,7 +20,11 @@ using System.Collections;
 using static MapMaker.PipeStuff;
 using TMPro;
 using MapMaker.utils;
+<<<<<<< Updated upstream
 using System.Data;
+=======
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
+>>>>>>> Stashed changes
 namespace MapMaker
 {
     [BepInDependency("com.entwinedteam.entwined")]
@@ -99,9 +103,12 @@ namespace MapMaker
         // Networking
         public static int NextMapIndex;
         // Pipes & Testing
-        internal static PipeStuff.PipeResponder pipeResponder;
+        internal static PipeResponder pipeResponder;
         // If true it doesnt automaticly reset the map data when entering the singleplayer area. instead it does it when someone joins you.
         public static bool IsInTestMode = false;
+
+        // Used for GetAllTexts()
+        public static List<LuaMain.Text> texts = [];
 
         // Used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
         public static Fix Camera_XMin = (Fix)(-97.27f);
@@ -472,11 +479,12 @@ namespace MapMaker
                         }
                         if (Dict.ContainsKey("Texts"))
                         {
-                            MoreJsonParceing.SpawnTexts((List<object>)Dict["Texts"], i);
+                            texts.Clear();
+                            SpawnTexts((List<object>)Dict["Texts"]);
                         }
 
                         // display map title
-                        TextMeshPro mapTitle = LuaSpawner.SpawnText(new Vec2(Fix.Zero, (Fix)36), Fix.Zero, (Fix)(24/18), mapName, lua ? Color.yellow : Color.white);
+                        TextMeshPro mapTitle = LuaSpawner.SpawnText(new Vec2(Fix.Zero, (Fix)36), (Fix)(24/18), Fix.Zero, mapName, lua ? Color.yellow : Color.white);
                         mapTitle.gameObject.AddComponent<FadeOutText>();
                     }
                 }
@@ -486,6 +494,44 @@ namespace MapMaker
                 }
             }
         }
+        public static void SpawnTexts(List<object> textList)
+        {
+            foreach (Dictionary<string, object> text in textList)
+            {
+                try
+                {
+                    Dictionary<string, object> transform = (Dictionary<string, object>)text["transform"];
+                    Fix x = (Fix)Convert.ToDouble(transform["x"]);
+                    Fix y = (Fix)Convert.ToDouble(transform["y"]);
+
+                    Fix scale = Fix.One;
+                    if (text.ContainsKey("scale"))
+                        scale = (Fix)Convert.ToDouble(text["scale"]);
+
+                    Fix rotation = Fix.Zero;
+                    if (text.ContainsKey("rotation"))
+                        rotation = ConvertToRadians(Convert.ToDouble(text["rotation"]));
+
+                    Dictionary<string, object> textData = (Dictionary<string, object>)text["textData"];
+                    string contents = (string)textData["text"];
+
+                    List<object> colorData = (List<object>)textData["color"];
+                    Color color = new(
+                        (float)(Convert.ToInt32(colorData[0]) / 255.0),
+                        (float)(Convert.ToInt32(colorData[1]) / 255.0),
+                        (float)(Convert.ToInt32(colorData[2]) / 255.0),
+                        (float)(Convert.ToInt32(colorData[3]) / 255.0)
+                    );
+
+                    texts.Add(new(new(x, y), scale, rotation, contents, color));
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Failed to spawn text. Error: {ex}");
+                }
+            }
+        }
+
 
         public static void SpawnPlatformsFromMap(Dictionary<string, object> Dict, int index)
         {

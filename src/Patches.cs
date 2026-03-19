@@ -322,8 +322,7 @@ namespace MapMaker
             private static void asin(MoonSharp.Interpreter.CoreLib.MathModule __instance, ref DynValue __result, ScriptExecutionContext executionContext, CallbackArguments args)
             {
                 //Debug.Log("asin");
-                //Fix doesnt have a asin so thanks to chatgpt i use Acon and sqrt and exsponents to get Asin
-                __result = Plugin.exec1(args, "asin", d => (double)Fix.Acos(Fix.Sqrt(Fix.One - Fix.Pow2((Fix)d))), __instance);
+                __result = Plugin.exec1(args, "asin", d => (double)Fix.PiOver2 - (double)Fix.Acos((Fix)d), __instance);
             }
             [HarmonyPatch("atan")]
             [HarmonyPostfix]

@@ -272,7 +272,7 @@ namespace MapMaker.Lua_stuff
             return blackHole2;
         }
 
-        public static TextMeshPro SpawnText(Vec2 pos, Fix rotation, Fix scale, string contents, Color color)
+        public static TextMeshPro SpawnText(Vec2 pos, Fix scale, Fix rotation, string contents, Color color)
         {
             TextMeshPro text = new GameObject(contents, typeof(RectTransform), typeof(MeshRenderer), typeof(CanvasRenderer), typeof(MeshFilter), typeof(TextMeshPro), typeof(TMP_SpriteAnimator)).GetComponent<TextMeshPro>();
             text.text = contents;

@@ -1,5 +1,6 @@
 ﻿//using AsmResolver.PE.DotNet.Metadata.Tables.Rows;
 //using AsmResolver.PE.DotNet.ReadyToRun;
+using AsmResolver.PE.Platforms;
 using BoplFixedMath;
 using MonoMod.Utils;
 using MoonSharp.Interpreter;
@@ -17,6 +18,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization.Configuration;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.Composites;
 using UnityEngine.InputSystem.XR;
@@ -78,12 +80,19 @@ namespace MapMaker.Lua_stuff
             script.Globals["SpawnExplosion"] = (object)SpawnExplosionDouble;
             script.Globals["SpawnBoulder"] = (object)SpawnBoulderDouble;
             script.Globals["SpawnPlatform"] = (object)SpawnPlatform;
+            script.Globals["SpawnText"] = (object)SpawnText;
             script.Globals["RaycastRoundedRect"] = (object)RaycastRoundedRect;
             script.Globals["GetClosestPlayer"] = (object)GetClosestPlayer;
+            script.Globals["GetClosestPlatform"] = (object)GetClosestPlatform;
+            script.Globals["GetClosestBoplBody"] = (object)GetClosestBoplBody;
+            script.Globals["GetClosestBlackHole"] = (object)GetClosestBlackHole;
+            script.Globals["GetClosestText"] = (object)GetClosestText;
             script.Globals["GetAllPlatforms"] = (object)GetAllPlatforms;
             script.Globals["GetAllPlayers"] = (object)GetAllPlayers;
             script.Globals["GetAllBoplBodys"] = (object)GetAllBoplBodys;
+            script.Globals["GetAllBoplBodies"] = (object)GetAllBoplBodys;
             script.Globals["GetAllBlackHoles"] = (object)GetAllBlackHoles;
+            script.Globals["GetAllTexts"] = (object)GetAllTexts;
             script.Globals["ShootBlink"] = (object)ShootBlink;
             script.Globals["ShootGrow"] = (object)ShootGrow;
             script.Globals["ShootShrink"] = (object)ShootShrink;
@@ -102,7 +111,11 @@ namespace MapMaker.Lua_stuff
             UserData.RegisterProxyType<PlatformProxy, StickyRoundedRectangle>(r => new PlatformProxy(r));
             UserData.RegisterProxyType<BoplBodyProxy, BoplBody>(r => new BoplBodyProxy(r));
             UserData.RegisterProxyType<BlackHoleProxy, BlackHole>(r => new BlackHoleProxy(r));
+<<<<<<< Updated upstream
             UserData.RegisterProxyType<LuaCollisionInfoPlatformsProxy, LuaPlatformCollisionInfo>(r => new LuaCollisionInfoPlatformsProxy(r));
+=======
+            UserData.RegisterProxyType<TextProxy, Text>(r => new TextProxy(r));
+>>>>>>> Stashed changes
             return script;
         }
         public void Register()
@@ -147,23 +160,29 @@ namespace MapMaker.Lua_stuff
             catch (MoonSharp.Interpreter.SyntaxErrorException e)
             {
                 Console.WriteLine($"ERROR PARSING LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
-                Plugin.logger.LogError($"ERROR PARSING LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
+                // Plugin.logger.LogError($"ERROR PARSING LUA SCRIPT {Name} Error: {e.DecoratedMessage}");
                 return DynValue.Nil;
             }
             catch (InternalErrorException e)
             {
                 Console.WriteLine($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");              
-                UnityEngine.Debug.LogError($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
+                // UnityEngine.Debug.LogError($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
                 Plugin.logger.LogError($"CONGRATS! YOU BROKE THE INTERPITER IN SCRIPT {Name} Error: {e} pls send me the map and perferably also the replay so i can report the bug.");
                 return DynValue.Nil;
             }
             catch (Exception e)
             {
+<<<<<<< Updated upstream
                 var consoleError = $"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e}" +
                     $"\n(if this is blank, you likely did something like calling a function on a type that doesn't have that function.)";
                 Console.WriteLine(consoleError);
                 UnityEngine.Debug.LogError(consoleError);
                 Plugin.logger.LogError(consoleError);
+=======
+                Console.WriteLine($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
+                // UnityEngine.Debug.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
+                Plugin.logger.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
+>>>>>>> Stashed changes
                 return DynValue.Nil;
             }
             /*foreach (var Key in script.Globals.Keys)
@@ -178,6 +197,58 @@ namespace MapMaker.Lua_stuff
             }*/
 
         }
+
+        public class Text
+        {
+            private Vec2 pos;
+            private Fix scale;
+            private Fix rot;
+            private string text;
+            private Color color;
+            public TextMeshPro textObj;
+
+            public Text()
+            {
+                pos = Vec2.zero;
+                scale = Fix.Zero;
+                rot = Fix.Zero;
+                text = "";
+                color = Color.white;
+                textObj = null;
+            }
+
+            public Text(TextMeshPro textObj) : this()
+            {
+                this.textObj = textObj;
+            }
+
+            public Text(Vec2 pos, Fix scale, Fix rot, string text, Color color)
+            {
+                this.pos = pos;
+                this.rot = rot;
+                this.scale = scale;
+                this.text = text;
+                this.color = color;
+                textObj = LuaSpawner.SpawnText(pos, scale, rot, text, color);
+                Plugin.texts.Add(this);
+            }
+
+            // Getters
+            public Vec2 GetPos() => pos;
+            public Fix GetScale() => scale;
+            public Fix GetRot() => rot;
+            public string GetText() => text;
+            public Color GetColor() => color;
+
+            // Setters
+            public void SetPos(Vec2 position) => pos = position;
+            public void SetScale(Fix newScale) => scale = newScale;
+            public void SetRot(Fix newRotation) => rot = newRotation;
+            public void SetText(string newText) => text = newText;
+            public void SetColor(Color newColor) => color = newColor;
+            public void SetColor(Fix r, Fix g, Fix b, Fix a) => color = new((int)r, (int)g, (int)b, (int)a);
+        }
+
 
         public static BoplBody SpawnSpike(StickyRoundedRectangle attachedGround, double percentAroundSurface, double scale, double offset)
         {
@@ -306,6 +377,10 @@ namespace MapMaker.Lua_stuff
             plat.GetComponent<SpriteRenderer>().color = color;
             return plat.GetComponent<StickyRoundedRectangle>();
         }
+        public static Text SpawnText(double posX, double posY, double scale, double rotation, string contents, float R, float G, float B, float A)
+        {
+            return new(new((Fix)posX, (Fix)posY), (Fix)scale, (Fix)rotation, contents, new(R, G, B, A));
+        }
         public static DynValue RaycastRoundedRect(double posX, double posY, double angle, double maxDist)
         {
             var pos = new Vec2((Fix)posX, (Fix)posY);
@@ -332,13 +407,9 @@ namespace MapMaker.Lua_stuff
         }
         public static DynValue GetClosestPlayer(double posX, double posY)
         {
-            //PlayerList (1)
-            var playerlist = GameObject.Find("PlayerList");
-            if (playerlist == null)
-            {
-                playerlist = GameObject.Find("PlayerList (1)");
-            }
-            var players = playerlist.transform;
+            //set playerlist to "PlayerList" if none found, try "PlayerList (1)"
+            var players = GameObject.Find("PlayerList").transform ?? GameObject.Find("PlayerList (1)").transform;
+
             PlayerPhysics CurrentPlayer = null;
             Fix bestDist = Fix.MaxValue;
             foreach (Transform player in players)
@@ -362,76 +433,96 @@ namespace MapMaker.Lua_stuff
             }
             return DynValue.Nil;
         }
+        public static DynValue GetClosestPlatform(double posX, double posY)
+        {
+            // get list of platforms with stickyroundedrect that arent null
+            List<StickyRoundedRectangle> platforms = PlatformApi.PlatformApi.PlatformList
+                .Where(platform => platform != null)
+                .Select(platform => platform.GetComponent<StickyRoundedRectangle>())
+                .Where(sticky => sticky != null)
+                .ToList();
+
+            // order the platforms with their distance and get the first element (closest platform)
+            StickyRoundedRectangle closestPlatform = platforms
+                .Select(platform => new { platform, dist = Vec2.Distance(new((Fix)posX, (Fix)posY), platform.GetComponent<FixTransform>().position) })
+                .OrderBy(pair => pair.dist)
+                .FirstOrDefault()?.platform;
+
+            // return the platform - if didn't found any: return nil
+            return closestPlatform ? UserData.Create(closestPlatform) : DynValue.Nil;
+        }
+        public static DynValue GetClosestBoplBody(double posX, double posY)
+        {
+            // get list of bopl bodies
+            List<BoplBody> boplBodies = Resources.FindObjectsOfTypeAll<BoplBody>()
+                .Where(b => b.gameObject.scene.name != null && b.HasBeenInitialized && !b.physicsCollider.IsDestroyed).ToList();
+
+            // order the bodies with their distance and get the first element (closest body)
+            BoplBody closestBody = boplBodies
+                .Select(body => new { body, dist = Vec2.Distance(new((Fix)posX, (Fix)posY), body.GetComponent<FixTransform>().position) })
+                .OrderBy(pair => pair.dist)
+                .FirstOrDefault()?.body;
+
+            // return the bopl body - if didn't found any: return nil
+            return closestBody ? UserData.Create(closestBody) : DynValue.Nil;
+        }
+        public static DynValue GetClosestBlackHole(double posX, double posY)
+        {
+            // get list of black holes
+            List<BlackHole> bHoles = Resources.FindObjectsOfTypeAll<BlackHole>()
+                .Where(h => h.gameObject.scene.IsValid() && h.dCircle.initHasBeenCalled && !h.GetComponent<FixTransform>().IsDestroyed).ToList();
+
+            // order the black holes with their distance and get the first element (closest black hole)
+            BlackHole closestBHole = bHoles
+                .Select(bHole => new { bHole, dist = Vec2.Distance(new((Fix)posX, (Fix)posY), bHole.GetComponent<FixTransform>().position) })
+                .OrderBy(pair => pair.dist)
+                .FirstOrDefault()?.bHole;
+
+            // return the black hole - if didn't found any: return nil
+            return closestBHole ? UserData.Create(closestBHole) : DynValue.Nil;
+        }
+        public static DynValue GetClosestText(double posX, double posY)
+        {
+            // order the texts with their distance and get the first element (closest text)
+            Text closestText = Plugin.texts
+                .Select(text => new { text, dist = Vec2.Distance(new((Fix)posX, (Fix)posY), (Vec2)text.textObj.rectTransform.position) })
+                .OrderBy(pair => pair.dist)
+                .FirstOrDefault()?.text;
+
+            // return the text - if didn't found any: return nil
+            return closestText != null ? UserData.Create(closestText) : DynValue.Nil;
+        }
+
         public static DynValue GetAllPlayers(Script script)
         {
-            List<PlayerPhysics> Players = new();
-            //lists are refrece types so i cant drectly set it and instead must copy it manualy
-            foreach (PlayerPhysics player in players)
-            {
-                Players.Add(player);
-            }
-            //remove any invalid players from the players list
-            foreach (PlayerPhysics player in players)
-            {
-                if (player == null)
-                {
-                    Players.Remove(player);
-                    //end this iteratson of the loop
-                    continue;
-                }
-                try
-                {
-                    if (player.gameObject == null)
-                    {
-                        //this code will never be reaced as if theres no gameobject just the act of doing player.gameObject cause a null ref error even if player isnt null. but just in case
-                        Players.Remove(player);
-                    }
-                }
-                catch
-                {
-                    Players.Remove(player);
-                }
-            }
-            players = Players;
-            //DynValue.FromObject
+            List<PlayerPhysics> result = players.Where(p => p != null && p.gameObject != null).ToList();
+
             return DynValue.NewTuple(
-                DynValue.NewNumber(players.Count),
-                DynValue.FromObject(script, players)
+                DynValue.NewNumber(result.Count),
+                DynValue.FromObject(script, result)
             );
         }
         public static DynValue GetAllBoplBodys(Script script)
         {
-            BoplBody[] allObjects = Resources.FindObjectsOfTypeAll(typeof(BoplBody)) as BoplBody[];
-            List<BoplBody> result = new();
-            foreach (var body in allObjects)
-            {
-                if (body.gameObject.scene.name != null && body.HasBeenInitialized && !body.physicsCollider.IsDestroyed)
-                {
-                    result.Add(body);
-                }
-            }
+            List<BoplBody> boplBodies = Resources.FindObjectsOfTypeAll<BoplBody>()
+                .Where(b => b.gameObject.scene.name != null && b.HasBeenInitialized && !b.physicsCollider.IsDestroyed).ToList();
+
             return DynValue.NewTuple(
-                DynValue.NewNumber(result.Count),
-                DynValue.FromObject(script, result)
+                DynValue.NewNumber(boplBodies.Count),
+                DynValue.FromObject(script, boplBodies)
             );
         }
-
         public static DynValue GetAllBlackHoles(Script script)
         {
-            BlackHole[] allHoles = Resources.FindObjectsOfTypeAll(typeof(BlackHole)) as BlackHole[];
-            List<BlackHole> result = new();
-            foreach (var hole in allHoles)
-            {
-                if (hole.gameObject.scene.name != null && hole.dCircle.initHasBeenCalled && !hole.GetComponent<FixTransform>().IsDestroyed)
-                {
-                    result.Add(hole);
-                }
-            }
+            List<BlackHole> blackHoles = Resources.FindObjectsOfTypeAll<BlackHole>()
+                .Where(h => h.gameObject.scene.IsValid() && h.dCircle.initHasBeenCalled && !h.GetComponent<FixTransform>().IsDestroyed).ToList();
+
             return DynValue.NewTuple(
-                DynValue.NewNumber(result.Count),
-                DynValue.FromObject(script, result)
+                DynValue.NewNumber(blackHoles.Count),
+                DynValue.FromObject(script, blackHoles)
             );
         }
+        public static DynValue GetAllTexts(Script script) => DynValue.NewTuple(DynValue.NewNumber(Plugin.texts.Count), DynValue.FromObject(script, Plugin.texts));
 
         public static void ShootBlink(double posX, double posY, double Angle, double minPlayerDuration, double WallDuration, double WallDelay, double WallShake)
         {
@@ -749,6 +840,15 @@ namespace MapMaker.Lua_stuff
                 DynValue.NewNumber((double)vec2.y)
             );
         }
+        public static DynValue ColorToTuple(Color c)
+        {
+            return DynValue.NewTuple(
+                DynValue.NewNumber(c.r),
+                DynValue.NewNumber(c.g),
+                DynValue.NewNumber(c.b),
+                DynValue.NewNumber(c.a)
+            );
+        }
     }
     public class LuaPlayerPhysicsProxy
     {
@@ -982,7 +1082,7 @@ namespace MapMaker.Lua_stuff
                 case "Rock":
                     return Ability.Rock;
                 case "Missile":
-                    return Ability.Missle;
+                    return Ability.Missile;
                 case "Spike":
                     return Ability.Spike;
                 case "TimeStop":
@@ -1050,7 +1150,7 @@ namespace MapMaker.Lua_stuff
                     return "Grow";
                 case Ability.Rock:
                     return "Rock";
-                case Ability.Missle:
+                case Ability.Missile:
                     return "Missile";
                 case Ability.Spike:
                     return "Spike";
@@ -1106,7 +1206,7 @@ namespace MapMaker.Lua_stuff
             Gust = 7,
             Grow = 8,
             Rock = 9,
-            Missle = 10,
+            Missile = 10,
             Spike = 11,
             TimeStop = 12,
             SmokeGrenade = 13,
@@ -2289,6 +2389,58 @@ namespace MapMaker.Lua_stuff
         public bool IsDisappeared()
         {
             return !target.gameObject.activeInHierarchy;
+        }
+    }
+
+    public class TextProxy
+    {
+        public LuaMain.Text target;
+
+        [MoonSharpHidden]
+        public TextProxy(LuaMain.Text p) => target = p;
+
+        public string GetClassType() => "Text";
+        public string GetObjectType() => "Text";
+
+        public DynValue GetPos() => LuaMain.Vec2ToTuple(target.GetPos());
+        public void SetPos(double x, double y) 
+        {
+            target.textObj.rectTransform.position = new((float)x, (float)y);
+            target.SetPos(new((Fix)x, (Fix)y));
+        }
+
+        public double GetScale() => (double)target.GetScale();
+        public void SetScale(double scale)
+        {
+            target.textObj.rectTransform.localScale = Vector3.one * (float)scale;
+            target.SetScale((Fix)scale);
+        }
+
+        public double GetRot() => (double)target.GetRot();
+        public void SetRot(double rot)
+        {
+            target.textObj.rectTransform.rotation = Quaternion.Euler(0, 0, (float)rot);
+            target.SetRot((Fix)rot);
+        }
+
+        public string GetText() => target.GetText();
+        public void SetText(string text)
+        {
+            target.textObj.text = text;
+            target.SetText(text);
+        }
+
+        public DynValue GetColor() => LuaMain.ColorToTuple(target.GetColor());
+        public void SetColor(double r, double g, double b, double a)
+        {
+            target.textObj.color = new((float)r, (float)g, (float)b, (float)a);
+            target.SetColor(target.textObj.color);
+        }
+
+        public void Destroy()
+        {
+            Plugin.texts.Remove(target);
+            GameObject.Destroy(target.textObj);
         }
     }
 }
