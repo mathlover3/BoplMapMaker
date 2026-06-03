@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -286,6 +287,93 @@ namespace MapMaker.Lua_stuff
             Vector2 preferredSize = text.GetPreferredValues();
             text.rectTransform.sizeDelta = preferredSize;
             return text;
+        }
+        
+        public static GameObject SpawnSprite(Vec2 pos, Fix z, Fix width, Fix height, Fix rotation, string imagePath, bool pixelPerfect)
+        {
+            Sprite sprite = LoadSpriteFromCache(imagePath, pixelPerfect);
+            if (sprite == null)
+            {
+                Debug.LogWarning($"Failed to load sprite from path: {imagePath}");
+                return null;
+            }
+            
+            GameObject rectObj = new GameObject("Sprite");
+            rectObj.transform.position = new Vector3((float)pos.x, (float)pos.y, 0);
+            rectObj.transform.rotation = Quaternion.Euler(0, 0, (float)rotation);
+            rectObj.transform.localScale = new Vector3((float)width, (float)height, 1);
+            
+            
+            SpriteRenderer spriteRenderer = rectObj.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = sprite;
+            string name;
+            switch ((int)z)
+            {
+                case <= -1:
+                    name = "background";
+                    break;
+                case 0:
+                    name = "Default";
+                    break;
+                case >= 1:
+                    name = "behind Walls Infront of everything else";
+                    break;
+            }
+            
+            spriteRenderer.sortingLayerName = name;
+            
+            
+            return rectObj;
+        }
+
+        public static Sprite LoadSpriteFromCache(string filePath, bool pixelPerfect, float pixelsPerUnit = 100f)
+        {
+            try
+            {
+                foreach (var entry in Plugin.SpriteDataCache)
+                {
+                    Debug.Log(entry);
+                }
+                // Try to get just the filename from the path
+                string fileName = Path.GetFileName(filePath);
+                byte[] fileData = null;
+        
+                // Check cache by filename first
+                if (Plugin.SpriteDataCache.ContainsKey(fileName))
+                {
+                    fileData = Plugin.SpriteDataCache[fileName];
+                }
+                // If not found, try the full path
+                else if (Plugin.SpriteDataCache.ContainsKey(filePath))
+                {
+                    fileData = Plugin.SpriteDataCache[filePath];
+                }
+        
+                if (fileData != null)
+                {
+                    Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                    if (texture.LoadImage(fileData))
+                    {
+                        texture.filterMode = pixelPerfect ? FilterMode.Point : FilterMode.Bilinear;
+                        texture.wrapMode = TextureWrapMode.Clamp;
+                        return Sprite.Create(
+                            texture,
+                            new Rect(0, 0, texture.width, texture.height),
+                            new Vector2(0.5f, 0.5f),
+                            pixelsPerUnit
+                        );
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"Sprite not found in cache: {filePath} (filename: {fileName})");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error loading texture from cache {filePath}: {e.Message}");
+            }
+            return null;
         }
 
         public static Fix CalculateAngle(Vec2 vec2)

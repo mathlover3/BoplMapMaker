@@ -64,9 +64,9 @@ namespace MapMaker.Lua_stuff
                 server.Detach(script);
             }
         }
-        public Script SetUpScriptFuncsons()
+        public Script SetUpScriptFunctions()
         {
-            //dont want to let people use librays that would give them acsess outside of the game like os and io now do we? also no time package eather as thats just asking for desinks.
+            // Don't want to let people use libraries that would give them access outside the game like os and io now do we? also no time package eather as that's just asking for desyncs.
             Script script = new Script(CoreModules.Preset_HardSandbox | CoreModules.ErrorHandling | CoreModules.Coroutine | CoreModules.Metatables);
             script.Globals["SpawnArrow"] = (object)SpawnArrowDouble;
             script.Globals["SpawnSpike"] = (object)SpawnSpike;
@@ -81,6 +81,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["SpawnBoulder"] = (object)SpawnBoulderDouble;
             script.Globals["SpawnPlatform"] = (object)SpawnPlatform;
             script.Globals["SpawnText"] = (object)SpawnText;
+            script.Globals["SpawnSprite"] = (object)SpawnSprite;
             script.Globals["RaycastRoundedRect"] = (object)RaycastRoundedRect;
             script.Globals["GetClosestPlayer"] = (object)GetClosestPlayer;
             script.Globals["GetClosestPlatform"] = (object)GetClosestPlatform;
@@ -93,6 +94,7 @@ namespace MapMaker.Lua_stuff
             script.Globals["GetAllBoplBodies"] = (object)GetAllBoplBodys;
             script.Globals["GetAllBlackHoles"] = (object)GetAllBlackHoles;
             script.Globals["GetAllTexts"] = (object)GetAllTexts;
+            script.Globals["GetAllSprites"] = (object)GetAllSprites;
             script.Globals["ShootBlink"] = (object)ShootBlink;
             script.Globals["ShootGrow"] = (object)ShootGrow;
             script.Globals["ShootShrink"] = (object)ShootShrink;
@@ -106,16 +108,14 @@ namespace MapMaker.Lua_stuff
             script.Globals["GetAllPlatformsCollisionsThatTouched"] = (object)GetAllPlatformsCollisionsThatTouched;
             script.Globals["GetAllPlatformCollisionsThatHappened"] = (object)GetAllPlatformCollisionsThatHappened;
             script.Options.DebugPrint = s => { Console.WriteLine(s); };
-            // Register just MyClass, explicitely.
+            // Register just MyClass, explicitly.
             UserData.RegisterProxyType<LuaPlayerPhysicsProxy, PlayerPhysics>(r => new LuaPlayerPhysicsProxy(r));
             UserData.RegisterProxyType<PlatformProxy, StickyRoundedRectangle>(r => new PlatformProxy(r));
             UserData.RegisterProxyType<BoplBodyProxy, BoplBody>(r => new BoplBodyProxy(r));
             UserData.RegisterProxyType<BlackHoleProxy, BlackHole>(r => new BlackHoleProxy(r));
-<<<<<<< Updated upstream
             UserData.RegisterProxyType<LuaCollisionInfoPlatformsProxy, LuaPlatformCollisionInfo>(r => new LuaCollisionInfoPlatformsProxy(r));
-=======
             UserData.RegisterProxyType<TextProxy, Text>(r => new TextProxy(r));
->>>>>>> Stashed changes
+            UserData.RegisterProxyType<SpriteProxy, SpriteObject>(r => new SpriteProxy(r));
             return script;
         }
         public void Register()
@@ -172,17 +172,14 @@ namespace MapMaker.Lua_stuff
             }
             catch (Exception e)
             {
-<<<<<<< Updated upstream
                 var consoleError = $"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e}" +
                     $"\n(if this is blank, you likely did something like calling a function on a type that doesn't have that function.)";
                 Console.WriteLine(consoleError);
                 UnityEngine.Debug.LogError(consoleError);
                 Plugin.logger.LogError(consoleError);
-=======
                 Console.WriteLine($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
                 // UnityEngine.Debug.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
                 Plugin.logger.LogError($"Congrats! you found a error in my code! pls send the replay of this to me so i can fix it. and the error, err: {e} ");
->>>>>>> Stashed changes
                 return DynValue.Nil;
             }
             /*foreach (var Key in script.Globals.Keys)
@@ -249,6 +246,164 @@ namespace MapMaker.Lua_stuff
             public void SetColor(Fix r, Fix g, Fix b, Fix a) => color = new((int)r, (int)g, (int)b, (int)a);
         }
 
+        public class SpriteObject
+        {
+            private Vec2 pos;
+            private Fix z;
+            private Fix width;
+            private Fix height;
+            private Fix rot;
+            private string imagePath;
+            private bool pixelPerfect;
+            public GameObject spriteObj;
+            public SpriteRenderer spriteRenderer;
+
+            public SpriteObject()
+            {
+                pos = Vec2.zero;
+                z = Fix.Zero;
+                width = Fix.Zero;
+                height = Fix.Zero;
+                rot = Fix.Zero;
+                imagePath = "";
+                pixelPerfect = false;
+                spriteObj = null;
+                spriteRenderer = null;
+            }
+
+            public SpriteObject(GameObject spriteObj) : this()
+            {
+                this.spriteObj = spriteObj;
+                spriteRenderer = spriteObj?.GetComponent<SpriteRenderer>();
+            }
+
+            public SpriteObject(Vec2 pos, Fix z, Fix width, Fix height, Fix rot, string imagePath, bool pixelPerfect)
+            {
+                this.pos = pos;
+                this.z = z;
+                this.width = width;
+                this.height = height;
+                this.rot = rot;
+                this.imagePath = imagePath;
+                this.pixelPerfect = pixelPerfect;
+                
+                spriteObj = LuaSpawner.SpawnSprite(pos, z, width, height, rot, imagePath, pixelPerfect);
+                if (spriteObj != null)
+                {
+                    spriteRenderer = spriteObj.GetComponent<SpriteRenderer>();
+                    Plugin.sprites.Add(this);
+                }
+            }
+
+            // Getters
+            public Vec2 GetPos() => pos;
+            public Fix GetZ() => z;
+            public Fix GetWidth() => width;
+            public Fix GetHeight() => height;
+            public Fix GetRot() => rot;
+            public string GetImagePath() => imagePath;
+            public bool GetPixelPerfect() => pixelPerfect;
+            public Sprite GetSprite() => spriteRenderer?.sprite;
+
+            // Setters
+            public void SetPos(Vec2 newPos) 
+            { 
+                pos = newPos;
+                if (spriteObj != null)
+                    spriteObj.transform.position = new Vector3((float)pos.x, (float)pos.y, 0);
+            }
+            
+            public void SetZ(Fix newZ) 
+            { 
+                z = newZ;
+                if (spriteObj != null)
+                {
+                    spriteObj.transform.position = new Vector3((float)pos.x, (float)pos.y, 0);
+                    spriteRenderer.sortingOrder = (int)(-z * (Fix)100);
+                }
+            }
+            
+            public void SetWidth(Fix newWidth) 
+            { 
+                width = newWidth;
+                if (spriteObj != null)
+                {
+                    Vector3 scale = spriteObj.transform.localScale;
+                    scale.x = (float)width;
+                    spriteObj.transform.localScale = scale;
+                }
+            }
+            
+            public void SetHeight(Fix newHeight) 
+            { 
+                height = newHeight;
+                if (spriteObj != null)
+                {
+                    Vector3 scale = spriteObj.transform.localScale;
+                    scale.y = (float)height;
+                    spriteObj.transform.localScale = scale;
+                }
+            }
+            
+            public void SetSize(Fix newWidth, Fix newHeight)
+            {
+                width = newWidth;
+                height = newHeight;
+                if (spriteObj != null)
+                    spriteObj.transform.localScale = new Vector3((float)width, (float)height, 1);
+            }
+            
+            public void SetRot(Fix newRotation) 
+            { 
+                rot = newRotation;
+                if (spriteObj != null)
+                    spriteObj.transform.rotation = Quaternion.Euler(0, 0, (float)rot);
+            }
+            
+
+            // Utility methods
+            public void SetColor(Color color)
+            {
+                if (spriteRenderer != null)
+                    spriteRenderer.color = new Color(color.r, color.g, color.b, color.a);
+            }
+            
+            public void SetColor(Fix r, Fix g, Fix b, Fix a)
+            {
+                if (spriteRenderer != null)
+                    spriteRenderer.color = new UnityEngine.Color((float)r, (float)g, (float)b, (float)a);
+            }
+            
+            public Color GetColor()
+            {
+                if (spriteRenderer != null)
+                {
+                    Color unityColor = spriteRenderer.color;
+                    return new Color(unityColor.r, unityColor.g, unityColor.b, unityColor.a);
+                }
+                return Color.white;
+            }
+
+            public void Destroy()
+            {
+                if (spriteObj != null)
+                {
+                    UnityEngine.Object.Destroy(spriteObj);
+                    Plugin.sprites?.Remove(this);
+                }
+            }
+
+            public void SetActive(bool active)
+            {
+                if (spriteObj != null)
+                    spriteObj.SetActive(active);
+            }
+            
+            public bool IsActive()
+            {
+                return spriteObj != null && spriteObj.activeSelf;
+            }
+        }
 
         public static BoplBody SpawnSpike(StickyRoundedRectangle attachedGround, double percentAroundSurface, double scale, double offset)
         {
@@ -380,6 +535,12 @@ namespace MapMaker.Lua_stuff
         public static Text SpawnText(double posX, double posY, double scale, double rotation, string contents, float R, float G, float B, float A)
         {
             return new(new((Fix)posX, (Fix)posY), (Fix)scale, (Fix)rotation, contents, new(R, G, B, A));
+        }
+
+        public static SpriteObject SpawnSprite(double posX, double posY, double zDepth, double width, double height, double rotation,
+            string imagePath, bool pixelPerfect)
+        {
+            return new(new((Fix)posX, (Fix)posY), (Fix)zDepth, (Fix)width, (Fix)height, (Fix)rotation, imagePath, pixelPerfect);
         }
         public static DynValue RaycastRoundedRect(double posX, double posY, double angle, double maxDist)
         {
@@ -523,6 +684,8 @@ namespace MapMaker.Lua_stuff
             );
         }
         public static DynValue GetAllTexts(Script script) => DynValue.NewTuple(DynValue.NewNumber(Plugin.texts.Count), DynValue.FromObject(script, Plugin.texts));
+        
+        public static DynValue GetAllSprites(Script script) => DynValue.NewTuple(DynValue.NewNumber(Plugin.sprites.Count), DynValue.FromObject(script, Plugin.sprites));
 
         public static void ShootBlink(double posX, double posY, double Angle, double minPlayerDuration, double WallDuration, double WallDelay, double WallShake)
         {
@@ -822,7 +985,7 @@ namespace MapMaker.Lua_stuff
         {
             if (script == null)
             {
-                script = SetUpScriptFuncsons();
+                script = SetUpScriptFunctions();
                 if (UseDebugServer)
                 {
                     server.AttachToScript(script, Name);
@@ -2441,6 +2604,72 @@ namespace MapMaker.Lua_stuff
         {
             Plugin.texts.Remove(target);
             GameObject.Destroy(target.textObj);
+        }
+    }
+    
+    public class SpriteProxy
+    {
+        public LuaMain.SpriteObject target;
+
+        [MoonSharpHidden]
+        public SpriteProxy(LuaMain.SpriteObject p) => target = p;
+
+        public string GetClassType() => "Sprite";
+        public string GetObjectType() => "Sprite";
+
+        public DynValue GetPos() => LuaMain.Vec2ToTuple(target.GetPos());
+        public void SetPos(double x, double y) 
+        {
+            target.SetPos(new Vec2((Fix)x, (Fix)y));
+        }
+        
+        public double GetZ() => (double)target.GetZ();
+        public void SetZ(double z)
+        {
+            target.SetZ((Fix)z);
+        }
+
+        public double GetWidth() => (double)target.GetWidth();
+        public void SetWidth(double width)
+        {
+            target.SetWidth((Fix)width);
+        }
+
+        public double GetHeight() => (double)target.GetHeight();
+        public void SetHeight(double height)
+        {
+            target.SetHeight((Fix)height);
+        }
+
+        public double GetRot() => (double)target.GetRot();
+        public void SetRot(double rot)
+        {
+            target.SetRot((Fix)rot);
+        }
+
+        public string GetImagePath() => target.GetImagePath();
+    
+        public bool GetPixelPerfect() => target.GetPixelPerfect();
+
+        public DynValue GetColor() => LuaMain.ColorToTuple(target.GetColor());
+        public void SetColor(double r, double g, double b, double a)
+        {
+            target.SetColor((Fix)r, (Fix)g, (Fix)b, (Fix)a);
+        }
+
+        public void Destroy()
+        {
+            target.Destroy();
+        }
+
+        public void SetActive(bool active)
+        {
+            target.SetActive(active);
+        }
+
+        public bool IsActive()
+        {
+            return target.IsActive();
         }
     }
 }

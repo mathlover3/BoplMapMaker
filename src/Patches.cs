@@ -19,6 +19,9 @@ using System.ComponentModel;
 using TMPro;
 using System.Drawing;
 using System.Runtime.Remoting.Contexts;
+using Color = UnityEngine.Color;
+using Image = UnityEngine.UI.Image;
+
 //using UnityEngine.UIElements;
 
 namespace MapMaker
@@ -33,16 +36,27 @@ namespace MapMaker
             [HarmonyPostfix]
             private static void mapMaker_noMaps_warnPostfix()
             {
-                if (Plugin.MyZipArchives.Count() == 0)
+                if (Plugin.MyZipArchives.Any())
                 {
-                    if (Plugin.maplessText != null)
-                    {
-                        GameObject.Destroy(Plugin.maplessText.gameObject);
-                    }
-                    Plugin.maplessText = LuaSpawner.SpawnText(new Vec2(Fix.Zero, (Fix)4.6), Fix.Zero, (Fix)0.15, "No maps loaded! Local games do not work in map maker " +
-                        "without maps.\nCheck <game or mod manager profile directory>/BepInEx/Plugins/Maps/.", UnityEngine.Color.red);
+                    Debug.Log(Plugin.MapJsons.Length);
+                    var warningCanvasObject = GameObject.Find("WarningCanvas");
+                    Debug.Log(warningCanvasObject.transform.GetChild(0));
+                    var mainPanel = warningCanvasObject.transform.GetChild(0);
+                    mainPanel.GetComponent<Image>().color = new Color(0.40392156862745f, 0.74901960784314f, 0.37254901960784f);
+                    mainPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(878, 420); 
+                    var body = mainPanel.GetChild(0);
+                    body.GetComponent<RectTransform>().sizeDelta = new Vector2(360, 390);
+                    var mainText = body.GetChild(0);
+                    mainText.GetComponent<TextMeshProUGUI>().color = new Color(0.6078431372549f, 1, 0.54117647058824f);
+                    mainText.GetComponent<TextMeshProUGUI>().text = Plugin.MapJsons.Length > 1 
+                        ? $"{Plugin.MapJsons.Length} maps\nloaded!" 
+                        : $"{Plugin.MapJsons.Length} map\nloaded!";
+                    var subText = mainPanel.transform.GetChild(0).GetChild(1);
+                    subText.GetComponent<TextMeshProUGUI>().text = "";
+                    subText.GetComponent<RectTransform>().sizeDelta = Vector2.zero;
                 }
             }
+            
         }
 
         [HarmonyPatch(typeof(MachoThrow2))]
