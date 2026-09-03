@@ -1309,7 +1309,7 @@ first = true");*/
                 warningCanvasObject.GetComponent<Canvas>().sortingOrder = 100;
                 var mapButton = warningCanvasObject.transform.GetChild(0).GetChild(0).GetChild(2);
                 var webButton = warningCanvasObject.transform.GetChild(0).GetChild(0).GetChild(3);
-                var docsButton = warningCanvasObject.transform.GetChild(0).GetChild(0).GetChild(3);
+                var docsButton = warningCanvasObject.transform.GetChild(0).GetChild(0).GetChild(4);
                 mapButton.GetComponent<Button>().onClick.AddListener(OnClickOpenMaps);
                 webButton.GetComponent<Button>().onClick.AddListener(OnClickMap);
                 docsButton.GetComponent<Button>().onClick.AddListener(OnClickDocs);
