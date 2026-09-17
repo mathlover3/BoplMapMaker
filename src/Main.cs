@@ -20,11 +20,6 @@ using System.Collections;
 using static MapMaker.PipeStuff;
 using TMPro;
 using MapMaker.utils;
-<<<<<<< Updated upstream
-using System.Data;
-=======
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
->>>>>>> Stashed changes
 namespace MapMaker
 {
     [BepInDependency("com.entwinedteam.entwined")]
@@ -48,6 +43,7 @@ namespace MapMaker
         public static Fix OneByOneBlockMass = Fix.One;
         public static string[] MapJsons;
         public static string[] MetaDataJsons;
+        public static Dictionary<string, byte[]> SpriteDataCache;
         // Define a static logger instance SOMEONE PLEASE MAKE A LOGGER LATER!
         public static ManualLogSource logger;
         public static bool UseCustomTexture = false;
@@ -70,6 +66,7 @@ namespace MapMaker
         public static List<UnityEngine.Color> CustomBoulderSmokeColors = new(ignore);
         public static AssetBundle MyAssetBundle;
         public static AssetBundle SpriteAssetBundle;
+        public static AssetBundle UIAssetBundle;
         public static PlatformApi.PlatformApi platformApi = new();
         private static Trigger TriggerPrefab = null;
         private static Spawner SpawnerPrefab = null;
@@ -109,6 +106,7 @@ namespace MapMaker
 
         // Used for GetAllTexts()
         public static List<LuaMain.Text> texts = [];
+        public static List<LuaMain.SpriteObject> sprites = [];
 
         // Used for making the map bigger (replacing all refrences in the main game from scenebounds to this using transpilers)
         public static Fix Camera_XMin = (Fix)(-97.27f);
@@ -138,8 +136,6 @@ namespace MapMaker
         }
 
         //public static bool noMapsCheckHasSpawnedText = false;
-
-        public static TextMeshPro maplessText;
 
         private void Awake()
         {
@@ -178,6 +174,7 @@ namespace MapMaker
             MyAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakerassets");
             string[] assetNames = MyAssetBundle.GetAllAssetNames();
             SpriteAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakericons");
+            UIAssetBundle = AssetBundle.LoadFromFile(Path.GetDirectoryName(Info.Location) + "/mapmakerui");
             if (DeveloperMode) {
                 foreach (string name in assetNames)
                 {
@@ -220,6 +217,7 @@ namespace MapMaker
             // Create a List for the json for a bit
             List<string> JsonList = [];
             List<string> MetaDataList = [];
+            List<(string fileName, byte[] data)> SpriteDataList = [];
             foreach (ZipArchive zipArchive in zipArchives2)
             {
                 // Get the first .boplmap file if there is multiple. (THERE SHOULD NEVER BE MULTIPLE .boplmap's IN ONE .zip)
@@ -227,6 +225,27 @@ namespace MapMaker
                 {
                     JsonList.Add(GetFileFromZipArchive(zipArchive, IsBoplMap)[0]);
                     MetaDataList.Add(GetFileFromZipArchive(zipArchive, IsMetaDataFile)[0]);
+                    
+                    string[] spriteEntryNames = GetFileNamesFromZipArchive(zipArchive, IsSpriteFile);
+        
+                    foreach (var spriteEntryName in spriteEntryNames)
+                    {
+                        // Get the actual bytes using the entry name
+                        byte[] spriteBytes = ReadEntryFromZip(zipArchive, spriteEntryName);
+            
+                        // Now Path.GetFileName will work correctly because spriteEntryName is a valid path string
+                        string fileName = Path.GetFileName(spriteEntryName);
+            
+                        if (spriteBytes != null)
+                        {
+                            SpriteDataList.Add((fileName, spriteBytes));
+                            Debug.Log($"Cached Sprite: {fileName}, Size: {spriteBytes.Length} bytes");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Failed to read sprite: {spriteEntryName}");
+                        }
+                    }
                 }
                 // IndexOutOfRangeException will be thrown if this zip file isn't a bopl map or is corrupt
                 catch (IndexOutOfRangeException e)
@@ -245,6 +264,17 @@ namespace MapMaker
             }
             MapJsons = [.. JsonList];
             MetaDataJsons = [.. MetaDataList];
+            SpriteDataCache = SpriteDataList.ToDictionary(x =>
+            {
+                Debug.Log($"Cached {x.fileName}");
+                return x.fileName;
+            }, x =>
+            {
+                Debug.Log($" with {x.data.Length} bytes");
+                return x.data;
+            });
+            
+            
 
             // Find the objects
             GameObject[] allObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
@@ -310,6 +340,47 @@ namespace MapMaker
                 }
             }
         }
+        
+        private static byte[] ReadEntryFromZip(ZipArchive zipArchive, string entryName)
+        {
+            try
+            {
+                var entry = zipArchive.GetEntry(entryName);
+                if (entry != null)
+                {
+                    using (var stream = entry.Open())
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        stream.CopyTo(memoryStream);
+                        return memoryStream.ToArray();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error reading {entryName} from zip: {ex.Message}");
+            }
+            return null;
+        }
+        
+        public static string[] GetFileNamesFromZipArchive(ZipArchive archive, Predicate<string> predicate)
+        {
+            List<string> matchingEntries = [];
+    
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                if (entry.FullName.EndsWith("/"))
+                    continue;
+        
+                if (predicate(entry.FullName))
+                {
+                    matchingEntries.Add(entry.FullName);
+                }
+            }
+    
+            return [.. matchingEntries];
+        }
+        
         public void Update()
         {
             if (FirstUpdate)
@@ -364,6 +435,12 @@ namespace MapMaker
         {
             return path.EndsWith("MetaData.json");
         }
+
+        public static bool IsSpriteFile(string path)
+        {
+            return path.EndsWith("png", StringComparison.OrdinalIgnoreCase);
+        }
+        
         
         // Check if there is a custom map we should load (returns enum) (david) (this was annoying to make but at least i learned about predicits!)
         public static MapIdCheckerThing CheckIfWeHaveCustomMapWithMapId()
@@ -437,45 +514,45 @@ namespace MapMaker
                         SpawnPlatformsFromMap(Dict, i);
                         if (Dict.ContainsKey("AndGates"))
                         {
-                            MoreJsonParceing.SpawnAndGates((List<object>)Dict["AndGates"]);
+                            MoreJsonParsing.SpawnAndGates((List<object>)Dict["AndGates"]);
                         }
                         if (Dict.ContainsKey("OrGates"))
                         {
-                            MoreJsonParceing.SpawnOrGates((List<object>)Dict["OrGates"]);
+                            MoreJsonParsing.SpawnOrGates((List<object>)Dict["OrGates"]);
                         }
                         if (Dict.ContainsKey("NotGates"))
                         {
-                            MoreJsonParceing.SpawnNotGates((List<object>)Dict["NotGates"]);
+                            MoreJsonParsing.SpawnNotGates((List<object>)Dict["NotGates"]);
                         }
                         if (Dict.ContainsKey("DelayGates"))
                         {
-                            MoreJsonParceing.SpawnDelayGates((List<object>)Dict["DelayGates"]);
+                            MoreJsonParsing.SpawnDelayGates((List<object>)Dict["DelayGates"]);
                         }
                         if (Dict.ContainsKey("Triggers"))
                         {
-                            MoreJsonParceing.SpawnTriggers((List<object>)Dict["Triggers"]);
+                            MoreJsonParsing.SpawnTriggers((List<object>)Dict["Triggers"]);
                         }
                         if (Dict.ContainsKey("ShootBlinks"))
                         {
-                            MoreJsonParceing.SpawnShootBlinks((List<object>)Dict["ShootBlinks"]);
+                            MoreJsonParsing.SpawnShootBlinks((List<object>)Dict["ShootBlinks"]);
                         }
                         if (Dict.ContainsKey("ShootGrows"))
                         {
-                            MoreJsonParceing.SpawnShootGrows((List<object>)Dict["ShootGrows"]);
+                            MoreJsonParsing.SpawnShootGrows((List<object>)Dict["ShootGrows"]);
                         }
                         if (Dict.ContainsKey("ShootStrinks"))
                         {
-                            MoreJsonParceing.SpawnShootStrinks((List<object>)Dict["ShootStrinks"]);
+                            MoreJsonParsing.SpawnShootStrinks((List<object>)Dict["ShootStrinks"]);
                         }
                         if (Dict.ContainsKey("Spawners"))
                         {
-                            MoreJsonParceing.SpawnSpawners((List<object>)Dict["Spawners"]);
+                            MoreJsonParsing.SpawnSpawners((List<object>)Dict["Spawners"]);
                         }
                         bool lua = false;
                         if (Dict.ContainsKey("LuaGates"))
                         {
                             lua = true;
-                            MoreJsonParceing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
+                            MoreJsonParsing.SpawnLuaGates((List<object>)Dict["LuaGates"], i);
                         }
                         if (Dict.ContainsKey("Texts"))
                         {
@@ -728,21 +805,12 @@ namespace MapMaker
                             CustomTextureName = (String)CustomTexture["CustomTextureName"];
                             Debug.Log(CustomTextureName);
 
-                            // Doesnt work if there are multiple files ending with the file name
-                            //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
-                            Byte[] filedata;
-                            Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
-                            if (filedatas.Length > 0)
+                            // Use the cached version instead of reading from disk
+                            sprite = LuaSpawner.LoadSpriteFromCache(CustomTextureName, false, 250); // true for pixel perfect
+                            if (sprite == null)
                             {
-                                filedata = filedatas[0];
-                                Debug.Log($"Filedata is {filedata}");
-                                sprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
-                                Debug.Log($"sprite is {sprite}");
-                            }
-                            else
-                            {
-                                logger.LogError($"Error: no file named {CustomTextureName}");
-                                Debug.LogError($"Error: no file named {CustomTextureName}");
+                                logger.LogError($"Error: Could not load texture {CustomTextureName} from cache");
+                                Debug.LogError($"Error: Could not load texture {CustomTextureName} from cache");
                                 return;
                             }
                         }
@@ -779,30 +847,16 @@ namespace MapMaker
                             // Custom Boulder time
                             float PixelsPerUnit = (float)Convert.ToDouble(CustomDrillColorAndBolderTexture["BoulderPixelsPerUnit"]);
                             CustomTextureName = (String)CustomDrillColorAndBolderTexture["CustomBoulderTexture"];
-
-                            // Doesnt work if there are multiple files ending with the file name (Melon, I swear ive seen this before)
-                            //TODO: make it so that if a sprite for it with the pramiters alredy exsits use that. as creating a sprite from raw data is costly
-                            Byte[] filedata;
-                            Byte[][] filedatas = GetFileFromZipArchiveBytes(zipArchives[index], IsCustomTexture);
-                            if (filedatas.Length > 0)
+                            
+                            BoulderSprite = LuaSpawner.LoadSpriteFromCache(CustomTextureName, false, PixelsPerUnit);
+                            if (BoulderSprite == null)
                             {
-                                filedata = filedatas[0];
-                                Debug.Log($"filedata length is {filedata.Length}");
-                                BoulderSprite = IMG2Sprite.LoadNewSprite(filedata, PixelsPerUnit);
-                                Debug.Log($"sprite is {BoulderSprite}");
-                                NamedSprite namedSprite = new NamedSprite(CustomTextureName, BoulderSprite, true);
-                                Debug.Log("NamedSprite generated");
-                                CustomMatchoManSprites.Add(namedSprite);
-                                Debug.Log("Added NamedSprite to CustomMatchoManSprites");
-                            }
-                            else
-                            {
-                                logger.LogError($"Error: no file named {CustomTextureName}");
-                                Debug.LogError($"Error: no file named {CustomTextureName}");
+                                logger.LogError($"Error: Could not load boulder texture {CustomTextureName} from cache");
+                                Debug.LogError($"Error: Could not load boulder texture {CustomTextureName} from cache");
                                 return;
                             }
                             var BoulderSmokeColorList = ListOfObjectsToListOfFloats((List<object>)CustomDrillColorAndBolderTexture["BoulderSmokeColor"]);
-                            UnityEngine.Color BoulderSmokeColor = new(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
+                            Color BoulderSmokeColor = new(BoulderSmokeColorList[0], BoulderSmokeColorList[1], BoulderSmokeColorList[2], BoulderSmokeColorList[3]);
                             CustomBoulderSmokeColors.Add(BoulderSmokeColor);
                         }
                         if (CustomTexture != null && CustomTexture.ContainsKey("UseSlimeCam"))
@@ -1022,7 +1076,7 @@ namespace MapMaker
                     DisappearGameObject.AddComponent<FixTransform>();
                     DisappearPlatformsOnSignalPrefab = DisappearGameObject.AddComponent<DisappearPlatformsOnSignal>();
 
-                    // Reset this at the begiening of every round.
+                    // Reset this at the beginning of every round.
                     DisappearPlatformsOnSignal.DisappearPlatformsOnSignals = new();
                     DisappearGameObject.GetComponent<FixTransform>().position = new Vec2((Fix)1000, (Fix)1000);
                     DisappearGameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
@@ -1231,9 +1285,7 @@ first = true");*/
             if (scene.name == "MainMenu")
             {
                 var menu = GameObject.Find("Tutorial").transform;
-                var buttonPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/mapmaker button.prefab");
                 var discordPrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/discord button.prefab");
-                var websitePrefab = MyAssetBundle.LoadAsset<GameObject>("assets/assetbundleswanted/website button 1.prefab");
 
                 GameObject CreateButton(string name, GameObject prefab, Transform parent, Vector3 localPosition, Vector3 localScale, UnityAction onClick)
                 {
@@ -1243,12 +1295,31 @@ first = true");*/
                     buttonObject.GetComponent<Button>().onClick.AddListener(onClick);
                     return buttonObject;
                 }
-
-                CreateButton("MapMaker", buttonPrefab, menu, new Vector3(800, 35), new Vector3(3.5f, 3.5f), OnClickDocs);
-                CreateButton("Get Maps", websitePrefab, menu, new Vector3(-800, 35), new Vector3(3.5f, 3.5f), OnClickMap);
                 CreateButton("Discord", discordPrefab, GameObject.Find("discord-link").transform, new Vector3(75, 25), new Vector3(0.20f, 0.20f), OnClickDiscord);
+                
+                var warningCanvas = UIAssetBundle.LoadAsset<GameObject>("Warning");
+                foreach (var asset in UIAssetBundle.LoadAllAssets())
+                {
+                    Debug.Log(asset);
+                }
+                var warningCanvasObject = Instantiate(warningCanvas);
+                warningCanvasObject.name = "WarningCanvas";
+                warningCanvasObject.transform.localPosition = Vector3.zero;
+                warningCanvasObject.transform.localScale = Vector3.one;
+                warningCanvasObject.GetComponent<Canvas>().sortingOrder = 100;
+                var mapButton = warningCanvasObject.transform.GetChild(0).GetChild(0).GetChild(2);
+                var webButton = warningCanvasObject.transform.GetChild(0).GetChild(0).GetChild(3);
+                var docsButton = warningCanvasObject.transform.GetChild(0).GetChild(0).GetChild(4);
+                mapButton.GetComponent<Button>().onClick.AddListener(OnClickOpenMaps);
+                webButton.GetComponent<Button>().onClick.AddListener(OnClickMap);
+                docsButton.GetComponent<Button>().onClick.AddListener(OnClickDocs);
             }
 
+        }
+        
+        public static void OnClickOpenMaps()
+        {
+            System.Diagnostics.Process.Start(mapsFolderPath);
         }
         public static void OnClickMap()
         {

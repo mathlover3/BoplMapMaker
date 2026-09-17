@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MapMaker
 {
-    public class MoreJsonParceing
+    public class MoreJsonParsing
     {
         public static void SpawnAndGates(List<object> gates)
         {
